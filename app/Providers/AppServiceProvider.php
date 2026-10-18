@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Providers;
+
+use App\Contracts\GoogleSheetGateway;
+use App\Enums\Role;
+use App\Models\User;
+use App\Services\Sheets\FakeGoogleSheetGateway;
+use App\Services\Sheets\GoogleSheetsGateway;
+use App\Services\Sheets\SheetException;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        $this->app->bind(GoogleSheetGateway::class, function () {
+            if (config('olo.sheets.driver') === 'fake') {
+                if (app()->isProduction()) {
+                    throw new SheetException('Driver fake dilarang di production.');
+                }
+
+                return new FakeGoogleSheetGateway;
+            }
+            if (config('olo.sheets.driver') !== 'google') {
+                throw new SheetException('Driver Sheets tidak dikenal.');
+            }
+
+            return new GoogleSheetsGateway;
+        });
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        Gate::define('area-dashboard', fn (User $user) => $user->active && $user->role->areaScope());
+        Gate::define('sync', fn (User $user) => $user->canSync());
+        Gate::define('administer', fn (User $user) => $user->active && $user->role === Role::SuperAdmin);
+    }
+}

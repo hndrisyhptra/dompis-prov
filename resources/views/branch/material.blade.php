@@ -1,0 +1,6 @@
+@extends('layouts.app')
+@section('title', 'Laporan Material')
+@section('content')
+<div class="page-heading"><div><div class="eyebrow">Operasional cabang</div><h1>Laporan pengeluaran material</h1><p class="muted">{{ $branches->pluck('name')->join(', ') ?: 'Belum ada branch aktif yang ditugaskan' }}</p></div><span class="badge warn">Menunggu integrasi</span></div>
+<section class="panel"><div class="panel-head"><h2>Pelaporan melalui Telegram</h2></div><div class="panel-body"><p>Alur yang disiapkan: laporan dari Telegram masuk ke Google Sheets, lalu disinkronkan ke web Dompisprov untuk ditampilkan sesuai branch.</p><div class="notice warning gap-top">Bot Telegram dan penarikan data material belum diaktifkan. Belum ada laporan material yang dapat ditarik atau dikirim melalui halaman ini.</div><h3>Yang perlu disiapkan saat melapor</h3><p class="muted">Nomor order, branch, material yang dikeluarkan, jumlah, satuan, dan catatan pemakaian. Format laporan dan bot yang digunakan akan ditetapkan oleh Admin Area.</p><div class="row gap-top"><a class="button secondary" href="{{ route('work-orders.index') }}">Lihat order cabang</a><a class="button secondary" href="{{ route('branch.dashboard') }}">Kembali ke dashboard</a></div></div></section>
+@endsection
