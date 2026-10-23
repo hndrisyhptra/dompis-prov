@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Branch;
 use App\Models\User;
 use App\Models\WorkOrder;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -27,15 +28,19 @@ class BranchOrderScope
             $query->whereIn('id_branches', Branch::withTrashed()->where('region_id', $filters['region'])->select('id_branches'));
         }
         if (! empty($filters['service'])) {
-            $query->where('service_name', $filters['service']);
+            $query->where('layanan', $filters['service']);
         }
-        $type = $filters['job_type'] ?? 'NEW INSTALL';
+        if (! empty($filters['order_month'])) {
+            $month = CarbonImmutable::createFromFormat('!Y-m', $filters['order_month']);
+            $query->whereDate('tgl_order', '>=', $month->toDateString())->whereDate('tgl_order', '<', $month->addMonth()->toDateString());
+        }
+        $type = $filters['jenis_pekerjaan'] ?? 'NEW INSTALL';
         if ($type === 'TANPA JENIS') {
-            $query->where(fn ($q) => $q->whereNull('job_type')->orWhereRaw('TRIM(job_type) = ?', [''])->orWhereRaw('UPPER(TRIM(job_type)) = ?', ['TANPA JENIS']));
+            $query->where(fn ($q) => $q->whereNull('jenis_pekerjaan')->orWhereRaw('TRIM(jenis_pekerjaan) = ?', [''])->orWhereRaw('UPPER(TRIM(jenis_pekerjaan)) = ?', ['TANPA JENIS']));
         } elseif ($type !== 'all') {
-            $query->whereRaw('UPPER(TRIM(job_type)) = ?', [strtoupper(trim($type, ' '))]);
+            $query->whereRaw('UPPER(TRIM(jenis_pekerjaan)) = ?', [strtoupper(trim($type, ' '))]);
         }
 
-        return $query;
+        return OwnerGroupAnalyticsService::filter($query, $filters['owner_group'] ?? null);
     }
 }

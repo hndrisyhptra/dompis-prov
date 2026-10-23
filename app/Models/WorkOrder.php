@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Enums\ProgressCategory;
 use App\Enums\Role;
+use App\Services\WorkOrderDerivedFields;
+use App\Services\WorkOrderMappingResolver;
+use App\Support\PsEligibility;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,12 +16,67 @@ class WorkOrder extends Model
 
     public const STATUSES = ['NEW', 'ASSIGNED', 'SURVEY', 'SCHEDULED', 'IN_PROGRESS', 'BLOCKED', 'FIELD_DONE', 'PENDING_VALIDATION', 'COMPLETED', 'CANCELLED'];
 
+    public const POTENTIAL_PS_STATUSES = [
+        'Activate Access Manual-STARTWORK',
+        'Activate Cross Connect-STARTWORK',
+        'Activate Global-COMPLETE',
+        'Activate Metro Manual-COMPLETE',
+        'Activate Metro Manual-STARTWORK',
+        'Activate NCIX-STARTWORK',
+        'Activate Service-STARTWORK',
+        'Activation Power-STARTWORK',
+    ];
+
+    public const NEW_ORDER_STATUSES = [
+        'Review Order TSQ Metro Manual-COMPLETE',
+        'Review Order TSQ Metro Manual-STARTWORK',
+        'Review Order TSQ Modify Metro Manual-COMPLETE',
+        'Review Order TSQ Modify Metro Manual-STARTWORK',
+        'Review Order TSQ WDM-COMPLETE',
+        'Review Order TSQ WDM-STARTWORK',
+        'Review Order TSQ-STARTWORK',
+    ];
+
     protected $guarded = ['id_work_orders'];
 
     protected function casts(): array
     {
-        return ['source_bima_fields' => 'array', 'order_date' => 'date', 'bima_ps_date' => 'date',
+        return ['device_overrides' => 'array', 'source_bima_fields' => 'array', 'tgl_order' => 'date', 'tgl_ps' => 'date',
             'branch_completed_at' => 'datetime', 'last_pulled_at' => 'datetime', 'last_progress_at' => 'datetime', 'verified_at' => 'datetime', 'field_done_at' => 'datetime'];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $order) {
+            $order->forceFill(WorkOrderDerivedFields::dates($order->tgl_order?->toDateString()));
+            $order->status_order = WorkOrderDerivedFields::status($order->task_bima, $order->status_bima);
+            // Branch progress/device saves must not restore a stale classification during a reference refresh.
+            if (! $order->exists || $order->isDirty(['task_bima', 'status_bima', 'status_order'])) {
+                $mapping = app(WorkOrderMappingResolver::class)->resolve($order->task_bima, $order->status_bima);
+                $order->mapping_order = $mapping?->mapping_order;
+                $order->id_mapping_order = $mapping?->getKey();
+            }
+        });
+    }
+
+    public function getUmurHariAttribute(): ?int
+    {
+        return WorkOrderDerivedFields::dates($this->tgl_order?->toDateString())['umur_hari'];
+    }
+
+    public function getKategoriUmurAttribute(): ?string
+    {
+        return WorkOrderDerivedFields::dates($this->tgl_order?->toDateString())['kategori_umur'];
+    }
+
+    public function taskLogs()
+    {
+        return $this->hasMany(BimaTaskLog::class, 'id_work_orders')->latest('id_bima_task_logs');
+    }
+
+    public function orderMapping()
+    {
+        return $this->belongsTo(MappingOrder::class, 'id_mapping_order');
     }
 
     public function progressLabel(): string
@@ -43,22 +101,35 @@ class WorkOrder extends Model
 
     public function scopePsEligible(Builder $query): Builder
     {
-        return $query->whereRaw('UPPER(TRIM(progress_category)) = ?', ['CLOSE'])
-            ->whereRaw('UPPER(TRIM(bima_status)) IN (?, ?)', ['CLOSE', 'COMPLETE']);
+        return PsEligibility::closedOrders($query, true);
+    }
+
+    public function scopePotentialPs(Builder $query): Builder
+    {
+        return $query->whereIn('status_order', self::POTENTIAL_PS_STATUSES);
+    }
+
+    public function scopeNewOrder(Builder $query): Builder
+    {
+        return $query->whereIn('status_order', self::NEW_ORDER_STATUSES);
+    }
+
+    public function scopeWaitingBima(Builder $query): Builder
+    {
+        return PsEligibility::closedOrders($query, false);
     }
 
     public function scopePsOnDate(Builder $query, string $date): Builder
     {
-        return $query->psEligible()->whereDate('bima_ps_date', $date);
+        return $query->psEligible()->whereDate('tgl_ps', $date);
     }
 
     public function isPsEligible(): bool
     {
-        return strtoupper(trim($this->progress_category ?? '', ' ')) === 'CLOSE'
-            && in_array(strtoupper(trim($this->bima_status ?? '', ' ')), ['CLOSE', 'COMPLETE'], true);
+        return PsEligibility::matches($this->progress_category, $this->status_order, $this->task_bima, $this->status_bima);
     }
 
-    public function branch()
+    public function assignedBranch()
     {
         return $this->belongsTo(Branch::class, 'id_branches')->withTrashed();
     }

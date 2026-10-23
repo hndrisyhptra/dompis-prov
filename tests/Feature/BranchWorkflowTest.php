@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\ProgressCategory;
 use App\Enums\Role;
 use App\Models\Branch;
 use App\Models\BranchMapping;
@@ -33,8 +32,8 @@ class BranchWorkflowTest extends OloTestCase
         $other = Branch::create(['code' => 'OTHER', 'name' => 'Branch Other']);
         BranchMapping::create(['bima_branch' => 'OTHER', 'id_branches' => $other->getKey()]);
         $this->pull([$this->row('OWN-ORDER', [1 => '2026-10-18']), $this->row('OTHER-ORDER', [1 => '2026-10-18', 5 => 'OTHER'])]);
-        $own = WorkOrder::where('external_order_id', 'OWN-ORDER')->firstOrFail();
-        $foreign = WorkOrder::where('external_order_id', 'OTHER-ORDER')->firstOrFail();
+        $own = WorkOrder::where('no_tq_sc_id', 'OWN-ORDER')->firstOrFail();
+        $foreign = WorkOrder::where('no_tq_sc_id', 'OTHER-ORDER')->firstOrFail();
         foreach ([$this->branchUser(), $this->branchUser()] as $admin) {
             $this->actingAs($admin)->get(route('branch.dashboard'))->assertOk()->assertViewHas('incoming', 1)->assertSee('OWN-ORDER')->assertDontSee('OTHER-ORDER')->assertDontSee('Sync Center');
             $this->get(route('work-orders.index'))->assertOk()->assertSee('OWN-ORDER')->assertDontSee('OTHER-ORDER');
@@ -53,10 +52,12 @@ class BranchWorkflowTest extends OloTestCase
         $order = $this->order();
         $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect(route('branch.dashboard'));
         $this->get('/')->assertRedirect(route('branch.dashboard'));
-        $response = $this->get(route('work-orders.show', $order))->assertOk()->assertSee('Update progress')->assertDontSee('name="operational_status"', false);
-        foreach (ProgressCategory::cases() as $category) {
-            $response->assertSee('value="'.$category->value.'"', false);
+        $this->get(route('work-orders.show', $order))->assertOk()->assertSee('Detail Order')->assertSee('Referensi BIMA')->assertDontSee('name="progress_category"', false);
+        $response = $this->get(route('work-orders.action.edit', [$order, 'progress']))->assertOk()->assertSee('Update Progress');
+        foreach (['OGP BIMA', 'RESUBMIT AO', 'SURVEY', 'JT', 'INSTALASI'] as $category) {
+            $response->assertSee('value="'.$category.'"', false);
         }
+        $response->assertDontSee('value="KENDALA"', false)->assertDontSee('value="CLOSE"', false);
         $this->get(route('branch.material'))->assertOk()->assertSee('Menunggu integrasi')->assertSee('belum diaktifkan');
         $this->actingAs($this->user())->get(route('branch.dashboard'))->assertOk()->assertViewHas('incoming', 0)->assertViewHas('outstanding', 0)->assertSee('belum memiliki penugasan branch');
     }
@@ -74,7 +75,7 @@ class BranchWorkflowTest extends OloTestCase
         $this->assertNull($order->verified_at);
         $completed = $order->branch_completed_at->toDateTimeString();
         $this->get(route('branch.dashboard'))->assertViewHas('complete', 0)->assertViewHas('outstanding', 0);
-        $this->pull([$this->row(changes: [13 => 'COMPLETE', 15 => '2026-10-18'])]);
+        $this->pull([$this->row(changes: [14 => 'Approval E2E Testing Manual', 13 => 'COMPLETE', 15 => '2026-10-18'])]);
         $this->get(route('branch.dashboard'))->assertViewHas('complete', 1);
         $this->travelTo(Carbon::parse('2026-10-18 18:00:00', 'UTC'));
         $this->patch(route('work-orders.progress', $order), ['revision' => 1, 'progress_category' => 'CLOSE', 'notes' => 'Dokumentasi sudah dikirim.'])->assertRedirect();

@@ -2,13 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Models\AuditLog;
 use App\Models\SyncJob;
 use App\Services\BimaSheetPullService;
-use App\Services\MonitoringSheetPushService;
 use App\Services\Sheets\SheetException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class ProcessSheetSync implements ShouldQueue
@@ -32,8 +33,27 @@ class ProcessSheetSync implements ShouldQueue
         if (! in_array($job->state, ['queued', 'running', 'retrying'], true)) {
             return;
         }
+        if ($job->direction === 'push') {
+            DB::transaction(function () use ($job) {
+                $job = SyncJob::lockForUpdate()->findOrFail($job->getKey());
+                if (! $job->busy()) {
+                    return;
+                }
+                $job->update(['state' => 'failed', 'finished_at' => now(), 'error' => 'Publikasi MySQL ke Google Sheets sudah dinonaktifkan.']);
+                AuditLog::create(['id_users' => $job->id_users, 'action' => 'monitoring.disabled', 'entity_type' => 'sync_job', 'id_entity' => $job->getKey(), 'metadata' => ['reason' => 'feature_removed']]);
+            });
+
+            return;
+        }
         $lock = Cache::lock('sheets:'.$job->connection_hash, 240);
         if (! $lock->get()) {
+            $this->release(15);
+
+            return;
+        }
+        $inbound = $job->direction === 'pull' ? Cache::lock('olo:work-order-inbound', 240) : null;
+        if ($inbound && ! $inbound->get()) {
+            $lock->release();
             $this->release(15);
 
             return;
@@ -46,13 +66,14 @@ class ProcessSheetSync implements ShouldQueue
             if (! $job->actor?->canSync()) {
                 throw new \InvalidArgumentException('Hak sinkronisasi operator sudah dicabut.');
             }
+            if ($job->direction === 'pull' && config('olo.inbound') !== 'sheets') {
+                throw new \InvalidArgumentException('Mode penerimaan WO sudah beralih ke import Excel.');
+            }
             if ($job->connection_hash !== BimaSheetPullService::connectionHash()) {
                 throw new \InvalidArgumentException('Konfigurasi koneksi berubah. Buat job baru.');
             }
             $job->update(['state' => 'running', 'started_at' => $job->started_at ?? now(), 'attempts' => $job->attempts + 1, 'error' => null]);
-            if ($job->direction === 'push') {
-                app(MonitoringSheetPushService::class)->push($job);
-            } elseif ($job->stage === 'preview') {
+            if ($job->stage === 'preview') {
                 $pull->preview($job);
             } else {
                 $pull->pull($job);
@@ -64,6 +85,7 @@ class ProcessSheetSync implements ShouldQueue
             $job->update(['state' => 'retrying', 'error' => $exception instanceof SheetException ? $exception->getMessage() : 'Sinkronisasi gagal. Periksa koneksi/worker dan coba lagi.', 'finished_at' => null]);
             throw new SheetException($job->error);
         } finally {
+            $inbound?->release();
             $lock->release();
         }
     }

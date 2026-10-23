@@ -21,11 +21,11 @@ class BranchAnalyticsTest extends OloTestCase
             $this->row('OTHER-BRANCH', [1 => '2026-10-18', 5 => 'OTHER']),
         ]);
         foreach (['TODAY-CLOSE' => '2026-10-17 17:00:00', 'PREVIOUS-CLOSE' => '2026-10-17 16:59:59', 'MODIFY' => '2026-10-18 03:00:00', 'OTHER-BRANCH' => '2026-10-18 03:00:00'] as $id => $date) {
-            WorkOrder::where('external_order_id', $id)->update(['progress_category' => 'CLOSE', 'operational_status' => 'FIELD_DONE', 'branch_completed_at' => $date, 'last_progress_at' => $date, 'bima_status' => 'COMPLETE', 'bima_ps_date' => Carbon::parse($date, 'UTC')->timezone('Asia/Jakarta')->toDateString()]);
+            WorkOrder::where('no_tq_sc_id', $id)->firstOrFail()->update(['task_bima' => 'Approval E2E Testing Manual', 'progress_category' => 'CLOSE', 'operational_status' => 'FIELD_DONE', 'branch_completed_at' => $date, 'last_progress_at' => $date, 'status_bima' => 'COMPLETE', 'tgl_ps' => Carbon::parse($date, 'UTC')->timezone('Asia/Jakarta')->toDateString()]);
         }
-        WorkOrder::where('external_order_id', 'CANCEL')->update(['progress_category' => 'CANCEL', 'operational_status' => 'CANCELLED']);
-        WorkOrder::where('external_order_id', 'DESK')->update(['progress_category' => 'CLOSE ON DESK', 'operational_status' => 'PENDING_VALIDATION']);
-        WorkOrder::where('external_order_id', 'OPEN')->firstOrFail()->issues()->create(['id_users' => $this->area->getKey(), 'category' => 'ACCESS', 'description' => 'Uji', 'pic' => 'PIC']);
+        WorkOrder::where('no_tq_sc_id', 'CANCEL')->update(['progress_category' => 'CANCEL', 'operational_status' => 'CANCELLED']);
+        WorkOrder::where('no_tq_sc_id', 'DESK')->update(['progress_category' => 'CLOSE ON DESK', 'operational_status' => 'PENDING_VALIDATION']);
+        WorkOrder::where('no_tq_sc_id', 'OPEN')->firstOrFail()->issues()->create(['id_users' => $this->area->getKey(), 'category' => 'ACCESS', 'description' => 'Uji', 'pic' => 'PIC']);
         $branchUser = $this->user();
         $branchUser->branches()->attach($this->branch);
         $response = $this->actingAs($branchUser)->get(route('branch.dashboard'))->assertOk()->assertViewHas('incoming', 4)->assertViewHas('complete', 1)->assertViewHas('outstanding', 1)->assertViewHas('issues', 1)->assertViewHas('period_complete', 2)->assertDontSee('OTHER-BRANCH');
@@ -33,7 +33,7 @@ class BranchAnalyticsTest extends OloTestCase
         $this->assertSame(14, $series->count());
         $this->assertSame(1, $series['2026-10-18']['count']);
         $this->assertSame(1, $series['2026-10-17']['count']);
-        $this->get(route('branch.dashboard', ['job_type' => 'all', 'days' => 7]))->assertViewHas('incoming', 5)->assertViewHas('complete', 2)->assertViewHas('period_complete', 3);
+        $this->get(route('branch.dashboard', ['jenis_pekerjaan' => 'all', 'days' => 7]))->assertViewHas('incoming', 5)->assertViewHas('complete', 2)->assertViewHas('period_complete', 3);
         $this->get(route('work-orders.index', ['queue' => 'ps_today']))->assertOk()->assertSee('TODAY-CLOSE')->assertDontSee('PREVIOUS-CLOSE')->assertDontSee('OTHER-BRANCH');
         $this->get(route('work-orders.index', ['queue' => 'today']))->assertOk()->assertSee('TODAY-CLOSE')->assertSee('OPEN')->assertDontSee('PREVIOUS-CLOSE')->assertDontSee('OTHER-BRANCH');
         $this->get(route('work-orders.index', ['queue' => 'outstanding']))->assertOk()->assertSee('OPEN')->assertDontSee('TODAY-CLOSE')->assertDontSee('PREVIOUS-CLOSE');

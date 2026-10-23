@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class AssignUserLocation extends Command
 {
-    protected $signature = 'olo:user-location {identity : Username atau email} {--region= : Kode region} {--sto= : Kode STO} {--clear : Hapus lokasi utama tanpa mengubah hak cabang}';
+    protected $signature = 'olo:user-location {identity : Username atau email} {--region= : Kode region} {--sto= : Kode STO} {--clear : Hapus lokasi utama tanpa mengubah hak Branch}';
 
     protected $description = 'Tetapkan region/STO utama user; tidak memberikan hak akses branch baru';
 
@@ -36,14 +36,14 @@ class AssignUserLocation extends Command
             }
             $region ??= $sto?->region;
             if (! $user->role->areaScope() && (($sto && ! $user->branches()->where('branches.id_branches', $sto->id_branches)->where('active', true)->exists()) || ($region && ! $sto && ! $user->branches()->where('active', true)->get()->contains(fn ($branch) => $branch->matchesRegion($region))))) {
-                $this->error('Lokasi berada di luar hak cabang user. Tetapkan hak cabang melalui proses admin terlebih dahulu.');
+                $this->error('Lokasi berada di luar hak Branch user. Tetapkan hak Branch melalui proses admin terlebih dahulu.');
 
                 return self::FAILURE;
             }
             $before = $user->only(['id_regions', 'id_service_areas']);
             $user->forceFill(['id_regions' => $region?->getKey(), 'id_service_areas' => $sto?->getKey(), 'management_revision' => $user->management_revision + 1])->save();
             AuditLog::create(['action' => 'user.location_assigned_cli', 'entity_type' => 'user', 'id_entity' => $user->getKey(), 'metadata' => ['before' => $before, 'after' => $user->only(['id_regions', 'id_service_areas'])]]);
-            $this->info('Lokasi utama user disimpan. Hak akses cabang tetap mengikuti user_branches.');
+            $this->info('Lokasi utama user disimpan. Hak akses Branch tetap mengikuti user_branches.');
 
             return self::SUCCESS;
         });

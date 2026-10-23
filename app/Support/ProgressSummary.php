@@ -9,7 +9,7 @@ class ProgressSummary
 {
     public const GROUPS = [
         'survey' => ['SURVEY'], 'bima' => ['OGP BIMA', 'RESUBMIT AO'],
-        'cndc' => ['CNDC'], 'kendala' => ['KENDALA'], 'jt' => ['JT'],
+        'cndc' => ['CNDC'], 'kendala' => ['KENDALA', 'HOLD', 'BUTUH QE', 'PERIZINAN'], 'jt' => ['JT'],
         'cancel' => ['CANCEL'], 'close' => ['CLOSE'],
     ];
 

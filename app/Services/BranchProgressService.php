@@ -53,13 +53,29 @@ class BranchProgressService
     {
         $category = ProgressCategory::from($data['progress_category']);
         $oldCategory = $order->progress_category;
+        if (isset($data['workflow_mode']) && $order->terminal() && ! $actor->role->areaScope()) {
+            abort_unless($data['workflow_mode'] === 'close' && $oldCategory === 'CLOSE' && $category === ProgressCategory::Close, 403, 'Koreksi order yang sudah ditutup memerlukan Admin Area.');
+        }
         abort_if($order->terminal() && $oldCategory !== $category->value && ! $actor->role->areaScope(), 403, 'Koreksi order yang sudah ditutup memerlukan Admin Area.');
+        $notes = trim($data['notes']);
+        $isIssue = $category === ProgressCategory::Kendala || ($data['workflow_mode'] ?? null) === 'issue';
+        $resolved = false;
+        if (! empty($data['resolve_issues'])) {
+            if ($isIssue) {
+                throw ValidationException::withMessages(['resolve_issues' => 'Pilih progress setelah kendala selesai untuk mengonfirmasi penyelesaian.']);
+            }
+            foreach ($order->issues()->where('status', 'OPEN')->lockForUpdate()->get() as $issue) {
+                $issue->update(['status' => 'RESOLVED', 'resolved_at' => now(), 'resolution' => $notes]);
+                AuditLog::create(['id_users' => $actor->getKey(), 'action' => 'issue.resolved', 'entity_type' => 'wo_issue', 'id_entity' => $issue->getKey(),
+                    'metadata' => ['id_work_orders' => $order->getKey(), 'origin' => 'progress']]);
+                $resolved = true;
+            }
+        }
         if (in_array($category, [ProgressCategory::Close, ProgressCategory::CloseOnDesk], true) && $order->issues()->where('status', 'OPEN')->exists()) {
             throw ValidationException::withMessages(['progress_category' => 'Selesaikan kendala aktif sebelum menutup order.']);
         }
-        $notes = trim($data['notes']);
-        $needsIssue = $category === ProgressCategory::Kendala && ! $order->issues()->where('status', 'OPEN')->exists();
-        if (! $needsIssue && $oldCategory === $category->value && $order->events()->first()?->notes === $notes) {
+        $needsIssue = $isIssue && ! $order->issues()->where('status', 'OPEN')->exists();
+        if (! $resolved && ! $needsIssue && $oldCategory === $category->value && $order->events()->first()?->notes === $notes) {
             return;
         }
         $oldStatus = $order->operational_status;
@@ -67,7 +83,7 @@ class BranchProgressService
         $verified = $order->verification_status === 'VERIFIED' && $category->complete();
         $order->update([
             'progress_category' => $category->value,
-            'operational_status' => $verified ? 'COMPLETED' : $category->operationalStatus(),
+            'operational_status' => $verified ? 'COMPLETED' : ($isIssue && $category !== ProgressCategory::Cancel ? 'BLOCKED' : $category->operationalStatus()),
             'branch_completed_at' => $category->complete() ? ($order->branch_completed_at ?? now()) : null,
             'field_done_at' => $category->complete() ? ($order->field_done_at ?? now()) : null,
             'verification_status' => $verified ? 'VERIFIED' : 'UNVERIFIED',
@@ -77,8 +93,14 @@ class BranchProgressService
         $order->events()->create(['id_users' => $actor->getKey(), 'old_status' => $oldStatus, 'new_status' => $order->operational_status,
             'old_progress_category' => $oldCategory, 'new_progress_category' => $category->value, 'revision' => $revision, 'notes' => $notes]);
         if ($needsIssue) {
-            $issue = $order->issues()->create(['id_users' => $actor->getKey(), 'category' => 'OTHER', 'description' => $notes, 'pic' => mb_substr($actor->name, 0, 120)]);
+            $issue = $order->issues()->create(['id_users' => $actor->getKey(), 'category' => $category === ProgressCategory::Perizinan ? 'PERMIT' : 'OTHER', 'description' => $notes, 'pic' => mb_substr($actor->name, 0, 120)]);
             AuditLog::create(['id_users' => $actor->getKey(), 'action' => 'issue.opened', 'entity_type' => 'wo_issue', 'id_entity' => $issue->getKey(), 'metadata' => ['id_work_orders' => $order->getKey(), 'origin' => 'progress_kendala']]);
+        }
+        if ($isIssue && ! $needsIssue) {
+            $issue = $order->issues()->where('status', 'OPEN')->firstOrFail();
+            $note = $issue->notes()->create(['id_users' => $actor->getKey(), 'note' => $notes]);
+            AuditLog::create(['id_users' => $actor->getKey(), 'action' => 'issue.note_added', 'entity_type' => 'wo_issue_note', 'id_entity' => $note->getKey(),
+                'metadata' => ['id_wo_issues' => $issue->getKey(), 'id_work_orders' => $order->getKey(), 'origin' => 'progress']]);
         }
         AuditLog::create(['id_users' => $actor->getKey(), 'action' => 'progress.changed', 'entity_type' => 'work_order', 'id_entity' => $order->getKey(),
             'metadata' => ['old_category' => $oldCategory, 'new_category' => $category->value, 'revision' => $revision]]);

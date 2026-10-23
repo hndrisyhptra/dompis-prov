@@ -1,5 +1,8 @@
 # OLO Command Center Jawa–Bali
 
+
+**Pembaruan 20 Oktober 2026:** penerimaan WO sekarang melalui upload XLSX BIMA, mapping kolom, preview dan konfirmasi pada Sync Center. Google tidak diperlukan untuk import. Panduan lama BIMA_RAW di bawah hanya untuk mode legacy `WO_ORDER_SOURCE=sheets`. Lihat [panduan import Excel, schema dan hasil uji](docs/EXCEL_WORK_ORDER_IMPORT.md). Default baru `WO_ORDER_SOURCE=excel`. [Preset export Work Orders](docs/BIMA_WORK_ORDERS_TEMPLATE.md) otomatis memilih 11 kolom sesuai mapping pemilik. Nama fisik kolom telah disesuaikan dengan label sumber, misalnya `tgl_order`, `no_tq_sc_id`, `nama_olo` dan `status_order`; lihat [daftar kolom MySQL](docs/WORK_ORDER_COLUMN_NAMES.md).
+
 Laravel 13.37 / PHP ≥8.3, MySQL, Blade, Tailwind 4, Vite 8. Implementasi pertama mencakup fondasi RBAC, mapping branch, preview/pull Bima dan bagian operasional M3. Requirement produk ada di `AGENTS.md`, `SKILLS.md`, dan `PRD_OLO_Command_Center_v2.md`.
 
 ## Yang sudah berfungsi
@@ -130,7 +133,7 @@ Kontrak adapter diperiksa terhadap dokumentasi resmi Google: [spreadsheets.get d
 
 Perubahan login terbaru: username `superadmin` telah diprovision secara eksplisit pada MySQL lokal sesuai permintaan pemilik. Password hanya tersimpan sebagai hash di database dan tidak disertakan dalam source/seeder/dokumentasi. Halaman login menerima username atau email. Untuk menjalankan server lokal gunakan port 8011, karena 8000 dipakai aplikasi lain.
 
-Spreadsheet Bima lokal sudah diarahkan ke file yang diberikan pemilik. Lihat [panduan koneksi Google Sheets](docs/GOOGLE_SHEETS_SETUP.md) untuk tab paste dan service account; akses baca sudah terverifikasi pada preview #5, dengan header valid dan 0 baris order. Tempel data order sebelum membuat preview baru.
+Spreadsheet Bima lokal sudah diarahkan ke file yang diberikan pemilik. Lihat [panduan koneksi Google Sheets](docs/GOOGLE_SHEETS_SETUP.md) untuk tab paste dan service account; akses baca sudah terverifikasi pada preview #5, dengan header valid dan 0 baris order. Untuk alur saat ini, upload file XLSX di Sync Center; pemeriksaan Google tersebut adalah hasil historis mode Sheets.
 
 
 ### Penamaan ID database bisnis
@@ -160,3 +163,7 @@ Superadmin, Koordinator Area, Admin Area dan HD Area mendapat beranda `/dashboar
 Repository hanya memuat source, dependency lockfiles, tests dan master referensi region/STO untuk migration. `.env`, kredensial Google/Telegram, database/dump, backup, log, dependency terpasang, hasil build, workbook asli serta screenshot aplikasi tetap lokal dan diabaikan Git. Screenshot yang dirujuk pada catatan implementasi adalah bukti QA lokal; file tersebut tidak didistribusikan bersama source.
 
 Untuk checkout baru, ikuti petunjuk instalasi di atas dan buat `.env` dari `.env.example`. Jika perlu menjalankan dua pengujian workbook asli, salin secara privat `EXPORT-BIMA.xlsx` dan `LHPP OLO.xlsx` ke `storage/template/`; jangan mengunggah workbook tersebut ke repository. Pengujian referensi workbook otomatis dilewati bila file privat belum tersedia. Pengujian lainnya menggunakan fake adapter dan data terisolasi tanpa kredensial Google.
+
+Status BIMA, Log Task BIMA, perangkat cabang dan umur otomatis: [panduan dan hasil pengujian](docs/BIMA_STATUS_AND_DEVICES.md). Setelah deployment jalankan migrasi, restart worker, dan aktifkan Laravel scheduler untuk menyegarkan nilai umur SQL setiap hari.
+
+Referensi klasifikasi order BIMA (178 aturan): [implementasi dan backfill mapping](docs/ORDER_MAPPING_REFERENCE.md). Setelah migrasi jalankan `php artisan olo:apply-order-mapping --actor=superadmin`.

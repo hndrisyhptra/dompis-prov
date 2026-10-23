@@ -18,7 +18,7 @@ class MonitoringSheetPushService
     {
         if (! $job->snapshot) {
             $rows = DB::transaction(function () {
-                $orders = WorkOrder::where('source_system', 'BIMA')->with(['branch', 'issues' => fn ($q) => $q->where('status', 'OPEN')])->orderBy('external_order_id')->get();
+                $orders = WorkOrder::where('source_system', 'BIMA')->with(['assignedBranch', 'issues' => fn ($q) => $q->where('status', 'OPEN')])->orderBy('no_tq_sc_id')->get();
                 if ($orders->isEmpty()) {
                     throw new \InvalidArgumentException('Tidak ada WO untuk dipublikasikan. Snapshot kosong tidak dikirim.');
                 }
@@ -27,11 +27,11 @@ class MonitoringSheetPushService
                 $rows = [self::HEADERS];
                 foreach ($orders as $wo) {
                     $issue = $wo->issues->first();
-                    $rows[] = [$wo->external_order_id, $wo->source_sid ?? '', $wo->regional ?? '', $wo->branch?->name ?? '', $wo->sto_code ?? '', $wo->service_name ?? '', $wo->job_type ?? '',
-                        $wo->bima_status ?? '', $wo->bima_final_status ?? '', $wo->progress_category ?? $wo->operational_status, $wo->verification_status,
+                    $rows[] = [$wo->no_tq_sc_id, $wo->sid ?? '', $wo->regional ?? '', $wo->assignedBranch?->name ?? '', $wo->sto ?? '', $wo->layanan ?? '', $wo->jenis_pekerjaan ?? '',
+                        $wo->status_bima ?? '', $wo->status_final ?? '', $wo->progress_category ?? $wo->operational_status, $wo->verification_status,
                         $wo->issues->pluck('category')->unique()->implode(', '), $wo->issues->pluck('description')->implode('; '), $issue?->pic ?? '', $issue?->eta?->format('Y-m-d') ?? '',
                         $format($wo->last_progress_at), $format($wo->field_done_at), $format($wo->verified_at),
-                        $wo->order_date ? (string) max(0, (int) $wo->order_date->diffInDays(now()->timezone('Asia/Jakarta')->startOfDay(), false)) : '', $stamp];
+                        $wo->tgl_order ? (string) max(0, (int) $wo->tgl_order->diffInDays(now()->timezone('Asia/Jakarta')->startOfDay(), false)) : '', $stamp];
                 }
 
                 return $rows;

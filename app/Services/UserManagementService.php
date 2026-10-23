@@ -40,10 +40,10 @@ class UserManagementService
             sort($branchIds);
             sort($existingBranches);
             if ($branches->count() !== count($branchIds) || $branches->contains(fn ($branch) => ! $branch->active && ! in_array($branch->getKey(), $existingBranches, true))) {
-                throw ValidationException::withMessages(['branches' => 'Cabang tidak tersedia atau tidak aktif.']);
+                throw ValidationException::withMessages(['branches' => 'Branch tidak tersedia atau tidak aktif.']);
             }
             if (! $role->areaScope() && ($branches->isEmpty() || ($active && ! $branches->contains('active', true)))) {
-                throw ValidationException::withMessages(['branches' => 'Role cabang memerlukan minimal satu cabang aktif untuk akun aktif.']);
+                throw ValidationException::withMessages(['branches' => 'Role Branch memerlukan minimal satu Branch aktif untuk akun aktif.']);
             }
             $region = ! empty($data['id_regions']) ? Region::where('is_active', true)->lockForUpdate()->find($data['id_regions']) : null;
             $sto = ! empty($data['id_service_areas']) ? ServiceArea::with(['branch', 'region'])->where('is_active', true)->lockForUpdate()->find($data['id_service_areas']) : null;
@@ -55,7 +55,7 @@ class UserManagementService
             }
             $region ??= $sto?->region;
             if (! $role->areaScope() && (($sto && ! $branches->contains(fn ($branch) => $branch->getKey() === $sto->id_branches && $branch->active)) || ($region && ! $branches->contains(fn ($branch) => $branch->active && $branch->matchesRegion($region))))) {
-                throw ValidationException::withMessages(['id_service_areas' => 'Lokasi utama harus berada dalam cabang aktif yang ditugaskan.']);
+                throw ValidationException::withMessages(['id_service_areas' => 'Lokasi utama harus berada dalam Branch aktif yang ditugaskan.']);
             }
             $before = $user->exists ? $this->accessState($user) : null;
             $user->forceFill([

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'User Management')
 @section('content')
-<div class="page-heading"><div><div class="eyebrow">Administrasi</div><h1>User Management</h1><p class="muted">Kelola akun, peran, dan cakupan cabang pengguna.</p></div><a class="button primary" href="{{ route('users.create') }}"><x-icon name="users"/> Tambah user</a></div>
+<div class="page-heading"><div><div class="eyebrow">Administrasi</div><h1>User Management</h1><p class="muted">Kelola akun, peran, dan cakupan Branch pengguna.</p></div><a class="button primary" href="{{ route('users.create') }}"><x-icon name="users"/> Tambah user</a></div>
 <section class="panel">
     <div class="panel-head"><h2>Daftar pengguna</h2><span class="badge">{{ $users->total() }} pengguna</span></div>
     <form class="filters" method="GET" action="{{ route('users.index') }}" data-loading="Mencari…">
@@ -10,7 +10,7 @@
         <div><label for="active">Status</label><select id="active" name="active"><option value="">Semua status</option><option value="1" @selected(request('active') === '1')>Aktif</option><option value="0" @selected(request('active') === '0')>Nonaktif</option></select></div>
         <button class="button secondary" type="submit">Terapkan</button><a class="button secondary" href="{{ route('users.index') }}">Reset</a>
     </form>
-    <div class="table-wrap"><table><thead><tr><th>Pengguna</th><th>Role</th><th>Cakupan cabang</th><th>Lokasi utama</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+    <div class="table-wrap"><table><thead><tr><th>Pengguna</th><th>Role</th><th>Cakupan Branch</th><th>Lokasi utama</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
     @forelse($users as $user)
         <tr><td><strong>{{ $user->name }}</strong><div class="small muted">{{ $user->username ? '@'.$user->username : 'Tanpa username' }}</div><div class="small muted">{{ $user->email ?? 'Tanpa email' }}</div></td>
         <td>{{ $user->role->label() }}@if($user->is(auth()->user()))<div class="small muted">Akun Anda</div>@endif</td>

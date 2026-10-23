@@ -51,7 +51,7 @@ class AccessAndSyncTest extends OloTestCase
         $this->get('/work-orders')->assertOk();
         $this->assertSame(0, $this->sheets->reads);
         $job = $this->preview([$this->row()]);
-        $this->get('/sync/jobs/'.$job->getKey())->assertOk()->assertSee('Konfirmasi & tarik', false);
+        $this->get('/sync/jobs/'.$job->getKey())->assertOk()->assertSee('Konfirmasi & tarik');
         $this->getJson('/sync/jobs/'.$job->getKey())->assertOk()->assertJsonMissingPath('snapshot');
     }
 

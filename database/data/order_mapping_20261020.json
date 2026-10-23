@@ -1,0 +1,720 @@
+{
+  "source": "MAPPING-ORDER.xlsx",
+  "sheet": "Sheet1",
+  "range": "A1:B179",
+  "sha256": "14e1b9732d05d8b90f6ec2c87f8c2eb9ab166b6d39e915fe2c9d140f6c116de1",
+  "rules": [
+    {
+      "status_order": "Activate Access Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate Colocation-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Activate Cross Connect-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate Global-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Activate Metro Bitstream Transport-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Activate Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Activate Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate NCIX-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate Service-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activation Power-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Activation Power-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Approval E2E Testing Bitstream NNI-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Approval E2E Testing Bitstream Transport-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Approval E2E Testing Manual-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Approval E2E Testing Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Approval E2E Testing VPN-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Approval E2E Testing-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Approval E2E Testing-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Approval End to End Test-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Approval Project Management-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Approval Survey-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Approval Survey-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "BER Test WDM End 1-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "CE Jumpering-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "-COMPWORK",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Create MRTG Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Create MRTG Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Deactivate Access METRO Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Deactivate Access-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Deactivate Access-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Deactivate Metro METRO Manual-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Deactivate Metro METRO Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Deactivate Metro METRO Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Entry VLAN and VCID Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Entry VLAN and VCID Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Integrasi Access Port WDM End 2-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Modify Access VPN-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Modify Switch-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "NDE LME-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "NDE LME-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Pickup NTE from SCM Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate ANUplink OLO-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Populate ANUplink OLO-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate ME Access Manual-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Populate ME Access Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate ME Transport-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Populate METRO NNI-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "PopulateANDownlinkPort Manual-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "PopulateANDownlinkPort Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "PopulatePEPort-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Pull Drop Cable Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Registration Suplychain-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Resource Allocation LME-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review LME-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Review LME-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order Bitstream Transport-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Review Order Metro Manual-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Review Order Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Review Order neuCentrIX-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Review Order neuCentrIX-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ Bitstream Transport-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Review Order TSQ Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Review Order TSQ Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ Modify Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Review Order TSQ Modify Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ WDM-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Review Order TSQ WDM-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Shipment and Delivery-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Shipment Delivery Dark Fiber-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Site-Survey Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Site-Survey Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Survey On Desk-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Survey Perangkat Metro dan Rak OLO-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Survey-Ondesk Manual-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Survey-Ondesk Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Suspend METRO Manual-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Testing and Approval METRO Manual-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Testing and Approval-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Testing dan Approval WDM-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Testing dan Approval-COMPLETE",
+      "mapping_order": "PS"
+    },
+    {
+      "status_order": "Unpull Drop Cable Manual-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Unpull Drop Cable Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Upload Berita Acara-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate Data ME IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate Metro IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Validate Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate PE Router IP Transit-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Waiting Customer Configuration-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Service Testing-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Deactivate Metro IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "PopulatePEPort-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate Metro Bitstream Transport-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate Data PE IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Suspend METRO Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Install NTE Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Populate Switch-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ Modify IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate Uplink OLT-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate Access Disconnect-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate METRO NNI-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Validate Access Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Deactivate Switch-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Approval End to End Test-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Testing dan Approval WDM-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Modify PE Router IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Survey Perangkat Metro dan Rak OLO-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate Switch-WORKFAIL",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Modify Metro IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Recover NTE-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ Bitstream Transport-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Populate ME Transport-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Create Dashboard MRTG Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Pull Drop Cable Bitstream NNI-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Approval Survey-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate PE Router VPN-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Pickup NTE from SCM Manual-CANCLWORK",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Activate Cross Connect-CANCLWORK",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Approval E2E Testing Bitstream NNI-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate ME Access-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Testing and Approval-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ Modify Metro Manual-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Allocate Access Cust End 2-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "BER Test WDM Coordination-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ Bitstream Transport-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order TSQ Modify Bitstream NNI-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Create Dashboard MRTG-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Install NTE Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order Disconnect-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Integrasi Access Port WDM End 1-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Create MRTG-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "PopulateANUplinkPort Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Approval E2E Testing Bitstream Transport-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order AO Modify IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order Modify Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Inventory LME-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order Metro Manual-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Allocate Access Cust End 1-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Deactivate PE Router IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Resource Allocation LME-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "ReserveIP-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Entry VLAN OLO-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Upload Berita Acara Dark Fiber Origin-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order Modify Metro Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Allocate New WDM-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate Switch-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Additional Port-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Resource Allocation LME-COMPLETE",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order AO IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate Data AN-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activation NTE-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Entry VLAN-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Site Survey-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Validate PE Router-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Pickup NTE from SCM-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate Metro IP Transit-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Validate Access-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Activate Colocation-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review LME-WORKFAIL",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Validate Access-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Activate Access-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order Bitstream Transport-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Populate ANUplink OLO-COMPLETE",
+      "mapping_order": "STUCK"
+    },
+    {
+      "status_order": "Activation NTE-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "PopulateANDownlinkPort-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Review Order Tiang-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Penunjukkan Waspang-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Site Survey-WORKFAIL",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Site Survey-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Site Survey-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "Resource Allocation-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "Survey On Desk-CANCLWORK",
+      "mapping_order": "CANCLWORK"
+    },
+    {
+      "status_order": "-STARTWORK",
+      "mapping_order": "OPEN"
+    },
+    {
+      "status_order": "PopulateANUplinkPort Manual-COMPLETE",
+      "mapping_order": "STUCK"
+    }
+  ]
+}

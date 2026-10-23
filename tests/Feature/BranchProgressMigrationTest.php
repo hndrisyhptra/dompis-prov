@@ -16,7 +16,7 @@ class BranchProgressMigrationTest extends TestCase
 
     public function test_legacy_data_is_preserved_only_evidenced_completion_dates_are_backfilled_and_rollback_works(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 9, '--force' => true])->assertSuccessful();
         $user = User::factory()->create();
         $branch = Branch::create(['code' => 'SAFE', 'name' => 'Branch Uji']);
         foreach (['NEW', 'SURVEY', 'COMPLETED', 'COMPLETED', 'CANCELLED', 'FIELD_DONE'] as $index => $status) {
@@ -39,7 +39,9 @@ class BranchProgressMigrationTest extends TestCase
         $dates = DB::table('work_orders')->orderBy('id_work_orders')->pluck('branch_completed_at')->all();
         $this->assertSame([null, null, '2026-10-17 17:30:00', null, null, null], $dates);
         foreach ($before as $table => $rows) {
-            $this->assertSame($rows, DB::table($table)->select(array_keys($rows[0]))->get()->map(fn ($row) => (array) $row)->all());
+            $columns = $table === 'work_orders' ? (require database_path('migrations/2026_10_20_000010_rename_work_order_source_columns.php'))::COLUMNS : [];
+            $expected = array_map(fn ($row) => collect($row)->mapWithKeys(fn ($value, $field) => [($columns[$field] ?? $field) => $value])->all(), $rows);
+            $this->assertSame($expected, DB::table($table)->select(array_keys($expected[0]))->get()->map(fn ($row) => (array) $row)->all());
         }
         DB::table('wo_issue_notes')->insert(['id_wo_issues' => $issueId, 'id_users' => $user->getKey(), 'note' => 'Tindak lanjut']);
         try {
@@ -48,7 +50,7 @@ class BranchProgressMigrationTest extends TestCase
         } catch (QueryException) {
             $this->assertDatabaseCount('wo_issue_notes', 1);
         }
-        $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 9, '--force' => true])->assertSuccessful();
         $this->assertFalse(Schema::hasTable('wo_issue_notes'));
         $this->assertFalse(Schema::hasColumn('work_orders', 'progress_category'));
         foreach ($before as $table => $rows) {

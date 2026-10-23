@@ -15,10 +15,12 @@ class AreaAnalyticsService
     {
         $today = CarbonImmutable::now('Asia/Jakarta')->startOfDay();
         $month = CarbonImmutable::createFromFormat('!Y-m', $filters['month'] ?? $today->format('Y-m'), 'Asia/Jakarta');
-        $base = $this->scope->orders($user, $filters + ['job_type' => 'all']);
+        $base = $this->scope->orders($user, $filters + ['jenis_pekerjaan' => 'all']);
         $zero = array_fill_keys(array_keys(ProgressSummary::LABELS), 0);
-        $summary = array_fill_keys(['total', 'ps_total', 'ps_today', 'incoming_today', 'outstanding', 'open_issues', 'waiting_bima', 'missing_ps_date', 'future_ps_date', 'unmapped'], 0);
+        $summary = array_fill_keys(['total', 'ps_total', 'ps_today', 'incoming_today', 'outstanding', 'open_issues', 'waiting_bima', 'missing_ps_date', 'future_ps_date', 'unmapped', 'unupdated', 'closed_by_branch'], 0);
         $rows = [];
+        $summary['potential_ps'] = (clone $base)->potentialPs()->count();
+        $summary['new_order'] = (clone $base)->newOrder()->count();
         $branches = Branch::withTrashed()->with(['region' => fn ($q) => $q->withTrashed()])->orderBy('name')->get()->keyBy('id_branches');
         foreach ($branches as $branch) {
             if (($filters['region'] ?? null) && (int) $branch->region_id !== (int) $filters['region']) {
@@ -38,30 +40,36 @@ class AreaAnalyticsService
             $series[$date->toDateString()] = ['date' => $date->toDateString(), 'label' => $date->format('d M'), 'day' => $day, 'count' => 0, 'future' => $date->isAfter($today)];
         }
         $lastPull = null;
-        foreach ((clone $base)->select(['id_work_orders', 'id_branches', 'job_type', 'order_date', 'progress_category', 'operational_status', 'bima_status', 'bima_ps_date', 'branch_completed_at', 'last_pulled_at'])
+        foreach ((clone $base)->select(['id_work_orders', 'id_branches', 'jenis_pekerjaan', 'tgl_order', 'progress_category', 'operational_status', 'status_bima', 'status_order', 'task_bima', 'tgl_ps', 'branch_completed_at', 'last_pulled_at', 'last_progress_at'])
             ->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')])->cursor() as $order) {
             $branchKey = $order->id_branches ?? 'unmapped';
             $rows[$branchKey] ??= $this->branchRow($branches->get($order->id_branches), $zero);
             $bucket = ProgressSummary::bucket($order);
             $rows[$branchKey]['counts'][$bucket]++;
             $rows[$branchKey]['counts']['total']++;
-            $type = strtoupper(trim($order->job_type ?? '', ' ')) ?: 'TANPA JENIS';
+            $type = strtoupper(trim($order->jenis_pekerjaan ?? '', ' ')) ?: 'TANPA JENIS';
             $types[$type] ??= array_fill_keys(array_keys($types['NEW INSTALL']), 0);
             $summary['total']++;
             $types[$type]['total']++;
             if (! $order->id_branches) {
                 $summary['unmapped']++;
             }
-            if ($order->order_date?->toDateString() === $today->toDateString()) {
+            if ($order->tgl_order?->toDateString() === $today->toDateString()) {
                 $summary['incoming_today']++;
                 $types[$type]['incoming_today']++;
             }
             if (! $order->terminal() && ! $order->branch_completed_at) {
                 $summary['outstanding']++;
+                if (! $order->last_progress_at) {
+                    $summary['unupdated']++;
+                }
                 $types[$type]['outstanding']++;
                 if ($order->open_issues_count > 0) {
                     $summary['open_issues']++;
                 }
+            }
+            if (strtoupper(trim($order->progress_category ?? '', ' ')) === 'CLOSE') {
+                $summary['closed_by_branch']++;
             }
             if (strtoupper(trim($order->progress_category ?? '', ' ')) === 'CLOSE' && ! $order->isPsEligible()) {
                 $summary['waiting_bima']++;
@@ -69,7 +77,7 @@ class AreaAnalyticsService
             if ($order->isPsEligible()) {
                 $summary['ps_total']++;
                 $types[$type]['ps_total']++;
-                $date = $order->bima_ps_date?->toDateString();
+                $date = $order->tgl_ps?->toDateString();
                 if (! $date) {
                     $summary['missing_ps_date']++;
                 } elseif ($date > $today->toDateString()) {
@@ -104,11 +112,11 @@ class AreaAnalyticsService
                 $grand[$key] += $value;
             }
         }
-        if (($filters['job_type'] ?? 'all') !== 'all') {
-            $types = array_intersect_key($types, [strtoupper(trim($filters['job_type'], ' ')) => true]);
+        if (($filters['jenis_pekerjaan'] ?? 'all') !== 'all') {
+            $types = array_intersect_key($types, [strtoupper(trim($filters['jenis_pekerjaan'], ' ')) => true]);
         }
 
-        return ['today' => $today, 'month' => $month, 'summary' => $summary, 'groups' => $groups, 'grand' => $grand, 'recap' => $types,
+        return ['orderMonths' => app(OrderMonthAnalyticsService::class)->summary($base), 'ownerGroups' => app(OwnerGroupAnalyticsService::class)->summary($base), 'today' => $today, 'month' => $month, 'summary' => $summary, 'groups' => $groups, 'grand' => $grand, 'recap' => $types,
             'branch_count' => count(array_filter($rows, fn ($row) => $row['branch_id'] !== null)),
             'series' => array_values($series), 'chart_max' => max(1, ...array_column($series, 'count')), 'month_ps' => array_sum(array_column($series, 'count')),
             'completion_rate' => $summary['total'] ? round($summary['ps_total'] / $summary['total'] * 100, 1) : 0, 'latest_pull' => $lastPull];

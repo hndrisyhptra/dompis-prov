@@ -20,17 +20,26 @@
             @else
             <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}" href="{{ route('branch.dashboard') }}"><x-icon name="dashboard"/> Dashboard Branch</a>
             @endif
-            <a class="nav-link {{ request()->routeIs('work-orders.*') ? 'active' : '' }}" href="{{ route('work-orders.index') }}"><x-icon name="orders"/> {{ auth()->user()->role->areaScope() ? 'Work Orders' : 'Order Cabang' }}</a>
+            <a class="nav-link {{ request()->routeIs('work-orders.*') ? 'active' : '' }}" href="{{ route('work-orders.index') }}"><x-icon name="orders"/> {{ auth()->user()->role->areaScope() ? 'Work Orders' : 'Work Order' }}</a>
             @if(! auth()->user()->role->areaScope())<a class="nav-link {{ request()->routeIs('branch.material') ? 'active' : '' }}" href="{{ route('branch.material') }}"><x-icon name="material"/> Laporan Material</a>@endif
             @can('sync')
-            <a class="nav-link {{ request()->routeIs('sync.*') ? 'active' : '' }}" href="{{ route('sync.index') }}"><x-icon name="sync"/> Sync Center</a>
-            <a class="nav-link {{ request()->routeIs('mappings.*') ? 'active' : '' }}" href="{{ route('mappings.index') }}"><x-icon name="branches"/> Branch & Mapping</a>
+            <a class="nav-link {{ request()->routeIs('sync.*', 'imports.*') ? 'active' : '' }}" href="{{ route('sync.index') }}"><x-icon name="sync"/> Sync Center</a>
+            @endcan
+            @can('manage-master-data')
+            <details class="nav-master" @if(request()->routeIs('master-data.*')) open @endif>
+                <summary class="nav-link {{ request()->routeIs('master-data.*') ? 'active' : '' }}"><x-icon name="branches"/><span class="nav-master-label">Master Data</span><span class="nav-master-chevron" aria-hidden="true">⌄</span></summary>
+                <div class="nav-submenu" aria-label="Submenu Master Data">
+                    @foreach(['regions'=>'Region', 'branches'=>'Branch', 'service-areas'=>'Service Area', 'mapping-orders'=>'Mapping Order', 'mapping-owner-groups'=>'Mapping Owner Grup'] as $submenu => $label)
+                        <a class="nav-sublink {{ request()->route('masterType') === $submenu ? 'active' : '' }}" href="{{ route('master-data.index', $submenu) }}" @if(request()->route('masterType') === $submenu) aria-current="page" @endif>{{ $label }}</a>
+                    @endforeach
+                </div>
+            </details>
             @endcan
             @can('administer')
             <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}"><x-icon name="users"/> User Management</a>
             @endcan
         </nav>
-        <div class="sidebar-foot"><div class="small muted">{{ auth()->user()->role->areaScope() ? 'Operasional Area' : 'Ruang kerja cabang' }}</div><strong>{{ auth()->user()->name }}</strong><div class="small muted">{{ str_replace('_', ' ', auth()->user()->role->value) }}</div><div class="row gap-top"><form method="POST" action="{{ route('logout') }}">@csrf<button class="button secondary">Keluar</button></form></div></div>
+        <div class="sidebar-foot"><div class="small muted">{{ auth()->user()->role->areaScope() ? 'Operasional Area' : 'Ruang kerja Branch' }}</div><strong>{{ auth()->user()->name }}</strong><div class="small muted">{{ str_replace('_', ' ', auth()->user()->role->value) }}</div><div class="row gap-top"><form method="POST" action="{{ route('logout') }}">@csrf<button class="button secondary">Keluar</button></form></div></div>
     </aside>
 @endauth
 <main class="{{ auth()->check() ? 'main' : 'guest-main' }}">

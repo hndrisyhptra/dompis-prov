@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\WoIssue;
 use App\Models\WorkOrder;
 use App\Services\BranchProgressService;
+use App\Support\WorkOrderActions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -16,10 +17,22 @@ class BranchProgressController extends Controller
 {
     public const CATEGORIES = ['ACCESS', 'MATERIAL', 'NETWORK', 'CUSTOMER', 'PERMIT', 'OTHER'];
 
+    public function updateAction(Request $request, WorkOrder $workOrder, string $mode, BranchProgressService $service)
+    {
+        Gate::authorize('update', $workOrder);
+        $definition = WorkOrderActions::definition($mode);
+        $data = $request->validate(['revision' => 'required|integer|min:0', 'progress_category' => ['required', Rule::in(array_keys($definition['categories']))],
+            'notes' => 'required|string|max:2000', 'operational_status' => 'prohibited', 'resolve_issues' => ['sometimes', 'boolean', Rule::prohibitedIf($mode === 'issue')]],
+            ['progress_category.in' => 'Status tidak tersedia pada halaman ini.', 'notes.required' => $mode === 'issue' ? 'Detail kendala wajib diisi.' : 'Catatan pembaruan wajib diisi.']);
+        $service->update($request->user(), $workOrder, $data + ['workflow_mode' => $mode]);
+
+        return redirect()->route('work-orders.show', $workOrder)->with('status', $definition['title'].' disimpan dan dicatat pada riwayat order.');
+    }
+
     public function update(Request $request, WorkOrder $workOrder, BranchProgressService $service)
     {
         Gate::authorize('update', $workOrder);
-        $data = $request->validate(['revision' => 'required|integer|min:0', 'operational_status' => ['required_without:progress_category', Rule::prohibitedIf($request->filled('progress_category')), Rule::in(WorkOrder::STATUSES)], 'progress_category' => ['required_without:operational_status', Rule::enum(ProgressCategory::class)], 'notes' => 'required|string|max:2000']);
+        $data = $request->validate(['revision' => 'required|integer|min:0', 'operational_status' => ['required_without:progress_category', Rule::prohibitedIf($request->filled('progress_category')), Rule::in(WorkOrder::STATUSES)], 'progress_category' => ['required_without:operational_status', Rule::enum(ProgressCategory::class)], 'notes' => 'required|string|max:2000', 'resolve_issues' => ['sometimes', 'boolean', Rule::prohibitedIf(! $request->filled('progress_category') || $request->input('progress_category') === 'KENDALA')]]);
         $service->update($request->user(), $workOrder, $data);
 
         return back()->with('status', 'Progress diperbarui dan dicatat pada timeline.');

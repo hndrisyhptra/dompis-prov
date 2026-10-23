@@ -34,18 +34,18 @@
             <label for="password_confirmation">Konfirmasi kata sandi</label><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" minlength="12" maxlength="255" @required(! $editing)>
         </div></section>
         <section class="panel"><div class="panel-head"><h2>Penugasan & lokasi utama</h2></div><div class="panel-body">
-            <p class="small muted" data-role-scope-hint>Role cabang memerlukan minimal satu cabang. Role Area mempunyai akses seluruh Area.</p>
-            <fieldset class="branch-fieldset"><legend>Cakupan cabang</legend><div class="branch-options">
+            <p class="small muted" data-role-scope-hint>Role Branch memerlukan minimal satu Branch. Role Area mempunyai akses seluruh Area.</p>
+            <fieldset class="branch-fieldset"><legend>Cakupan Branch</legend><div class="branch-options">
             @forelse($branches as $branch)<label class="branch-option"><input type="checkbox" name="branches[]" value="{{ $branch->getKey() }}" @checked(in_array((string) $branch->getKey(), $selectedBranches, true))><span><strong>{{ $branch->name }}</strong><small>{{ $branch->code }} · {{ $branch->region?->name ?? $branch->regional ?? 'Region belum dipetakan' }}{{ $branch->active ? '' : ' · Nonaktif' }}</small></span></label>
-            @empty<p class="small muted">Belum ada branch. Tambahkan branch melalui Branch & Mapping terlebih dahulu.</p>@endforelse
+            @empty<p class="small muted">Belum ada branch. Hubungi administrator untuk menyiapkan referensi Branch terlebih dahulu.</p>@endforelse
             </div></fieldset>
             @error('branches')<p class="field-error">{{ $message }}</p>@enderror
             <label for="id_regions">Region utama <span class="muted">· opsional</span></label><select id="id_regions" name="id_regions" @error('id_regions') aria-invalid="true" @enderror><option value="">Belum ditentukan</option>@foreach($regions as $region)<option value="{{ $region->getKey() }}" @selected((string) $selectedRegion === (string) $region->getKey())>{{ $region->name }}{{ $region->is_active ? '' : ' · Nonaktif' }}</option>@endforeach</select>
             @error('id_regions')<p class="field-error">{{ $message }}</p>@enderror
             <label for="id_service_areas">STO utama <span class="muted">· opsional</span></label><select id="id_service_areas" name="id_service_areas" @error('id_service_areas') aria-invalid="true" @enderror><option value="">Tanpa STO utama</option>@foreach($serviceAreas as $sto)<option value="{{ $sto->getKey() }}" data-region="{{ $sto->id_regions }}" data-branch="{{ $sto->id_branches }}" @selected((string) $selectedSto === (string) $sto->getKey())>{{ $sto->workzone }} · {{ $sto->name }} · {{ $sto->branch?->name ?? 'Branch tidak tersedia' }}{{ $sto->is_active && ! $sto->trashed() ? '' : ' · Nonaktif' }}</option>@endforeach</select>
-            <p class="small muted" data-sto-status aria-live="polite">Pilihan STO mengikuti region dan cakupan cabang. Lokasi utama tidak menambah hak akses.</p>
+            <p class="small muted" data-sto-status aria-live="polite">Pilihan STO mengikuti region dan cakupan Branch. Lokasi utama tidak menambah hak akses.</p>
             @error('id_service_areas')<p class="field-error">{{ $message }}</p>@enderror
-            <div class="notice gap-top">Perubahan role, akses cabang, identitas login, atau kata sandi akan mengakhiri sesi lain pengguna terkait.</div>
+            <div class="notice gap-top">Perubahan role, akses Branch, identitas login, atau kata sandi akan mengakhiri sesi lain pengguna terkait.</div>
         </div></section>
     </div>
     <div class="form-actions gap-top"><a class="button secondary" href="{{ route('users.index') }}">Batal</a><button type="submit" class="button primary">{{ $editing ? 'Simpan perubahan' : 'Tambah user' }}</button></div>

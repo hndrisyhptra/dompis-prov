@@ -1,14 +1,29 @@
-@can('update', $order)
-@php $locked = $order->terminal() && ! auth()->user()->role->areaScope(); @endphp
-@if($locked && ! $order->progress_category)<div class="notice">Order ini sudah ditutup. Koreksi status memerlukan Admin Area.</div>
-@else
-<form method="POST" action="{{ route('work-orders.progress', $order) }}" data-loading="Menyimpan progress…" data-progress-form>@csrf @method('PATCH')
-<input type="hidden" name="revision" value="{{ $order->revision }}">
-<label for="progress_category">Kategori progress</label><select id="progress_category" name="progress_category" required @if($locked) aria-describedby="closed-progress-hint" @endif><option value="">Pilih kategori progress</option>@foreach(\App\Enums\ProgressCategory::cases() as $category)@if(! $locked || $order->progress_category === $category->value)<option value="{{ $category->value }}" @selected(old('progress_category', $order->progress_category) === $category->value)>{{ $category->value }}</option>@endif @endforeach</select>
-@if($locked)<p id="closed-progress-hint" class="small muted">Order sudah ditutup. Anda dapat menambah catatan; perubahan kategori memerlukan Admin Area.</p>@endif
-<label for="progress-notes">Catatan progress / detail kendala</label><textarea id="progress-notes" name="notes" required maxlength="2000" placeholder="Tuliskan kondisi pekerjaan dan tindak lanjut…">{{ old('notes') }}</textarea>
-<p class="small muted" data-progress-hint>Catatan tersimpan pada riwayat order. Pilih KENDALA untuk mencatat hambatan pekerjaan.</p>
-<div class="form-actions gap-top"><button class="button primary" type="submit">Simpan progress</button></div></form>
+@php
+$activeIssues = $order->issues->where('status', 'OPEN');
+$locked = $order->terminal() && !auth()->user()->role->areaScope();
+$initialCategory = $mode === 'close' ? 'CLOSE' : (array_key_exists($order->progress_category ?? '', $definition['categories']) ? $order->progress_category : '');
+$selectedCategory = old('progress_category', $initialCategory);
+$deviceComplete = collect(array_keys(\App\Services\WorkOrderDeviceService::FIELDS))->filter(fn($field) => trim($order->$field ?? '') !== '')->count();
+@endphp
+@if($locked)<div class="notice success small">Order sudah ditutup. Anda tetap dapat menambahkan catatan tanpa mengubah status atau tanggal penyelesaian.</div>@endif
+@if($mode === 'close')
+<div class="notice small"><strong>Penutupan instalasi lapangan</strong><p>Gunakan CLOSE setelah instalasi dan pengujian lapangan selesai. Close belum tentu PS.</p><dl class="meta-list"><div><dt>Kendala aktif</dt><dd>{{ $activeIssues->count() ? $activeIssues->count().' perlu diselesaikan' : 'Tidak ada' }}</dd></div><div><dt>Data perangkat</dt><dd>{{ $deviceComplete }}/6 terisi @can('editDevices',$order) · <a href="{{ route('work-orders.show',$order) }}#order-devices">Lengkapi perangkat</a>@endcan</dd></div></dl><details><summary>Lihat 14 status BIMA untuk PS</summary><ul class="ps-rule-list">@foreach(\App\Support\PsEligibility::STATUSES as $psStatus)<li>{{ $psStatus }}</li>@endforeach</ul></details><p class="small muted">PS harian mengikuti TGL PS BIMA.</p></div>
+@elseif($mode === 'issue')
+<div class="notice small">Cancel Order mencatat pembatalan, bukan PS. Pembukaan kembali order yang sudah dibatalkan memerlukan Admin Area.</div>
 @endif
-@if(auth()->user()->role->areaScope() && in_array($order->operational_status, ['FIELD_DONE','PENDING_VALIDATION']) && $order->verification_status !== 'VERIFIED')<details class="gap-top"><summary>Verifikasi penyelesaian oleh Area</summary><form method="POST" action="{{ route('work-orders.progress', $order) }}" data-loading="Memverifikasi…">@csrf @method('PATCH')<input type="hidden" name="revision" value="{{ $order->revision }}"><input type="hidden" name="operational_status" value="COMPLETED"><label for="verification-notes">Catatan verifikasi</label><textarea id="verification-notes" name="notes" required maxlength="2000"></textarea><button type="submit" class="button secondary gap-top">Verifikasi selesai</button></form></details>@endif
-@endcan
+<form method="POST" action="{{ route('work-orders.action.update',[$order,$mode]) }}" data-loading="Menyimpan pembaruan…">
+@csrf @method('PATCH')<input type="hidden" name="revision" value="{{ old('revision',$order->revision) }}">
+<label for="progress_category">{{ $mode === 'issue' ? 'Kategori kendala' : 'Status Progress' }}</label>
+<select id="progress_category" name="progress_category" required @if($errors->has('progress_category')) aria-invalid="true" @endif>
+@if($mode !== 'close')<option value="">{{ $mode === 'issue' ? 'Pilih kategori kendala' : 'Pilih tahap pekerjaan' }}</option>@endif
+@foreach($definition['categories'] as $value=>$label)<option value="{{ $value }}" @selected($selectedCategory===$value)>{{ $label }}</option>@endforeach
+</select>
+@error('progress_category')<p class="master-field-error">{{ $message }}</p>@enderror
+<label for="progress-notes">{{ $mode === 'issue' ? 'Detail kendala' : ($mode === 'close' ? 'Ringkasan penyelesaian' : 'Catatan progress') }}</label>
+<textarea id="progress-notes" name="notes" required maxlength="2000" placeholder="{{ $mode === 'issue' ? 'Jelaskan kendala, penyebab dan tindak lanjut…' : ($mode === 'close' ? 'Tuliskan hasil instalasi dan pengujian lapangan…' : 'Tuliskan perkembangan pekerjaan dan rencana berikutnya…') }}" @if($errors->has('notes')) aria-invalid="true" @endif>{{ old('notes') }}</textarea>
+@error('notes')<p class="master-field-error">{{ $message }}</p>@enderror
+@if($activeIssues->isNotEmpty() && $mode !== 'issue')<div class="gap-top"><label class="check"><input type="checkbox" name="resolve_issues" value="1" @checked(old('resolve_issues')) @required($mode === 'close')> Seluruh kendala aktif sudah selesai</label><p class="small muted">Catatan di atas disimpan sebagai hasil penyelesaian kendala. Close membutuhkan penyelesaian seluruh kendala aktif.</p></div>@endif
+<div class="form-actions progress-save-bar gap-top"><a class="button secondary" href="{{ route('work-orders.show',$order) }}" title="Kembali tanpa menyimpan">Batal</a><button class="button primary" type="submit" title="Simpan {{ $definition['title'] }}">{{ $locked ? 'Tambahkan catatan' : ($mode === 'close' ? 'Konfirmasi CLOSE' : ($mode === 'issue' ? 'Simpan kendala' : 'Simpan progress')) }}</button></div>
+</form>
+@include('work-orders.issue-history')
+@if($mode === 'close' && auth()->user()->role->areaScope() && in_array($order->operational_status,['FIELD_DONE','PENDING_VALIDATION']) && $order->verification_status !== 'VERIFIED')<details class="gap-top"><summary>Verifikasi penyelesaian oleh Area</summary><form method="POST" action="{{ route('work-orders.progress',$order) }}" data-loading="Memverifikasi…">@csrf @method('PATCH')<input type="hidden" name="revision" value="{{ $order->revision }}"><input type="hidden" name="operational_status" value="COMPLETED"><label for="verification-notes">Catatan verifikasi</label><textarea id="verification-notes" name="notes" required maxlength="2000"></textarea><button type="submit" class="button secondary gap-top">Verifikasi selesai</button></form></details>@endif

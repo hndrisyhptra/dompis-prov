@@ -1,0 +1,21 @@
+@extends('layouts.app')
+@section('title', 'Mapping import Excel')
+@section('content')
+<a href="{{ route('sync.index') }}" class="back-link">← Sync Center</a>
+<div class="page-heading"><div><div class="eyebrow">Import work order · langkah 2 dari 3</div><h1>Periksa mapping kolom</h1><p class="muted">{{ $meta['file_name'] }} · Sheet {{ $meta['sheet'] }} · Header baris {{ $meta['header_row'] }}</p></div><span class="badge">{{ $job->rows()->count() }} baris</span></div>
+@if($presetMapping !== null)<div class="notice"><strong>Template BIMA Work Orders terdeteksi.</strong> Mapping bawaan mengikuti 13 pasangan kolom yang ditetapkan. Kolom D (ORDER / ORDER ID / ORDER-ID) menjadi no_tq_sc_id. Kolom J masuk ke owner_grup dan K ke status_bima. Periksa pilihan di bawah sebelum membuat preview; work order belum diubah.</div>
+@else<div class="notice">Template upload memiliki susunan berbeda. Pilihan otomatis hanya usulan berdasarkan nama header. Periksa kolom sebelum membuat preview; work order belum diubah.</div>@endif
+@if(!$job->expires_at?->isFuture())<div class="notice warning" role="alert">Sesi mapping kedaluwarsa. Upload ulang file dari Sync Center.</div>@endif
+@if($job->busy())<div class="notice warning">Preview sedang diproses. <a href="{{ route('sync.show', $job) }}">Lihat status</a></div>@endif
+<div class="grid order-detail-grid">
+<section class="panel"><div class="panel-head"><h2>Kolom tujuan dan kolom file</h2>@if($presetMapping !== null && !$job->busy())<a class="button secondary" href="{{ route('imports.mapping', [$job, 'use_bima_mapping'=>1]) }}">Gunakan mapping BIMA</a>@endif</div><form method="POST" action="{{ route('imports.preview', $job) }}" class="panel-body" data-loading="Mengantrekan preview…">@csrf
+<div class="notice small">NO TQ/SC/ID wajib. Pilih STO atau BRANCH sumber untuk menentukan Branch. Hanya satu kolom BRANCH digunakan. Kolom yang tidak dipilih tidak menimpa atribut WO yang sudah ada.</div>
+@foreach($primaryFields as $field=>$label)@include('imports.mapping-field')@endforeach
+@if($additionalFields)<details class="gap-top" @if(collect(array_keys($additionalFields))->contains(fn($field) => ($useBimaDefaults ? ($mapping[$field]??'') : old('mapping.'.$field, $mapping[$field]??'')) !== '')) open @endif><summary>Kolom tambahan · tidak dipilih oleh mapping BIMA</summary><p class="small muted">Gunakan hanya jika export menyediakan sumber yang sesuai. TGL PS belum ditetapkan; Date Modified dan Status Date tidak dianggap tanggal PS.</p>@foreach($additionalFields as $field=>$label)@include('imports.mapping-field')@endforeach</details>@endif
+<div class="notice small gap-top">Diisi otomatis: bulan dan tahun dari tgl_order; status_order dari task_bima–status_bima; mapping_order dari referensi; umur_hari dan kategori_umur dari tanggal order. Kolom hasil tersebut tidak dipilih dari export.</div>
+<label class="check gap-top"><input type="checkbox" name="confirmed_mapping" value="1" required> Saya sudah memeriksa mapping, termasuk kolom BRANCH yang digunakan.</label><button type="submit" class="button primary" @disabled($job->busy() || !$job->expires_at?->isFuture())>Buat preview import</button>
+</form></section>
+<aside><section class="panel"><div class="panel-head"><h2>Contoh isi file</h2></div><div class="panel-body"><p class="small muted">Tiga baris pertama, hanya untuk pemeriksaan mapping. ID/SID tidak otomatis disamakan.</p></div><div class="table-wrap"><table><thead><tr><th>Kolom file</th>@foreach($sample as $row)<th>Baris {{ $row->row_index }}</th>@endforeach</tr></thead><tbody>@foreach($meta['headers'] as $index=>$header)@if($header!=='')<tr><th>{{ \App\Services\WorkOrderXlsxReader::column($index) }} · {{ $header }}</th>@foreach($sample as $row)<td>{{ Str::limit($row->payload['raw'][$index]['value']??'',100) }} @if($row->payload['raw'][$index]['formula']??false)<span class="badge warn">Formula</span>@endif</td>@endforeach</tr>@endif @endforeach</tbody></table></div></section>
+<div class="notice gap-top">Bulan dan tahun mengikuti tanggal order. Umur dihitung sampai hari ini dalam zona waktu WIB. Status Bima yang memenuhi daftar 14 kombinasi PS otomatis menyesuaikan Status Progress menjadi CLOSE saat import; progress sebelumnya dicatat dalam riwayat. Status lainnya tidak menimpa progress.</div></aside>
+</div>
+@endsection

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'inbound' => env('WO_ORDER_SOURCE', 'excel'),
     'sheets' => [
         // Unconfigured is deliberately the default. Fake is only allowed outside production.
         'driver' => env('SHEETS_DRIVER', 'google'),

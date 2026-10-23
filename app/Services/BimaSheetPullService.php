@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Contracts\GoogleSheetGateway;
 use App\Models\AuditLog;
-use App\Models\BranchMapping;
-use App\Models\ServiceArea;
 use App\Models\SyncJob;
 use App\Models\WorkOrder;
 use Illuminate\Support\Facades\DB;
@@ -13,46 +11,11 @@ use InvalidArgumentException;
 
 class BimaSheetPullService
 {
-    public function __construct(private GoogleSheetGateway $gateway, private BimaRowMapper $mapper) {}
+    public function __construct(private GoogleSheetGateway $gateway, private BimaRowMapper $mapper, private BimaOrderResolver $resolver) {}
 
     public static function connectionHash(): string
     {
-        return hash('sha256', json_encode([config('olo.sheets.driver'), config('olo.sheets.spreadsheet_id'), config('olo.sheets.credentials_path'), config('olo.sheets.fake_path')]));
-    }
-
-    private function mappedBranch(array $data): ?int
-    {
-        $mapped = BranchMapping::where('enabled', true)->where('bima_branch', mb_strtoupper(trim($data['source_branch_name'])))
-            ->whereIn('sto_code', ['', mb_strtoupper(trim($data['sto_code']))])->whereHas('branch', fn ($q) => $q->where('active', true))
-            ->orderByRaw("CASE WHEN sto_code = '' THEN 1 ELSE 0 END")->value('id_branches');
-        $sto = ServiceArea::withTrashed()->with(['branch', 'region'])->where('workzone', mb_strtoupper(trim($data['sto_code'])))->first();
-        if (! $sto) {
-            return $mapped;
-        }
-        if ($sto->trashed() || ! $sto->is_active || ($sto->id_regions && ! $sto->region?->is_active)) {
-            return null;
-        }
-        if (! $sto->id_branches) {
-            return $mapped;
-        }
-        if (! $sto->branch?->active || ($sto->branch->region_id !== null && (int) $sto->branch->region_id !== $sto->id_regions)) {
-            return null;
-        }
-
-        // Competing explicit source mapping and STO ownership require Area review.
-        return $mapped && $mapped !== $sto->id_branches ? null : $sto->id_branches;
-    }
-
-    private function classify(array $data, ?WorkOrder $existing, ?int $branch): array
-    {
-        if (! $branch) {
-            return ['conflict', 'Mapping branch F/STO belum tersedia, tidak aktif, atau bertentangan dengan master STO.'];
-        }
-        if ($existing && ($existing->id_branches !== $branch || $existing->source_branch_name !== $data['source_branch_name'])) {
-            return ['conflict', 'Branch sumber/mapping berubah. Perlu review Area; tidak dipindahkan otomatis.'];
-        }
-
-        return [! $existing ? 'new' : ($existing->source_snapshot_hash === $data['source_snapshot_hash'] ? 'unchanged' : 'changed'), null];
+        return hash('sha256', json_encode(['wo-columns-v4-task-status', config('olo.sheets.driver'), config('olo.sheets.spreadsheet_id'), config('olo.sheets.credentials_path'), config('olo.sheets.fake_path')]));
     }
 
     public function preview(SyncJob $job): void
@@ -83,12 +46,12 @@ class BimaSheetPullService
             $branch = null;
             try {
                 $data = $this->mapper->map($row);
-                if (($counts[$data['external_order_id']] ?? 0) > 1) {
+                if (($counts[$data['no_tq_sc_id']] ?? 0) > 1) {
                     throw new InvalidArgumentException('ID H duplikat dalam snapshot. Semua kemunculan ID ditolak.');
                 }
-                $existing = WorkOrder::where('source_system', 'BIMA')->where('external_order_id', $data['external_order_id'])->first();
-                $branch = $this->mappedBranch($data);
-                [$action, $error] = $this->classify($data, $existing, $branch);
+                $existing = WorkOrder::where('source_system', 'BIMA')->where('no_tq_sc_id', $data['no_tq_sc_id'])->first();
+                $branch = $this->resolver->resolve($data);
+                [$action, $error] = $this->resolver->classify($data, $existing, $branch);
             } catch (InvalidArgumentException $exception) {
                 $action = 'rejected';
                 $error = $exception->getMessage();
@@ -126,21 +89,22 @@ class BimaSheetPullService
                     return;
                 }
                 $data = $entry['data'];
-                $existing = WorkOrder::where('source_system', 'BIMA')->where('external_order_id', $data['external_order_id'])->lockForUpdate()->first();
-                $branch = $this->mappedBranch($data);
-                [$action, $error] = $this->classify($data, $existing, $branch);
+                $existing = WorkOrder::where('source_system', 'BIMA')->where('no_tq_sc_id', $data['no_tq_sc_id'])->lockForUpdate()->first();
+                $branch = $this->resolver->resolve($data);
+                [$action, $error] = $this->resolver->classify($data, $existing, $branch);
                 if ($branch !== ($entry['id_branches'] ?? $entry['branch_id'] ?? null) || ($existing?->source_snapshot_hash !== $entry['expected_hash'] && $existing?->source_snapshot_hash !== $data['source_snapshot_hash'])) {
                     $action = 'conflict';
                     $error = 'Data sumber/mapping berubah sesudah preview. Buat preview baru.';
                 }
                 if (in_array($action, ['new', 'changed'], true)) {
                     // Explicit inbound allowlist from mapper. No operational field can enter this update.
-                    $attributes = $data + ['id_branches' => $branch, 'source_tab' => 'BIMA_RAW', 'last_pulled_at' => now()];
-                    $wo = $existing ?? new WorkOrder;
-                    $wo->fill($attributes)->save();
+                    $wo = app(WorkOrderSourceWriter::class)->write($job, $existing, $data, $branch, 'BIMA_RAW');
                     $action = $existing ? 'updated' : 'inserted';
                     AuditLog::create(['id_users' => $job->id_users, 'action' => 'bima.'.$action, 'entity_type' => 'work_order', 'id_entity' => $wo->getKey(),
                         'metadata' => ['id_sync_jobs' => $job->getKey(), 'fields' => $log->field_changes]]);
+                }
+                if ($action === 'unchanged' && $existing) {
+                    app(BimaAutoCloseService::class)->apply($existing, $job->actor, $job->getKey());
                 }
                 $log->update(['action' => $action, 'error' => $error, 'applied_at' => now()]);
             }, 3);

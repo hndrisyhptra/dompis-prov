@@ -28,6 +28,7 @@ abstract class OloTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['olo.inbound' => 'sheets']);
         $this->sheets = new SheetGateway([BimaRowMapper::HEADERS]);
         $this->app->instance(GoogleSheetGateway::class, $this->sheets);
         $this->area = $this->user(Role::AreaHd);

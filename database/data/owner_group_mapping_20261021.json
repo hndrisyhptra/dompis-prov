@@ -1,0 +1,104 @@
+{
+  "source": "mapping-ownergrup.xlsx",
+  "sheet": "Sheet1",
+  "range": "A1:B25",
+  "sha256": "fd00a4fa1fe70d23111957cb6ee184823849733593813b5d758769280220e0db",
+  "rules": [
+    {
+      "owner_grup": "DCS DCEC",
+      "kelompok_ownergrup": "DCS"
+    },
+    {
+      "owner_grup": "PMDA OLO",
+      "kelompok_ownergrup": "PMD"
+    },
+    {
+      "owner_grup": "SDI REGIONAL JATENG DIY",
+      "kelompok_ownergrup": "SDI REGIONAL"
+    },
+    {
+      "owner_grup": "SDI REGIONAL JATIM",
+      "kelompok_ownergrup": "SDI REGIONAL"
+    },
+    {
+      "owner_grup": "SDI REGIONAL BALI NUSRA",
+      "kelompok_ownergrup": "SDI REGIONAL"
+    },
+    {
+      "owner_grup": "TIF ED REGIONAL BALINUSRA",
+      "kelompok_ownergrup": "ED REGIONAL"
+    },
+    {
+      "owner_grup": "TIF ED REGIONAL JATIM",
+      "kelompok_ownergrup": "ED REGIONAL"
+    },
+    {
+      "owner_grup": "TIF FULFILLMENT MOBILE SERV OPS AREA 3",
+      "kelompok_ownergrup": "FF SO 3"
+    },
+    {
+      "owner_grup": "TIF FULFILLMENT MOBILE SERV OPS AREA 4",
+      "kelompok_ownergrup": "FF SO 4"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT DENPASAR",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT KUPANG",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT MADIUN",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT MAGELANG",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT MAKASSAR",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT MALANG",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT MATARAM",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT SEMARANG",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT SIDOARJO",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT SURAKARTA",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT SURAMADU",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF NON FBB FFM DISTRICT YOGYAKARTA",
+      "kelompok_ownergrup": "DISTRICT"
+    },
+    {
+      "owner_grup": "TIF PMD OLO",
+      "kelompok_ownergrup": "PMD"
+    },
+    {
+      "owner_grup": "TIF PMD TELKOM GROUP",
+      "kelompok_ownergrup": "PMD"
+    },
+    {
+      "owner_grup": "TIF PMDA",
+      "kelompok_ownergrup": "PMD"
+    }
+  ]
+}

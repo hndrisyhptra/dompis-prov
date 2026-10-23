@@ -1,0 +1,14 @@
+<section class="panel gap-top" aria-labelledby="owner-group-title">
+    <div class="panel-head"><div><h2 id="owner-group-title">Distribusi Owner Group</h2><p class="small muted">Jumlah order per Branch dan kelompok penanggung jawab · seluruh order sesuai filter</p></div><span class="badge">{{ number_format($ownerGroups['total']) }} order</span></div>
+    @if(! $ownerGroups['has_mapping'])<div class="notice owner-group-note">Referensi mapping Owner Group belum tersedia. Menunggu file Excel mapping; order tetap dihitung pada kolom Belum dipetakan.</div>@endif
+    <div class="table-wrap" tabindex="0" aria-label="Rekap Owner Group per Branch, geser horizontal untuk melihat semua kelompok"><table class="owner-group-matrix">
+        <caption class="sr-only">Distribusi order berdasarkan Owner Group, total per Branch dan Grand Total</caption>
+        <thead><tr><th scope="col" class="branch-sticky">Branch</th>@foreach($ownerGroups['groups'] as $group)<th scope="col">{{ $group }}</th>@endforeach<th scope="col">Belum dipetakan</th><th scope="col">Grand Total</th></tr></thead>
+        <tbody>@forelse($ownerGroups['rows'] as $row)
+            @php $rowFilters = array_replace($ownerScopeFilters, $row['branch_id'] ? ['branch' => $row['branch_id']] : ['queue' => 'unmapped']); @endphp
+            <tr><th scope="row" class="branch-sticky">{{ $row['name'] }}</th>@foreach($row['counts'] as $group => $count)<td class="numeric">@if($count)<a href="{{ route('work-orders.index', $rowFilters + ['owner_group' => $group]) }}" aria-label="{{ $row['name'] }} · {{ $group === 'unmapped' ? 'Belum dipetakan' : $group }} · {{ $count }} order">{{ number_format($count) }}</a>@else<span class="zero-count">0</span>@endif</td>@endforeach<td class="numeric total-cell"><a href="{{ route('work-orders.index', $rowFilters) }}" aria-label="{{ $row['name'] }} · Total Owner Group · {{ $row['total'] }} order">{{ number_format($row['total']) }}</a></td></tr>
+        @empty<tr><td colspan="{{ count($ownerGroups['groups']) + 3 }}"><div class="empty"><h3>Belum ada order dalam cakupan ini</h3><p>Ubah filter atau periksa hasil import dan penugasan Branch.</p></div></td></tr>@endforelse</tbody>
+        <tfoot><tr><th scope="row" class="branch-sticky">Grand Total</th>@foreach($ownerGroups['totals'] as $group => $count)<td class="numeric">@if($count)<a href="{{ route('work-orders.index', $ownerScopeFilters + ['owner_group' => $group]) }}">{{ number_format($count) }}</a>@else<span class="zero-count">0</span>@endif</td>@endforeach<td class="numeric total-cell">{{ number_format($ownerGroups['total']) }}</td></tr></tfoot>
+    </table></div>
+    <div class="area-table-note small muted">Owner Group sumber berasal dari kolom J BIMA. Kelompok mengikuti master mapping; nilai kosong, belum dikenal atau aturan nonaktif masuk Belum dipetakan. Klik angka untuk melihat order.</div>
+</section>

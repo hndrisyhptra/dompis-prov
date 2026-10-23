@@ -12,8 +12,10 @@ class SyncJobRow extends Model
 
     protected $guarded = ['id_sync_job_rows'];
 
+    protected $hidden = ['payload'];
+
     protected function casts(): array
     {
-        return ['field_changes' => 'array'];
+        return ['field_changes' => 'array', 'payload' => 'encrypted:array'];
     }
 }

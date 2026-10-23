@@ -5,9 +5,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchDashboardController;
 use App\Http\Controllers\BranchMappingController;
 use App\Http\Controllers\BranchProgressController;
+use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkOrderController;
+use App\Http\Controllers\WorkOrderDeviceController;
+use App\Http\Controllers\WorkOrderImportController;
 use App\Http\Middleware\ActiveUser;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +20,16 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 });
 Route::middleware(['auth', ActiveUser::class])->group(function () {
+    Route::prefix('master-data')->name('master-data.')->middleware('can:manage-master-data')->group(function () {
+        Route::get('/', fn () => redirect()->route('master-data.index', 'regions'));
+        Route::get('/{masterType}', [MasterDataController::class, 'index'])->name('index');
+        Route::get('/{masterType}/create', [MasterDataController::class, 'create'])->name('create');
+        Route::post('/{masterType}', [MasterDataController::class, 'store'])->name('store');
+        Route::get('/{masterType}/{record}/edit', [MasterDataController::class, 'edit'])->whereNumber('record')->name('edit');
+        Route::put('/{masterType}/{record}', [MasterDataController::class, 'update'])->whereNumber('record')->name('update');
+        Route::get('/{masterType}/{record}/delete', [MasterDataController::class, 'confirmDelete'])->whereNumber('record')->name('confirm-delete');
+        Route::delete('/{masterType}/{record}', [MasterDataController::class, 'destroy'])->whereNumber('record')->name('destroy');
+    });
     Route::get('/dashboard', [AreaDashboardController::class, 'index'])->middleware('can:area-dashboard')->name('area.dashboard');
     Route::get('/branch/dashboard', [BranchDashboardController::class, 'index'])->name('branch.dashboard');
     Route::get('/branch/material', [BranchDashboardController::class, 'material'])->name('branch.material');
@@ -25,12 +38,17 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
+    Route::get('/work-orders/{workOrder}/actions/{mode}', [WorkOrderController::class, 'editAction'])->whereIn('mode', ['progress', 'issue', 'close'])->name('work-orders.action.edit');
+    Route::patch('/work-orders/{workOrder}/actions/{mode}', [BranchProgressController::class, 'updateAction'])->whereIn('mode', ['progress', 'issue', 'close'])->name('work-orders.action.update');
+    Route::patch('/work-orders/{workOrder}/devices', [WorkOrderDeviceController::class, 'update'])->name('work-orders.devices');
     Route::patch('/work-orders/{workOrder}/progress', [BranchProgressController::class, 'update'])->name('work-orders.progress');
     Route::post('/work-orders/{workOrder}/issues', [BranchProgressController::class, 'storeIssue'])->name('work-orders.issues');
     Route::patch('/issues/{issue}/resolve', [BranchProgressController::class, 'resolveIssue'])->name('issues.resolve');
     Route::get('/sync', [SyncController::class, 'index'])->name('sync.index');
+    Route::post('/imports/excel', [WorkOrderImportController::class, 'upload'])->middleware('throttle:6,1')->name('imports.upload');
+    Route::get('/imports/{syncJob}/mapping', [WorkOrderImportController::class, 'mapping'])->name('imports.mapping');
+    Route::post('/imports/{syncJob}/preview', [WorkOrderImportController::class, 'preview'])->middleware('throttle:6,1')->name('imports.preview');
     Route::post('/sync/bima/preview', [SyncController::class, 'preview'])->middleware('throttle:6,1')->name('sync.preview');
-    Route::post('/sync/monitoring/push', [SyncController::class, 'push'])->middleware('throttle:6,1')->name('sync.push');
     Route::get('/sync/jobs/{syncJob}', [SyncController::class, 'show'])->name('sync.show');
     Route::post('/sync/jobs/{syncJob}/commit', [SyncController::class, 'commit'])->name('sync.commit');
     Route::post('/sync/jobs/{syncJob}/retry', [SyncController::class, 'retry'])->middleware('throttle:6,1')->name('sync.retry');

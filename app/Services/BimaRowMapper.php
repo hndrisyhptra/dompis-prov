@@ -30,7 +30,7 @@ class BimaRowMapper
 
             return (new DateTimeImmutable($serial < 60 ? '1899-12-31' : '1899-12-30'))->modify('+'.(int) $serial.' days')->format('Y-m-d');
         }
-        foreach (['Y-m-d', 'd/m/Y', 'd-m-Y', 'd/m/Y H:i:s', 'Y-m-d H:i:s'] as $format) {
+        foreach (['Y-m-d', 'd/m/Y', 'd-m-Y', 'd/m/Y H:i:s', 'Y-m-d H:i:s', 'Y-m-d H:i:s.v'] as $format) {
             $date = DateTimeImmutable::createFromFormat('!'.$format, trim((string) $value));
             $errors = DateTimeImmutable::getLastErrors();
             if ($date && (! $errors || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))) {
@@ -65,11 +65,11 @@ class BimaRowMapper
         // A:AB are inbound attributes. AC:AF are ignored derived fields, never operational progress/KPIs.
         $source = array_combine(array_slice(self::HEADERS, 0, 28), array_map(fn ($v) => (string) ($v ?? ''), array_slice($row, 0, 28)));
         $data = [
-            'source_system' => 'BIMA', 'external_order_id' => $id, 'source_sid' => $text(16),
-            'order_date' => $this->date($row[1]), 'bima_ps_date' => $this->date($row[15]),
-            'source_branch_name' => $text(5), 'sto_code' => $text(6), 'regional' => $text(4),
-            'customer_name' => $text(8), 'installation_address' => $text(9), 'service_name' => $text(10),
-            'job_type' => $text(11), 'bima_status' => $text(13), 'bima_final_status' => $text(26),
+            'source_system' => 'BIMA', 'no_tq_sc_id' => $id, 'sid' => $text(16),
+            'tgl_order' => $this->date($row[1]), 'tgl_ps' => $this->date($row[15]),
+            'branch' => $text(5), 'sto' => $text(6), 'regional' => $text(4),
+            'nama_olo' => $text(8), 'alamat' => $text(9), 'layanan' => $text(10),
+            'jenis_pekerjaan' => $text(11), 'status_bima' => $text(13), 'task_bima' => $text(14), 'status_final' => $text(26),
             'source_bima_fields' => $source,
         ];
         $data['source_snapshot_hash'] = hash('sha256', json_encode($data, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));

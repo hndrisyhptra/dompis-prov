@@ -40,7 +40,7 @@ class BimaPullTest extends OloTestCase
     {
         $job = $this->pull([$this->row(), $this->row('000124')]);
         $this->assertSame(2, $job->stats['inserted']);
-        $wo = WorkOrder::where('external_order_id', '000123')->firstOrFail();
+        $wo = WorkOrder::where('no_tq_sc_id', '000123')->firstOrFail();
         $wo->update(['operational_status' => 'IN_PROGRESS', 'revision' => 4, 'verification_status' => 'REVIEW', 'last_progress_at' => now()]);
         $lastProgress = $wo->fresh()->last_progress_at;
         $job = $this->pull([$this->row(changes: [13 => 'CLOSE', 17 => 'Catatan sumber'])]);
@@ -49,11 +49,11 @@ class BimaPullTest extends OloTestCase
         $this->assertSame(4, $wo->fresh()->revision);
         $this->assertSame('REVIEW', $wo->fresh()->verification_status);
         $this->assertTrue($lastProgress->equalTo($wo->fresh()->last_progress_at));
-        $this->assertSame('CLOSE', $wo->fresh()->bima_status);
+        $this->assertSame('CLOSE', $wo->fresh()->status_order);
         $job = $this->pull([$this->row(changes: [13 => 'CLOSE', 17 => 'Catatan sumber'])]);
         $this->assertSame(1, $job->stats['unchanged']);
         $this->assertDatabaseCount('work_orders', 2);
-        $this->assertSame('NEW', WorkOrder::where('external_order_id', '000124')->value('operational_status'));
+        $this->assertSame('NEW', WorkOrder::where('no_tq_sc_id', '000124')->value('operational_status'));
     }
 
     public function test_duplicate_blank_and_invalid_date_rows_are_rejected_others_continue(): void
@@ -77,7 +77,7 @@ class BimaPullTest extends OloTestCase
         $this->pull([$this->row(changes: [13 => 'CHANGED AGAIN'])]);
         app(BimaSheetPullService::class)->pull($stale);
         $this->assertSame(1, $stale->fresh()->stats['conflict']);
-        $this->assertSame('CHANGED AGAIN', WorkOrder::first()->bima_status);
+        $this->assertSame('CHANGED AGAIN', WorkOrder::first()->status_order);
     }
 
     public function test_mapping_change_after_preview_is_checked_before_commit(): void

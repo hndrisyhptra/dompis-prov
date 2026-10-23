@@ -36,7 +36,7 @@ class CheckGoogleSheets extends Command
                 try {
                     $data = $mapper->map($row);
                     $valid++;
-                    $id = $data['external_order_id'];
+                    $id = $data['no_tq_sc_id'];
                     $counts[$id] = ($counts[$id] ?? 0) + 1;
                 } catch (InvalidArgumentException) {
                     $invalid++;

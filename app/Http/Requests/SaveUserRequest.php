@@ -55,12 +55,12 @@ class SaveUserRequest extends FormRequest
             'password.confirmed' => 'Konfirmasi kata sandi belum cocok.',
             'exists' => ':attribute tidak ditemukan.',
             'role.in' => 'Role pengguna tidak tersedia.',
-            'branches.*.distinct' => 'Cabang yang dipilih tidak boleh berulang.',
+            'branches.*.distinct' => 'Branch yang dipilih tidak boleh berulang.',
         ];
     }
 
     public function attributes(): array
     {
-        return ['name' => 'nama', 'username' => 'username', 'email' => 'email', 'password' => 'kata sandi', 'role' => 'role', 'active' => 'status aktif', 'branches' => 'cabang', 'id_regions' => 'region utama', 'id_service_areas' => 'STO utama', 'management_revision' => 'versi data'];
+        return ['name' => 'nama', 'username' => 'username', 'email' => 'email', 'password' => 'kata sandi', 'role' => 'role', 'active' => 'status aktif', 'branches' => 'Branch', 'id_regions' => 'region utama', 'id_service_areas' => 'STO utama', 'management_revision' => 'versi data'];
     }
 }

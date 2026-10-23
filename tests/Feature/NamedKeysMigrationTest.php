@@ -34,7 +34,7 @@ class NamedKeysMigrationTest extends TestCase
         DB::table('branches')->insert(['id' => 201, 'code' => 'MIG', 'name' => 'Migration Branch']);
         DB::table('user_branches')->insert(['user_id' => 101, 'branch_id' => 201]);
         DB::table('branch_mappings')->insert(['id' => 301, 'bima_branch' => 'MIGRATION', 'branch_id' => 201]);
-        DB::table('work_orders')->insert(['id' => 401, 'external_order_id' => '000123', 'branch_id' => 201, 'source_bima_fields' => '{}', 'source_snapshot_hash' => str_repeat('a', 64), 'operational_status' => 'IN_PROGRESS', 'revision' => 7]);
+        DB::table('work_orders')->insert(['id' => 401, 'no_tq_sc_id' => '000123', 'branch_id' => 201, 'source_bima_fields' => '{}', 'source_snapshot_hash' => str_repeat('a', 64), 'operational_status' => 'IN_PROGRESS', 'revision' => 7]);
         DB::table('sync_jobs')->insert(['id' => 501, 'idempotency_key' => '00000000-0000-4000-8000-000000000501', 'actor_id' => 101, 'direction' => 'pull', 'state' => 'preview_ready', 'connection_hash' => str_repeat('b', 64), 'snapshot' => $snapshot]);
         DB::table('sync_job_rows')->insert(['id' => 601, 'sync_job_id' => 501, 'row_index' => 2, 'external_key' => '000123', 'action' => 'new']);
         DB::table('audit_logs')->insert(['id' => 701, 'actor_id' => 101, 'action' => 'migration.fixture', 'entity_type' => 'work_order', 'entity_id' => 401, 'metadata' => '{"branch_id":201,"sync_job_id":501}']);
@@ -77,7 +77,7 @@ class NamedKeysMigrationTest extends TestCase
         $this->assertSame(101, SyncJob::findOrFail(501)->actor->getKey());
         $this->assertSame(601, SyncJob::findOrFail(501)->rows->sole()->getKey());
         $order = WorkOrder::findOrFail(401);
-        $this->assertSame(201, $order->branch->getKey());
+        $this->assertSame(201, $order->assignedBranch->getKey());
         $this->assertSame(801, $order->events->sole()->getKey());
         $this->assertSame(901, $order->issues->sole()->getKey());
         $this->assertSame($snapshot, DB::table('sync_jobs')->value('snapshot'));

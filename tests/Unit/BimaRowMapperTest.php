@@ -40,8 +40,8 @@ class BimaRowMapperTest extends TestCase
         $row[28] = '=VLOOKUP(G2,A2:B3,2,FALSE)';
         $row[30] = '=TODAY()-B2';
         $this->assertSame($first, $mapper->map($row));
-        $this->assertSame('000001', $first['external_order_id']);
-        $this->assertSame('SID-0002', $first['source_sid']);
+        $this->assertSame('000001', $first['no_tq_sc_id']);
+        $this->assertSame('SID-0002', $first['sid']);
     }
 
     public function test_formula_in_source_attributes_is_rejected(): void
