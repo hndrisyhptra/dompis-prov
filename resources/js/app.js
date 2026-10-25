@@ -1,10 +1,14 @@
 import { setupJtBoq } from './jt-boq';
+import { setupPasswordVisibility } from './password-visibility';
+import { setupMaterialTemplate } from './material-template';
 import { setupDashboardTables } from './dashboard-tables';
 import { setupFormConfirmation } from './form-confirmation';
 
 setupFormConfirmation(document, message => window.confirm(message));
 setupDashboardTables(document);
 setupJtBoq(document);
+setupPasswordVisibility(document);
+setupMaterialTemplate(document);
 
 const kmlPreview = document.querySelector('[data-kml-preview]');
 if (kmlPreview) {

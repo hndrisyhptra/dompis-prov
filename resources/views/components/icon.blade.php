@@ -1,6 +1,7 @@
 @props(['name'])
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 @switch($name)
+@case('eye-off')<path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A11 11 0 0 1 12 5c7 0 10 7 10 7a18 18 0 0 1-3.3 4.3M6.1 6.1A18 18 0 0 0 2 12s3 7 10 7a11 11 0 0 0 5.9-1.9"/>@break
 @case('revenue')<path d="M3 3v18h18M7 14l4-4 4 2 5-7M16 5h4v4"/>@break
 @case('bookmark')<path d="M6 3h12v18l-6-4-6 4V3Z"/>@break
 @case('log-out')<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>@break

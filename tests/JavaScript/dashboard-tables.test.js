@@ -35,6 +35,18 @@ function fixture(supported = true) {
     return { root, content, title, fullList, dialog, buttons, bodies, requests, click, link };
 }
 const settle = () => new Promise(resolve => setImmediate(resolve));
+test('SVG line chart points open the same scoped dialog with SVGAnimatedString href', async () => {
+    const f = fixture();
+    const href = 'https://olo.test/work-orders?order_month=2026-07&queue=complete&branch=4';
+    const point = f.link({ baseVal: href }, undefined, 'Juli 2026 · Sudah PS');
+    assert.equal(f.click(f.root, point).defaultPrevented, true);
+    assert.equal(f.fullList.href, href);
+    assert.equal(new URL(f.requests[0].url).searchParams.get('order_month'), '2026-07');
+    assert.equal(f.title.textContent, 'Juli 2026 · Sudah PS');
+    respond(f.requests[0], '<p>Order PS bulan Juli</p>');
+    await settle();
+    assert.match(f.content.innerHTML, /Order PS bulan Juli/);
+});
 function respond(request, html, marker = 'orders') {
     request.resolve({ ok: true, headers: { get() { return marker; } }, async text() { return html; } });
 }

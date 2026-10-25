@@ -123,7 +123,7 @@ class BimaAutoCloseTest extends OloTestCase
         app(BimaAutoCloseService::class)->reconcile($this->area);
         $branchUser = $this->user();
         $branchUser->branches()->attach($this->branch);
-        $this->actingAs($branchUser)->get(route('branch.dashboard'))->assertOk()->assertSee('Penyelesaian berdasarkan bulan order')->assertViewHas('orderMonths', function ($data) {
+        $this->actingAs($branchUser)->get(route('branch.dashboard'))->assertOk()->assertSee('Penyelesaian berdasarkan bulan order')->assertSee('data-order-month-chart', false)->assertSee('cohort-line cohort-ps', false)->assertViewHas('orderMonths', function ($data) {
             $rows = collect($data['rows'])->keyBy('month');
 
             return $rows['2026-07']['total'] === 2 && $rows['2026-07']['ps'] === 1 && $rows['2026-07']['closed'] === 1 && $rows['2026-07']['outstanding'] === 1 && $rows['2026-08']['ps'] === 1;

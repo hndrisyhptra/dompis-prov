@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+.material-template { min-height:650px; line-height:1.8; resize:vertical; }
+.material-steps { padding-left:20px; list-style:decimal; display:grid; gap:12px; }
 
 .revenue-stats .stat strong, .revenue-stages .stat strong { font-size:clamp(19px,2vw,25px); overflow-wrap:anywhere; }
 .revenue-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -132,6 +134,46 @@ input[type=checkbox] { margin-top:4px; accent-color:var(--primary); width:15px; 
 .login-panel { margin-bottom:20px; }
 .login-panel .panel-body { padding:28px; }
 .login-panel h1 { font-size:23px; }
+.login-shell { max-width:1060px; margin:5vh auto; display:grid; grid-template-columns:1.15fr 1fr; border:1px solid var(--border); border-radius:6px; background:var(--surface); overflow:hidden; }
+.login-intro { background:var(--soft); padding:38px; display:flex; flex-direction:column; }
+.login-brand strong { font-size:20px; letter-spacing:-.4px; }
+.login-intro-copy { margin:auto 0; padding:28px 0; }
+.login-intro h2 { font-size:clamp(25px,3vw,34px); line-height:1.25; letter-spacing:-.8px; margin-bottom:16px; }
+.login-features { margin:28px 0 0; padding:0; list-style:none; display:grid; gap:19px; }
+.login-features li { display:flex; align-items:flex-start; gap:12px; }
+.login-features strong, .login-features span:not(.login-feature-icon) { display:block; }
+.login-features li div > span { color:var(--muted); font-size:12px; margin-top:3px; }
+.login-feature-icon { padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--surface); color:var(--primary); }
+.dark .login-feature-icon { color:#a5c9f4; }
+.login-intro-foot { padding-top:12px; border-top:1px solid var(--border); }
+.login-shell .login-panel { border:0; border-radius:0; margin:0; display:flex; align-items:center; }
+.login-shell .login-panel .panel-body { width:100%; padding:42px 36px; }
+.login-panel form { margin-top:26px; }
+.login-panel .login-remember { margin:20px 0; }
+.login-help { padding-top:24px; margin-top:28px; border-top:1px solid var(--border); }
+.password-field { position:relative; }
+.password-field input { padding-right:48px; }
+.password-toggle { position:absolute; top:50%; right:5px; transform:translateY(-50%); display:grid; place-items:center; width:36px; height:36px; padding:8px; border:0; border-radius:6px; background:transparent; color:var(--muted); cursor:pointer; }
+.password-toggle:hover { background:var(--soft); color:var(--text); }
+.password-toggle[hidden] { display:none; }
+.brand small { text-transform:none; letter-spacing:.2px; line-height:1.5; margin-top:5px; }
+.cohort-chart { display:block; width:100%; min-width:640px; height:auto; }
+.cohort-line { fill:none; stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }
+.cohort-total { --series-color:#315B8C; }
+.cohort-closed { --series-color:#7265a5; }
+.cohort-ps { --series-color:#287b57; }
+.cohort-outstanding { --series-color:#b27820; }
+.dark .cohort-total { --series-color:#8eb8e5; }
+.dark .cohort-closed { --series-color:#b9a4e8; }
+.dark .cohort-ps { --series-color:#82c6a6; }
+.dark .cohort-outstanding { --series-color:#e3ba76; }
+.cohort-line { stroke:var(--series-color); }
+.cohort-point { fill:var(--surface); stroke:var(--series-color); stroke-width:2; }
+.cohort-link:hover .cohort-point,.cohort-link:focus .cohort-point { fill:var(--series-color); r:6; }
+.cohort-legend { display:flex; flex-wrap:wrap; gap:10px 20px; margin-bottom:16px; font-size:12px; }
+.cohort-legend span { display:inline-flex; align-items:center; gap:8px; }
+.cohort-legend i { width:18px; height:3px; background:var(--series-color); }
+@media(max-width:800px) { .login-shell { max-width:540px; grid-template-columns:minmax(0,1fr); margin:10px auto; } .login-intro { padding:24px; } .login-intro-copy,.login-intro-foot { display:none; } .login-intro .login-brand { margin:0; } .login-shell .login-panel .panel-body { padding:28px 24px; } }
 .mobile-bar, .drawer-backdrop { display:none; }
 .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--primary); border-radius:50%; vertical-align:middle; margin-right:6px; animation:spin 1s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }

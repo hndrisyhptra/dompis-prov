@@ -22,9 +22,4 @@ class BranchDashboardController extends Controller
             'types' => WorkOrder::visibleTo($request->user())->select('jenis_pekerjaan')->distinct()->orderBy('jenis_pekerjaan')->pluck('jenis_pekerjaan')->filter(),
         ]);
     }
-
-    public function material(Request $request, BranchOrderScope $scope)
-    {
-        return view('branch.material', ['branches' => $scope->branches($request->user())]);
-    }
 }

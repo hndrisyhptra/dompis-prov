@@ -48,12 +48,12 @@ export function setupDashboardTables(root, fetcher = fetch, baseUrl = location.h
         if (event.defaultPrevented || event.button > 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         const link = event.target.closest?.('a[data-dashboard-orders]');
         if (!link) return;
-        const url = new URL(link.href, baseUrl);
+        const url = new URL(link.getAttribute?.('href') || link.href?.baseVal || link.href, baseUrl);
         if (url.origin !== origin) return;
         event.preventDefault();
         trigger = link;
         title.textContent = link.dataset.modalTitle || 'Daftar Work Order';
-        fullList.href = link.href;
+        fullList.href = url.href;
         url.searchParams.set('modal', '1');
         if (!dialog.open) dialog.showModal();
         load(url);

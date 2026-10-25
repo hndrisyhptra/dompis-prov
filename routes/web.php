@@ -7,9 +7,11 @@ use App\Http\Controllers\BranchDashboardController;
 use App\Http\Controllers\BranchMappingController;
 use App\Http\Controllers\BranchProgressController;
 use App\Http\Controllers\MasterDataController;
+use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\PriorityOrderController;
 use App\Http\Controllers\RevenueOverviewController;
 use App\Http\Controllers\SyncController;
+use App\Http\Controllers\TelegramMaterialWebhookController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\WorkOrderDeviceController;
@@ -19,6 +21,7 @@ use App\Http\Middleware\ActiveUser;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route(! auth()->check() ? 'login' : (auth()->user()->role->areaScope() ? 'area.dashboard' : 'branch.dashboard')));
+Route::post('/api/telegram/material/webhook', TelegramMaterialWebhookController::class)->middleware('throttle:120,1')->name('telegram.material.webhook');
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'auth.login')->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
@@ -37,7 +40,11 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
     Route::get('/dashboard', [AreaDashboardController::class, 'index'])->middleware('can:area-dashboard')->name('area.dashboard');
     Route::get('/revenue', [RevenueOverviewController::class, 'index'])->middleware('can:revenue-overview')->name('revenue.index');
     Route::get('/branch/dashboard', [BranchDashboardController::class, 'index'])->name('branch.dashboard');
-    Route::get('/branch/material', [BranchDashboardController::class, 'material'])->name('branch.material');
+    Route::get('/branch/material', fn () => redirect()->route('materials.index'))->name('branch.material');
+    Route::get('/materials', [MaterialReportController::class, 'index'])->name('materials.index');
+    Route::get('/materials/template', [MaterialReportController::class, 'template'])->name('materials.template');
+    Route::get('/materials/template/download', [MaterialReportController::class, 'downloadTemplate'])->name('materials.template.download');
+    Route::get('/materials/{materialReport}', [MaterialReportController::class, 'show'])->name('materials.show');
     Route::post('/issues/{issue}/notes', [BranchProgressController::class, 'addIssueNote'])->name('issues.notes');
     Route::resource('users', UserManagementController::class)->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:administer');
     Route::view('/logout/confirm', 'auth.logout-confirm')->name('logout.confirm');

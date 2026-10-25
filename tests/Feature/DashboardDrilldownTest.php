@@ -78,7 +78,13 @@ class DashboardDrilldownTest extends OloTestCase
         $links = $xpath->query('//a[@data-dashboard-orders]');
         $this->assertGreaterThan(100, $links->length);
         foreach ($links as $link) {
-            $expected = (int) str_replace(',', '', trim($link->textContent));
+            if ($xpath->query('.//circle', $link)->length) {
+                $this->assertMatchesRegularExpression('/:\s*([\d,]+) order$/u', $link->getAttribute('aria-label'));
+                preg_match('/:\s*([\d,]+) order$/u', $link->getAttribute('aria-label'), $count);
+                $expected = (int) str_replace(',', '', $count[1]);
+            } else {
+                $expected = (int) str_replace(',', '', trim($link->textContent));
+            }
             $parts = parse_url($link->getAttribute('href'));
             parse_str($parts['query'] ?? '', $filters);
             $modal = $this->get(route('work-orders.index', $filters + ['modal' => 1]))->assertOk()->assertHeader('X-Dashboard-Fragment', 'orders');

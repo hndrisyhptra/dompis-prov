@@ -1,0 +1,7 @@
+@extends('layouts.app')
+@section('title','Detail Laporan Material')
+@section('content')
+<a class="back-link" href="{{ route('materials.index') }}">← Laporan Material</a><div class="page-heading"><div><h1>Detail laporan material</h1><p class="muted mono">{{ $report->report_number }}</p></div>@can('view',$report->workOrder)<a class="button secondary" href="{{ route('work-orders.show',$report->workOrder) }}" title="Buka Work Order"><x-icon name="orders"/>Detail Order</a>@endcan</div>
+<div class="notice"><strong>{{ $report->branch?->name }} · {{ $report->state==='submitted' ? 'Laporan aktif' : 'Versi lama · sudah dikoreksi' }}</strong><p class="small">{{ $report->actor?->name ?? 'Akun tidak tersedia' }} · {{ $report->created_at->timezone('Asia/Jakarta')->format('d M Y H:i:s') }} WIB · Sumber Telegram</p>@if($report->supersedes)<p class="small">Mengoreksi laporan {{ $report->supersedes->report_number }}. Koreksi menggunakan template penuh; kosong/- berarti belum diisi pada versi baru.</p>@endif</div>
+<section class="panel"><div class="panel-head"><h2>Data laporan · 45 kolom</h2></div><div class="panel-body"><dl class="meta-list">@foreach($fields as $key=>$label)<div><dt>{{ $label }}</dt><dd class="preserve-lines">{{ $report->$key ?? '—' }}</dd></div>@endforeach</dl></div></section><p class="small muted gap-top">— berarti belum dilaporkan, bukan angka nol. Data ini merupakan laporan Branch, belum hasil validasi LHPP atau transaksi stok.</p>
+@endsection

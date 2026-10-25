@@ -27,11 +27,11 @@
             <div class="grid two compact-grid"><div><label for="role">Role <span class="muted">· wajib</span></label><select id="role" name="role" required @error('role') aria-invalid="true" @enderror>@foreach($roles as $role)<option value="{{ $role->value }}" data-area-scope="{{ $role->areaScope() ? '1' : '0' }}" @selected($selectedRole === $role->value)>{{ $role->label() }}</option>@endforeach</select></div>
             <div><label for="active">Status akun</label><select id="active" name="active"><option value="1" @selected((string) old('active', $editing ? (int) $managedUser->active : 1) === '1')>Aktif</option><option value="0" @selected((string) old('active', $editing ? (int) $managedUser->active : 1) === '0')>Nonaktif</option></select></div></div>
             <div class="form-divider"></div><h3>{{ $editing ? 'Ganti kata sandi' : 'Kata sandi awal' }}</h3>
-            <p class="small muted">{{ $editing ? 'Kosongkan kedua kolom untuk mempertahankan kata sandi saat ini.' : 'Minimal 12 karakter, huruf besar, huruf kecil, dan angka.' }}</p>
-            <label for="password">Kata sandi {{ $editing ? 'baru' : '' }}</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="255" @required(! $editing) @error('password') aria-invalid="true" @enderror>
-            @if($editing)<p class="small muted">Kata sandi baru minimal 12 karakter, dengan huruf besar, huruf kecil, dan angka.</p>@endif
+            <p class="small muted">{{ $editing ? 'Kosongkan kedua kolom untuk mempertahankan kata sandi saat ini.' : 'Minimal 8 karakter. Tidak wajib kombinasi huruf besar, huruf kecil, atau angka.' }}</p>
+            <label for="password">Kata sandi {{ $editing ? 'baru' : '' }}</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="255" @required(! $editing) @error('password') aria-invalid="true" @enderror><x-password-toggle target="password"/></div>
+            @if($editing)<p class="small muted">Kata sandi baru minimal 8 karakter, tanpa syarat kombinasi karakter.</p>@endif
             @error('password')<p class="field-error">{{ $message }}</p>@enderror
-            <label for="password_confirmation">Konfirmasi kata sandi</label><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" minlength="12" maxlength="255" @required(! $editing)>
+            <label for="password_confirmation">Konfirmasi kata sandi</label><div class="password-field"><input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="255" @required(! $editing)><x-password-toggle target="password_confirmation"/></div>
         </div></section>
         <section class="panel"><div class="panel-head"><h2>Penugasan & lokasi utama</h2></div><div class="panel-body">
             <p class="small muted" data-role-scope-hint>Role Branch memerlukan minimal satu Branch. Role Area mempunyai akses seluruh Area.</p>

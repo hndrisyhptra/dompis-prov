@@ -34,7 +34,7 @@ class UsernameAndThemeTest extends OloTestCase
 
     public function test_theme_icon_exists_only_once_in_authenticated_topbar(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Username atau email')->assertDontSee('data-theme-toggle', false);
+        $this->get('/login')->assertOk()->assertSee('Username atau email')->assertSee('Dompis Prov')->assertSee('WIBS Area Jawa Bali')->assertSee('data-password-toggle', false)->assertDontSee('data-theme-toggle', false)->assertDontSee('Command Center');
         $response = $this->actingAs($this->area)->get('/work-orders')->assertOk();
         $response->assertSeeInOrder(['class="topbar"', 'data-theme-toggle', 'theme-moon', 'theme-sun'], false);
         $this->assertSame(1, substr_count($response->getContent(), 'data-theme-toggle'));

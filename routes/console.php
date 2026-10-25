@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('olo:refresh-order-aging')->dailyAt('00:05')->timezone('Asia/Jakarta')->withoutOverlapping();
+Schedule::command('olo:telegram-retry')->everyMinute()->withoutOverlapping();

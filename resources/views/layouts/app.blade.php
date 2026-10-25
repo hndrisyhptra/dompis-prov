@@ -3,16 +3,16 @@
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Monitoring') · OLO Command Center</title>
+    <title>@yield('title', 'Monitoring') · Dompis Prov WIBS Area Jawa Bali</title>
     <script>try{document.documentElement.classList.toggle('dark',(localStorage.getItem('olo-theme')|| (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark')}catch(e){}</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
 @auth
-    <div class="mobile-bar"><button class="button secondary" id="menu-toggle" aria-controls="sidebar" aria-expanded="false">Menu</button><strong>OLO Command Center</strong></div>
+    <div class="mobile-bar"><button class="button secondary" id="menu-toggle" aria-controls="sidebar" aria-expanded="false">Menu</button><div><strong>Dompis Prov</strong><div class="small muted">WIBS Area Jawa Bali</div></div></div>
     <button class="drawer-backdrop" aria-label="Tutup menu" hidden></button>
     <aside class="sidebar" id="sidebar">
-        <a class="brand" href="{{ route(auth()->user()->role->areaScope() ? 'area.dashboard' : 'branch.dashboard') }}"><span class="brand-mark">OLO</span><span>Command Center<small>AREA JAWA–BALI</small></span></a>
+        <a class="brand" aria-label="Dompis Prov WIBS Area Jawa Bali" href="{{ route(auth()->user()->role->areaScope() ? 'area.dashboard' : 'branch.dashboard') }}"><span class="brand-mark">DP</span><span>Dompis Prov<small>WIBS<br>Area Jawa Bali</small></span></a>
         <div class="nav-label">Operasional</div>
         <nav aria-label="Navigasi utama">
             @if(auth()->user()->role->areaScope())
@@ -27,7 +27,7 @@
             @can('priority-orders')
             <a class="nav-link {{ request()->routeIs('priorities.*') ? 'active' : '' }}" href="{{ route('priorities.index') }}"><x-icon name="bookmark"/> Order Prioritas</a>
             @endcan
-            @if(! auth()->user()->role->areaScope())<a class="nav-link {{ request()->routeIs('branch.material') ? 'active' : '' }}" href="{{ route('branch.material') }}"><x-icon name="material"/> Laporan Material</a>@endif
+            @can('material-reports')<a class="nav-link {{ request()->routeIs('materials.*', 'branch.material') ? 'active' : '' }}" href="{{ route('materials.index') }}"><x-icon name="material"/> Laporan Material</a>@endcan
             @can('sync')
             <a class="nav-link {{ request()->routeIs('sync.*', 'imports.*') ? 'active' : '' }}" href="{{ route('sync.index') }}"><x-icon name="sync"/> Sync Center</a>
             @endcan

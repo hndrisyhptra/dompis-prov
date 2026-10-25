@@ -16,7 +16,7 @@ Laravel 13.37 / PHP ≥8.3, MySQL, Blade, Tailwind 4, Vite 8. Implementasi perta
 - Monitoring full snapshot push melalui queue: atomic `batchUpdate` untuk **A:T pada MONITORING_OLO**, menghapus sisa baris output lama dalam batch yang sama, lalu verifikasi readback. Tidak menulis BIMA_RAW. Retry memakai snapshot tetap; push berikutnya mengambil kondisi MySQL terbaru. Tidak ada incremental/changed-only push pada versi ini.
 - UI putih, primary #315B8C, tombol ikon matahari/bulan di topbar setelah login (tanpa tombol tema pada form login), dark mode tersimpan mengikuti sistem sebelum dipilih, radius 6px, drawer mobile dengan fokus keyboard, tabel scroll, empty/error/loading state dari proses nyata.
 
-**Pembacaan Google Sheets dan preview antrean sudah diuji dengan kredensial nyata: header BIMA_RAW valid, 0 baris order.** Pull dengan data order dan monitoring push belum diuji nyata. Telegram/material dan ekspor LHPP belum diimplementasikan. Hasil fake tetap dipisahkan dari pemeriksaan nyata.
+**Pembacaan Google Sheets dan preview antrean sudah diuji dengan kredensial nyata: header BIMA_RAW valid, 0 baris order.** Pull dengan data order dan monitoring push belum diuji nyata. Alur material Telegram → MySQL, template 45 kolom, koreksi dan laporan web kini disiapkan, tetapi bot belum dibuat/diaktifkan atau diuji nyata. Ekspor LHPP belum diimplementasikan. Hasil fake tetap dipisahkan dari pemeriksaan nyata. Panduan aktivasi: [Laporan Material Telegram](docs/TELEGRAM_MATERIAL_REPORTS.md).
 
 ## Menjalankan proyek
 
@@ -123,7 +123,7 @@ Tes memakai SQLite memory + fake gateway/HTTP, tanpa API nyata. Tes source workb
 ## Lanjutan dan keputusan pemilik
 
 - M3 masih memerlukan assignment teknisi, dashboard KPI/cutoff resmi, antrian approval konflik branch, UI administrasi user/role, audit browser dan hardening operasional. Kategori issue awal adalah vocabulary teknis sementara (`ACCESS/MATERIAL/NETWORK/CUSTOMER/PERMIT/OTHER`), perlu disahkan.
-- M4: daftar pelapor/chat Telegram resmi, syntax command, master material/unit, aturan review/correction dan mapping material ke LHPP. Belum ada webhook/publisher/material ledger yang diaktifkan.
+- M4: alur laporan langsung Telegram → MySQL sudah disiapkan dengan webhook, whitelist, koreksi dan retry; bot tetap nonaktif sesuai arahan pemilik. Aktivasi memerlukan bot/token lokal, HTTPS publik, pemetaan akun/chat dan tes end-to-end. Master satuan, persetujuan/stok dan mapping material ke LHPP belum ditetapkan.
 - M5: identitas H vs Q untuk SID/No_SID, tipe transaksi, mandatory fields per job, aturan `-`/`EKSISTING`, koordinat terverifikasi. Tidak ada ekspor berlabel READY saat gate belum tersedia.
 - Validasi ID H lintas export, job type backlog, cut-off completion, retensi PII, penanggung jawab Google sharing/production UAT masih perlu keputusan pemilik.
 
@@ -152,7 +152,7 @@ Superadmin dapat membuka menu **User Management** untuk menambah/mengedit akun, 
 
 ### Ruang kerja Admin Branch
 
-Login role Branch kini menuju `/branch/dashboard`. Order hasil pull langsung terlihat menurut penugasan cabang; progress 15 kategori, kendala/catatan dan analytics harian tersedia. PS memerlukan progress CLOSE dan STATUS BIMA CLOSE/COMPLETE; tanggal harian mengikuti TGL PS BIMA, terpisah dari verifikasi Area. Material Telegram → Sheets → web masih menunggu integrasi. Lihat [alur, definisi metrik, migrasi, pengujian dan manifest file](docs/BRANCH_WORKFLOW.md).
+Login role Branch kini menuju `/branch/dashboard`. Order hasil import langsung terlihat menurut penugasan Branch; progress, kendala/catatan dan analytics harian tersedia. PS memerlukan progress CLOSE dan salah satu 14 kombinasi status_order yang ditetapkan pemilik; tanggal harian mengikuti TGL PS BIMA. Material mengikuti arahan terbaru Telegram → MySQL langsung; lihat [panduan material terbaru](docs/TELEGRAM_MATERIAL_REPORTS.md). Catatan alur awal tersimpan di [Branch Workflow](docs/BRANCH_WORKFLOW.md), dengan aturan baru pada addendum AGENTS/PRD.
 
 ### Dashboard Area
 

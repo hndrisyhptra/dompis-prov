@@ -58,7 +58,8 @@ class BranchWorkflowTest extends OloTestCase
             $response->assertSee('value="'.$category.'"', false);
         }
         $response->assertDontSee('value="KENDALA"', false)->assertDontSee('value="CLOSE"', false);
-        $this->get(route('branch.material'))->assertOk()->assertSee('Menunggu integrasi')->assertSee('belum diaktifkan');
+        $this->get(route('branch.material'))->assertRedirect(route('materials.index'));
+        $this->get(route('materials.index'))->assertOk()->assertSee('Bot belum diaktifkan')->assertSee('Template Telegram');
         $this->actingAs($this->user())->get(route('branch.dashboard'))->assertOk()->assertViewHas('incoming', 0)->assertViewHas('outstanding', 0)->assertSee('belum memiliki penugasan branch');
     }
 

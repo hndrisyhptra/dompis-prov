@@ -14,7 +14,7 @@ class ExcelSourceColumnsMigrationTest extends TestCase
 
     public function test_source_columns_backfill_preserves_identity_progress_and_timestamps(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 13, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 14, '--force' => true])->assertSuccessful();
         $id = DB::table('work_orders')->insertGetId(['source_system' => 'BIMA', 'external_order_id' => '000001', 'progress_category' => 'SURVEY', 'revision' => 9,
             'source_snapshot_hash' => str_repeat('a', 64), 'source_bima_fields' => json_encode(['BW' => '100M', 'SN' => '000SN', 'TASK BIMA' => 'ACTIVATION', 'KETERANGAN' => 'Sumber lama', 'UMUR (HARI)' => '12']), 'created_at' => '2026-10-01 00:00:00', 'updated_at' => '2026-10-01 00:00:00'], 'id_work_orders');
         $before = DB::table('work_orders')->first();
@@ -36,7 +36,7 @@ class ExcelSourceColumnsMigrationTest extends TestCase
         $this->assertSame('12', $order->source_bima_fields['UMUR (HARI)']);
         $this->assertFalse(Schema::hasColumn('work_orders', 'source_district'));
         $this->assertTrue(Schema::hasColumn('sync_job_rows', 'payload'));
-        $this->artisan('migrate:rollback', ['--step' => 13, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 14, '--force' => true])->assertSuccessful();
         $this->assertFalse(Schema::hasColumn('work_orders', 'bandwidth'));
         $this->assertSame('SURVEY', $order->fresh()->progress_category);
         $this->assertDatabaseCount('work_orders', 1);

@@ -36,6 +36,20 @@ class UserManagementTest extends OloTestCase
         return User::where('username', 'operator.one')->firstOrFail();
     }
 
+    public function test_password_only_requires_eight_characters_for_create_and_update(): void
+    {
+        $this->actingAs($this->admin);
+        foreach (['abcdefgh', '12345678', 'ABCDEFGH'] as $i => $password) {
+            $this->post(route('users.store'), $this->payload(['username' => 'simple.'.$i, 'email' => 'simple'.$i.'@example.test', 'password' => $password, 'password_confirmation' => $password]))->assertSessionHasNoErrors()->assertRedirect();
+            $this->assertTrue(Hash::check($password, User::where('username', 'simple.'.$i)->sole()->password));
+        }
+        $user = User::where('username', 'simple.0')->sole();
+        $this->put(route('users.update', $user), $this->payload(['username' => $user->username, 'email' => $user->email, 'password' => '87654321', 'password_confirmation' => '87654321', 'management_revision' => 0]))->assertSessionHasNoErrors();
+        $this->assertTrue(Hash::check('87654321', $user->fresh()->password));
+        $this->post(route('users.store'), $this->payload(['password' => '1234567', 'password_confirmation' => '1234567']))->assertSessionHasErrors('password');
+        $this->put(route('users.update', $user), $this->payload(['username' => $user->username, 'email' => $user->email, 'password' => 'abcdefg', 'password_confirmation' => 'abcdefg', 'management_revision' => 1]))->assertSessionHasErrors('password');
+    }
+
     public function test_only_active_superadmin_can_access_all_management_routes_and_navigation(): void
     {
         $this->get(route('users.index'))->assertRedirect('/login');

@@ -6,7 +6,6 @@ use App\Enums\Role;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class SaveUserRequest extends FormRequest
 {
@@ -33,7 +32,7 @@ class SaveUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'username' => ['nullable', 'required_without:email', 'string', 'max:80', 'regex:/\A[a-zA-Z0-9][a-zA-Z0-9._-]*\z/', Rule::unique('users', 'username')->ignore($target?->getKey(), 'id_users')],
             'email' => ['nullable', 'required_without:username', 'email', 'max:255', Rule::unique('users', 'email')->ignore($target?->getKey(), 'id_users')],
-            'password' => [$target ? 'nullable' : 'required', 'string', 'max:255', 'confirmed', Password::min(12)->mixedCase()->numbers()],
+            'password' => [$target ? 'nullable' : 'required', 'string', 'min:8', 'max:255', 'confirmed'],
             'role' => ['required', Rule::in(array_map(fn ($role) => $role->value, array_filter(Role::cases(), fn ($role) => $role !== Role::Bot)))],
             'active' => ['required', 'boolean'],
             'branches' => ['sometimes', 'array', 'max:100'],
@@ -53,6 +52,7 @@ class SaveUserRequest extends FormRequest
             'unique' => ':attribute sudah digunakan oleh pengguna lain.',
             'email.email' => 'Format email belum sesuai.',
             'password.confirmed' => 'Konfirmasi kata sandi belum cocok.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
             'exists' => ':attribute tidak ditemukan.',
             'role.in' => 'Role pengguna tidak tersedia.',
             'branches.*.distinct' => 'Branch yang dipilih tidak boleh berulang.',

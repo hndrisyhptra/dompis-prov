@@ -14,7 +14,7 @@ class AccessAndSyncTest extends OloTestCase
     public function test_login_session_logout_and_inactive_access(): void
     {
         $this->get('/sync')->assertRedirect('/login');
-        $this->get('/login')->assertOk()->assertSee('Masuk ke workspace');
+        $this->get('/login')->assertOk()->assertSee('Masuk ke Dompis Prov');
         $this->post('/login', ['email' => $this->area->email, 'password' => 'password'])->assertRedirect(route('sync.index'));
         $this->assertAuthenticatedAs($this->area);
         $this->get(route('logout.confirm'))->assertOk()->assertSee('Apakah Anda yakin ingin Logout?')->assertSee('Ya, Logout')->assertSee('Tidak');
