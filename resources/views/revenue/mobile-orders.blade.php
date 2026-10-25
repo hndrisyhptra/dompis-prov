@@ -1,0 +1,7 @@
+<div class="revenue-mobile">@forelse($orders as $order)
+@php($stage=\App\Services\RevenueOverviewService::stage($order))
+<article class="panel-body revenue-order-card"><div class="row"><a class="mono strong" href="{{ route('work-orders.show',$order) }}">{{ $order->no_tq_sc_id }}</a><span class="badge {{ $stage==='ps' ? 'good' : '' }}">{{ \App\Services\RevenueOverviewService::STAGES[$stage] }}</span></div>
+<p class="small muted">{{ $order->assignedBranch?->name ?? 'Belum ditugaskan' }} · {{ $order->boq?->package?->name ?? 'Belum ada BOQ' }}</p><p>{{ $order->progressLabel() }}</p><p class="small muted">{{ $order->status_order ?: 'Status BIMA belum tersedia' }}</p>
+<dl class="revenue-order-values">@foreach(['material_total'=>'Material','labor_total'=>'Jasa','grand_total'=>'Total BOQ'] as $key=>$label)<div class="{{ $key==='grand_total' ? 'full' : '' }}"><dt class="small muted">{{ $label }}</dt><dd><strong>{{ $order->boq ? 'Rp '.$money($order->boq->$key) : '—' }}</strong></dd></div>@endforeach</dl>
+<div class="row"><a class="button secondary" href="{{ route('work-orders.show',$order) }}" title="Detail Order"><x-icon name="orders"/>Detail Order</a>@if($order->boq)<a class="button secondary" href="{{ route('boqs.show',$order) }}" title="Preview BOQ"><x-icon name="eye"/>Preview BOQ</a>@endif</div></article>
+@empty<div class="panel-body"><p class="muted">Tidak ada order sesuai filter.</p></div>@endforelse</div>

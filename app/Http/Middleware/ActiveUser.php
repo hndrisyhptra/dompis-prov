@@ -12,6 +12,9 @@ class ActiveUser
     {
         abort_unless($request->user()?->active && $request->user()->role !== Role::Bot, 403);
 
-        return $next($request)->header('Cache-Control', 'private, no-store');
+        $response = $next($request);
+        $response->headers->set('Cache-Control', 'private, no-store');
+
+        return $response;
     }
 }

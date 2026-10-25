@@ -1,8 +1,21 @@
+import { setupJtBoq } from './jt-boq';
 import { setupDashboardTables } from './dashboard-tables';
 import { setupFormConfirmation } from './form-confirmation';
 
 setupFormConfirmation(document, message => window.confirm(message));
 setupDashboardTables(document);
+setupJtBoq(document);
+
+const kmlPreview = document.querySelector('[data-kml-preview]');
+if (kmlPreview) {
+    Promise.all([import('leaflet'), import('./kml-map'), import('leaflet/dist/leaflet.css')])
+        .then(([leaflet, module]) => module.setupKmlMap(kmlPreview, { leaflet: leaflet.default ?? leaflet }))
+        .catch(() => {
+            kmlPreview.querySelector('[data-kml-status]').textContent = 'Komponen peta gagal dimuat. Muat ulang halaman atau unduh KML.';
+            kmlPreview.querySelector('[data-kml-status]').classList.add('danger');
+            kmlPreview.querySelector('[data-kml-map]').setAttribute('aria-busy', 'false');
+        });
+}
 
 const themeButtons = document.querySelectorAll('[data-theme-toggle]');
 function themeLabel() {

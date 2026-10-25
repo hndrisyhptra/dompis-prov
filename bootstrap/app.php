@@ -19,14 +19,16 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (PostTooLargeException $exception, Request $request) {
-            if (! $request->is('imports/excel')) {
+            if (! $request->is('imports/excel', 'work-orders/*/boq', 'work-orders/*/kml')) {
                 return null;
             }
-            $message = 'Ukuran kiriman melebihi batas server. Batas file XLSX saat ini '.WorkOrderUpload::limitLabel().'. Pilih file yang lebih kecil dan upload ulang.';
+            $kmlUpload = $request->is('work-orders/*/kml');
+            $limit = $kmlUpload ? min(5, WorkOrderUpload::limitBytes() / 1024 / 1024).' MB' : WorkOrderUpload::limitLabel();
+            $message = 'Ukuran kiriman melebihi batas server. Batas file saat ini '.$limit.'. Pilih file yang lebih kecil dan upload ulang.';
 
             return $request->expectsJson()
                 ? response()->json(['message' => $message, 'errors' => ['file' => [$message]]], 413)
-                : response()->view('errors.upload-too-large', ['message' => $message, 'errors' => new ViewErrorBag], 413);
+                : response()->view('errors.upload-too-large', ['message' => $message, 'errors' => new ViewErrorBag, 'kmlUpload' => $kmlUpload, 'boqUpload' => $request->is('work-orders/*/boq', 'work-orders/*/kml')], 413);
         });
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),

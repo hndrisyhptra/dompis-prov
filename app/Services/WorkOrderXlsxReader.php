@@ -24,7 +24,7 @@ class WorkOrderXlsxReader
         return $name;
     }
 
-    public function read(string $path, ?string $sheetName = null, int $headerRow = 1): array
+    public function read(string $path, ?string $sheetName = null, int $headerRow = 1, bool $includeFormulas = false): array
     {
         if (! is_file($path) || filesize($path) > WorkOrderUpload::MAX_BYTES || $headerRow < 1 || $headerRow > 50) {
             throw new InvalidArgumentException('Gunakan file XLSX maksimal 10 MB dan baris header 1–50.');
@@ -149,6 +149,11 @@ class WorkOrderXlsxReader
                         throw new InvalidArgumentException('Teks sel melebihi 8.192 karakter.');
                     }
                     $cells[$column - 1] = ['value' => $value, 'type' => $type, 'formula' => (bool) $cell->xpath('./*[local-name()="f"]')];
+                    if ($includeFormulas && $cells[$column - 1]['formula']) {
+                        $formula = $cell->xpath('./*[local-name()="f"]')[0];
+                        $cells[$column - 1]['expression'] = (string) $formula;
+                        $cells[$column - 1]['shared_formula'] = (string) $formula['t'] === 'shared';
+                    }
                 }
                 if (strlen(json_encode($cells, JSON_THROW_ON_ERROR)) > 65536) {
                     throw new InvalidArgumentException('Data dalam satu baris melebihi batas aman.');

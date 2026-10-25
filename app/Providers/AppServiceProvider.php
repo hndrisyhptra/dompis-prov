@@ -43,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('area-dashboard', fn (User $user) => $user->active && $user->role->areaScope());
+        Gate::define('revenue-overview', fn (User $user) => $user->active && $user->role !== Role::Bot);
         Gate::define('sync', fn (User $user) => $user->canSync());
         Gate::define('administer', fn (User $user) => $user->active && $user->role === Role::SuperAdmin);
         Gate::define('manage-master-data', fn (User $user) => $user->active && $user->role->managesMasterData());

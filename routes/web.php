@@ -2,16 +2,19 @@
 
 use App\Http\Controllers\AreaDashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BoqController;
 use App\Http\Controllers\BranchDashboardController;
 use App\Http\Controllers\BranchMappingController;
 use App\Http\Controllers\BranchProgressController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\PriorityOrderController;
+use App\Http\Controllers\RevenueOverviewController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\WorkOrderDeviceController;
 use App\Http\Controllers\WorkOrderImportController;
+use App\Http\Controllers\WorkOrderKmlController;
 use App\Http\Middleware\ActiveUser;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +35,7 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
         Route::delete('/{masterType}/{record}', [MasterDataController::class, 'destroy'])->whereNumber('record')->name('destroy');
     });
     Route::get('/dashboard', [AreaDashboardController::class, 'index'])->middleware('can:area-dashboard')->name('area.dashboard');
+    Route::get('/revenue', [RevenueOverviewController::class, 'index'])->middleware('can:revenue-overview')->name('revenue.index');
     Route::get('/branch/dashboard', [BranchDashboardController::class, 'index'])->name('branch.dashboard');
     Route::get('/branch/material', [BranchDashboardController::class, 'material'])->name('branch.material');
     Route::post('/issues/{issue}/notes', [BranchProgressController::class, 'addIssueNote'])->name('issues.notes');
@@ -42,6 +46,15 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
     Route::get('/priority-orders', [PriorityOrderController::class, 'index'])->middleware('can:priority-orders')->name('priorities.index');
     Route::post('/work-orders/{workOrder}/priority', [PriorityOrderController::class, 'store'])->name('priorities.store');
     Route::delete('/work-orders/{workOrder}/priority', [PriorityOrderController::class, 'destroy'])->name('priorities.destroy');
+    Route::get('/work-orders/{workOrder}/boq/upload', [BoqController::class, 'create'])->name('boqs.create');
+    Route::post('/work-orders/{workOrder}/boq', [BoqController::class, 'store'])->middleware('throttle:6,1')->name('boqs.store');
+    Route::get('/work-orders/{workOrder}/boq', [BoqController::class, 'show'])->name('boqs.show');
+    Route::get('/work-orders/{workOrder}/boq/template', [BoqController::class, 'template'])->name('boqs.template');
+    Route::get('/work-orders/{workOrder}/boq/download', [BoqController::class, 'download'])->name('boqs.download');
+    Route::get('/work-orders/{workOrder}/kml', [WorkOrderKmlController::class, 'show'])->name('work-orders.kml.show');
+    Route::post('/work-orders/{workOrder}/kml', [WorkOrderKmlController::class, 'store'])->middleware('throttle:6,1')->name('work-orders.kml.store');
+    Route::get('/work-orders/{workOrder}/kml/data', [WorkOrderKmlController::class, 'data'])->name('work-orders.kml.data');
+    Route::get('/work-orders/{workOrder}/kml/download', [WorkOrderKmlController::class, 'download'])->name('work-orders.kml.download');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
     Route::get('/work-orders/{workOrder}/actions/{mode}', [WorkOrderController::class, 'editAction'])->whereIn('mode', ['progress', 'issue', 'close'])->name('work-orders.action.edit');
     Route::patch('/work-orders/{workOrder}/actions/{mode}', [BranchProgressController::class, 'updateAction'])->whereIn('mode', ['progress', 'issue', 'close'])->name('work-orders.action.update');

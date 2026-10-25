@@ -20,7 +20,10 @@
             @else
             <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}" href="{{ route('branch.dashboard') }}"><x-icon name="dashboard"/> Dashboard Branch</a>
             @endif
-            <a class="nav-link {{ request()->routeIs('work-orders.*') ? 'active' : '' }}" href="{{ route('work-orders.index') }}"><x-icon name="orders"/> {{ auth()->user()->role->areaScope() ? 'Work Orders' : 'Work Order' }}</a>
+            <a class="nav-link {{ request()->routeIs('work-orders.*', 'boqs.*') ? 'active' : '' }}" href="{{ route('work-orders.index') }}"><x-icon name="orders"/> {{ auth()->user()->role->areaScope() ? 'Work Orders' : 'Work Order' }}</a>
+            @can('revenue-overview')
+            <a class="nav-link {{ request()->routeIs('revenue.*') ? 'active' : '' }}" href="{{ route('revenue.index') }}"><x-icon name="revenue"/> Revenue Overview</a>
+            @endcan
             @can('priority-orders')
             <a class="nav-link {{ request()->routeIs('priorities.*') ? 'active' : '' }}" href="{{ route('priorities.index') }}"><x-icon name="bookmark"/> Order Prioritas</a>
             @endcan

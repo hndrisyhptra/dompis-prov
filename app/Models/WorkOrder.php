@@ -134,6 +134,16 @@ class WorkOrder extends Model
         return PsEligibility::matches($this->progress_category, $this->status_order, $this->task_bima, $this->status_bima);
     }
 
+    public function kmls()
+    {
+        return $this->hasMany(WorkOrderKml::class, 'id_work_orders');
+    }
+
+    public function boq()
+    {
+        return $this->hasOne(QeBoq::class, 'id_work_orders');
+    }
+
     public function assignedBranch()
     {
         return $this->belongsTo(Branch::class, 'id_branches')->withTrashed();

@@ -22,9 +22,13 @@ class BranchProgressController extends Controller
         Gate::authorize('update', $workOrder);
         $definition = WorkOrderActions::definition($mode);
         $data = $request->validate(['revision' => 'required|integer|min:0', 'progress_category' => ['required', Rule::in(array_keys($definition['categories']))],
-            'notes' => 'required|string|max:2000', 'operational_status' => 'prohibited', 'resolve_issues' => ['sometimes', 'boolean', Rule::prohibitedIf($mode === 'issue')]],
+            'notes' => 'required|string|max:2000', 'boq_next' => ['nullable', Rule::in(['upload', 'skip']), Rule::prohibitedIf($mode !== 'progress' || $request->input('progress_category') !== 'JT')], 'operational_status' => 'prohibited', 'resolve_issues' => ['sometimes', 'boolean', Rule::prohibitedIf($mode === 'issue')]],
             ['progress_category.in' => 'Status tidak tersedia pada halaman ini.', 'notes.required' => $mode === 'issue' ? 'Detail kendala wajib diisi.' : 'Catatan pembaruan wajib diisi.']);
         $service->update($request->user(), $workOrder, $data + ['workflow_mode' => $mode]);
+
+        if (($data['boq_next'] ?? null) === 'upload' && $data['progress_category'] === 'JT') {
+            return redirect()->route('boqs.create', $workOrder)->with('status', 'Progress JT tersimpan. RAB/BOQ opsional dan dapat diunggah belakangan.');
+        }
 
         return redirect()->route('work-orders.show', $workOrder)->with('status', $definition['title'].' disimpan dan dicatat pada riwayat order.');
     }

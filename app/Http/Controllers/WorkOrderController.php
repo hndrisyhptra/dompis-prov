@@ -6,6 +6,7 @@ use App\Enums\ProgressCategory;
 use App\Models\MappingOwnergrup;
 use App\Models\Region;
 use App\Models\WorkOrder;
+use App\Services\Boq\BoqImportService;
 use App\Services\BranchOrderScope;
 use App\Services\WorkOrderQueueService;
 use App\Support\ProgressSummary;
@@ -69,7 +70,7 @@ class WorkOrderController extends Controller
             return redirect()->route('work-orders.action.edit', [$workOrder, $request->input('action')]);
         }
 
-        return view('work-orders.show', ['order' => $workOrder->load(['assignedBranch', 'events.actor', 'issues.notes.actor', 'priorities' => fn ($q) => $q->visibleTo($request->user())]), 'taskLogs' => $workOrder->taskLogs()->with('actor')->paginate(20, ['*'], 'task_page')]);
+        return view('work-orders.show', ['order' => $workOrder->load(['assignedBranch', 'events.actor', 'issues.notes.actor', 'priorities' => fn ($q) => $q->visibleTo($request->user())] + (BoqImportService::available() ? ['boq' => fn ($q) => $q] : [])), 'taskLogs' => $workOrder->taskLogs()->with('actor')->paginate(20, ['*'], 'task_page')]);
     }
 
     public function editAction(Request $request, WorkOrder $workOrder, string $mode)

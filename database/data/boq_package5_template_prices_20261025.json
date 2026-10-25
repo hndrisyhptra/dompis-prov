@@ -1,0 +1,2519 @@
+{
+  "source": {
+    "filename": "FORMAT BOQ DOMPIS KHUSUS QE RELOK UTILITAS - PAKET 5.xlsx",
+    "sha256": "78e130349dc06dcfb8b7ce66963fe7e08c507c13a7e942240d50c8f3dea3ab84",
+    "sheet": "BoQ",
+    "price_columns": "E+F",
+    "existing_prices_preserved": true
+  },
+  "prices": [
+    {
+      "designator_id": 1110,
+      "package_id": 2,
+      "price": "2169.00",
+      "source_row": 10
+    },
+    {
+      "designator_id": 1111,
+      "package_id": 2,
+      "price": "3471.00",
+      "source_row": 12
+    },
+    {
+      "designator_id": 1112,
+      "package_id": 2,
+      "price": "3073.00",
+      "source_row": 14
+    },
+    {
+      "designator_id": 1113,
+      "package_id": 2,
+      "price": "4338.00",
+      "source_row": 16
+    },
+    {
+      "designator_id": 1114,
+      "package_id": 2,
+      "price": "2169.00",
+      "source_row": 18
+    },
+    {
+      "designator_id": 1115,
+      "package_id": 2,
+      "price": "3073.00",
+      "source_row": 20
+    },
+    {
+      "designator_id": 1116,
+      "package_id": 2,
+      "price": "2169.00",
+      "source_row": 22
+    },
+    {
+      "designator_id": 1117,
+      "package_id": 2,
+      "price": "3073.00",
+      "source_row": 24
+    },
+    {
+      "designator_id": 1118,
+      "package_id": 2,
+      "price": "2169.00",
+      "source_row": 26
+    },
+    {
+      "designator_id": 1119,
+      "package_id": 2,
+      "price": "3037.00",
+      "source_row": 28
+    },
+    {
+      "designator_id": 1120,
+      "package_id": 2,
+      "price": "1476.00",
+      "source_row": 30
+    },
+    {
+      "designator_id": 1121,
+      "package_id": 2,
+      "price": "391.00",
+      "source_row": 32
+    },
+    {
+      "designator_id": 1122,
+      "package_id": 2,
+      "price": "3814.00",
+      "source_row": 34
+    },
+    {
+      "designator_id": 1123,
+      "package_id": 2,
+      "price": "4321.00",
+      "source_row": 36
+    },
+    {
+      "designator_id": 1124,
+      "package_id": 2,
+      "price": "4354.00",
+      "source_row": 38
+    },
+    {
+      "designator_id": 1125,
+      "package_id": 2,
+      "price": "3814.00",
+      "source_row": 40
+    },
+    {
+      "designator_id": 1126,
+      "package_id": 2,
+      "price": "4321.00",
+      "source_row": 42
+    },
+    {
+      "designator_id": 1127,
+      "package_id": 2,
+      "price": "4321.00",
+      "source_row": 44
+    },
+    {
+      "designator_id": 1128,
+      "package_id": 2,
+      "price": "4321.00",
+      "source_row": 46
+    },
+    {
+      "designator_id": 1129,
+      "package_id": 2,
+      "price": "4321.00",
+      "source_row": 48
+    },
+    {
+      "designator_id": 1130,
+      "package_id": 2,
+      "price": "4321.00",
+      "source_row": 50
+    },
+    {
+      "designator_id": 1131,
+      "package_id": 2,
+      "price": "4321.00",
+      "source_row": 52
+    },
+    {
+      "designator_id": 1132,
+      "package_id": 2,
+      "price": "3901.00",
+      "source_row": 54
+    },
+    {
+      "designator_id": 1133,
+      "package_id": 2,
+      "price": "3951.00",
+      "source_row": 56
+    },
+    {
+      "designator_id": 1134,
+      "package_id": 2,
+      "price": "3971.00",
+      "source_row": 58
+    },
+    {
+      "designator_id": 1135,
+      "package_id": 2,
+      "price": "4571.00",
+      "source_row": 60
+    },
+    {
+      "designator_id": 1136,
+      "package_id": 2,
+      "price": "130000.00",
+      "source_row": 62
+    },
+    {
+      "designator_id": 1137,
+      "package_id": 2,
+      "price": "130000.00",
+      "source_row": 64
+    },
+    {
+      "designator_id": 1138,
+      "package_id": 2,
+      "price": "1240.00",
+      "source_row": 66
+    },
+    {
+      "designator_id": 1139,
+      "package_id": 2,
+      "price": "15117.00",
+      "source_row": 68
+    },
+    {
+      "designator_id": 1140,
+      "package_id": 2,
+      "price": "661780.00",
+      "source_row": 70
+    },
+    {
+      "designator_id": 1141,
+      "package_id": 2,
+      "price": "184572.00",
+      "source_row": 71
+    },
+    {
+      "designator_id": 1142,
+      "package_id": 2,
+      "price": "102150.00",
+      "source_row": 73
+    },
+    {
+      "designator_id": 1143,
+      "package_id": 2,
+      "price": "12042.00",
+      "source_row": 74
+    },
+    {
+      "designator_id": 1144,
+      "package_id": 2,
+      "price": "22550.00",
+      "source_row": 75
+    },
+    {
+      "designator_id": 1145,
+      "package_id": 2,
+      "price": "30917.00",
+      "source_row": 76
+    },
+    {
+      "designator_id": 1146,
+      "package_id": 2,
+      "price": "35313.00",
+      "source_row": 77
+    },
+    {
+      "designator_id": 1147,
+      "package_id": 2,
+      "price": "37192.00",
+      "source_row": 78
+    },
+    {
+      "designator_id": 1148,
+      "package_id": 2,
+      "price": "39420.00",
+      "source_row": 79
+    },
+    {
+      "designator_id": 1149,
+      "package_id": 2,
+      "price": "41500.00",
+      "source_row": 80
+    },
+    {
+      "designator_id": 1150,
+      "package_id": 2,
+      "price": "169200.00",
+      "source_row": 81
+    },
+    {
+      "designator_id": 1151,
+      "package_id": 2,
+      "price": "105008.00",
+      "source_row": 83
+    },
+    {
+      "designator_id": 1152,
+      "package_id": 2,
+      "price": "125778.00",
+      "source_row": 84
+    },
+    {
+      "designator_id": 1153,
+      "package_id": 2,
+      "price": "140190.00",
+      "source_row": 85
+    },
+    {
+      "designator_id": 1154,
+      "package_id": 2,
+      "price": "146321.00",
+      "source_row": 86
+    },
+    {
+      "designator_id": 1155,
+      "package_id": 2,
+      "price": "150452.00",
+      "source_row": 87
+    },
+    {
+      "designator_id": 1156,
+      "package_id": 2,
+      "price": "157583.00",
+      "source_row": 88
+    },
+    {
+      "designator_id": 1157,
+      "package_id": 2,
+      "price": "210000.00",
+      "source_row": 89
+    },
+    {
+      "designator_id": 1158,
+      "package_id": 2,
+      "price": "76883.00",
+      "source_row": 91
+    },
+    {
+      "designator_id": 1159,
+      "package_id": 2,
+      "price": "280.00",
+      "source_row": 92
+    },
+    {
+      "designator_id": 1160,
+      "package_id": 2,
+      "price": "740.00",
+      "source_row": 93
+    },
+    {
+      "designator_id": 1161,
+      "package_id": 2,
+      "price": "650.00",
+      "source_row": 94
+    },
+    {
+      "designator_id": 1162,
+      "package_id": 2,
+      "price": "140450.00",
+      "source_row": 95
+    },
+    {
+      "designator_id": 1163,
+      "package_id": 2,
+      "price": "68069.00",
+      "source_row": 97
+    },
+    {
+      "designator_id": 1164,
+      "package_id": 2,
+      "price": "10851.00",
+      "source_row": 99
+    },
+    {
+      "designator_id": 1165,
+      "package_id": 2,
+      "price": "1005.00",
+      "source_row": 101
+    },
+    {
+      "designator_id": 1166,
+      "package_id": 2,
+      "price": "96130.00",
+      "source_row": 104
+    },
+    {
+      "designator_id": 1167,
+      "package_id": 2,
+      "price": "0.00",
+      "source_row": 106
+    },
+    {
+      "designator_id": 1168,
+      "package_id": 2,
+      "price": "11478.00",
+      "source_row": 108
+    },
+    {
+      "designator_id": 1169,
+      "package_id": 2,
+      "price": "567240.00",
+      "source_row": 110
+    },
+    {
+      "designator_id": 1170,
+      "package_id": 2,
+      "price": "45142.00",
+      "source_row": 111
+    },
+    {
+      "designator_id": 1171,
+      "package_id": 2,
+      "price": "756320.00",
+      "source_row": 112
+    },
+    {
+      "designator_id": 1172,
+      "package_id": 2,
+      "price": "3306.00",
+      "source_row": 114
+    },
+    {
+      "designator_id": 1173,
+      "package_id": 2,
+      "price": "3125.00",
+      "source_row": 116
+    },
+    {
+      "designator_id": 1174,
+      "package_id": 2,
+      "price": "3125.00",
+      "source_row": 118
+    },
+    {
+      "designator_id": 1175,
+      "package_id": 2,
+      "price": "3126.00",
+      "source_row": 120
+    },
+    {
+      "designator_id": 1176,
+      "package_id": 2,
+      "price": "3802.00",
+      "source_row": 122
+    },
+    {
+      "designator_id": 1177,
+      "package_id": 2,
+      "price": "3125.00",
+      "source_row": 124
+    },
+    {
+      "designator_id": 1178,
+      "package_id": 2,
+      "price": "3125.00",
+      "source_row": 126
+    },
+    {
+      "designator_id": 1179,
+      "package_id": 2,
+      "price": "3106.00",
+      "source_row": 128
+    },
+    {
+      "designator_id": 1180,
+      "package_id": 2,
+      "price": "3796.00",
+      "source_row": 130
+    },
+    {
+      "designator_id": 1181,
+      "package_id": 2,
+      "price": "1395.00",
+      "source_row": 132
+    },
+    {
+      "designator_id": 1182,
+      "package_id": 2,
+      "price": "3125.00",
+      "source_row": 134
+    },
+    {
+      "designator_id": 1183,
+      "package_id": 2,
+      "price": "3156.00",
+      "source_row": 136
+    },
+    {
+      "designator_id": 1184,
+      "package_id": 2,
+      "price": "3125.00",
+      "source_row": 138
+    },
+    {
+      "designator_id": 1185,
+      "package_id": 2,
+      "price": "3125.00",
+      "source_row": 140
+    },
+    {
+      "designator_id": 1186,
+      "package_id": 2,
+      "price": "540.00",
+      "source_row": 142
+    },
+    {
+      "designator_id": 1187,
+      "package_id": 2,
+      "price": "47624.00",
+      "source_row": 143
+    },
+    {
+      "designator_id": 1188,
+      "package_id": 2,
+      "price": "1563.00",
+      "source_row": 145
+    },
+    {
+      "designator_id": 1189,
+      "package_id": 2,
+      "price": "1929.00",
+      "source_row": 147
+    },
+    {
+      "designator_id": 1190,
+      "package_id": 2,
+      "price": "1563.00",
+      "source_row": 149
+    },
+    {
+      "designator_id": 1191,
+      "package_id": 2,
+      "price": "1921.00",
+      "source_row": 151
+    },
+    {
+      "designator_id": 1192,
+      "package_id": 2,
+      "price": "1478.00",
+      "source_row": 153
+    },
+    {
+      "designator_id": 1193,
+      "package_id": 2,
+      "price": "1921.00",
+      "source_row": 155
+    },
+    {
+      "designator_id": 1194,
+      "package_id": 2,
+      "price": "44551.00",
+      "source_row": 157
+    },
+    {
+      "designator_id": 1195,
+      "package_id": 2,
+      "price": "1460.00",
+      "source_row": 159
+    },
+    {
+      "designator_id": 1196,
+      "package_id": 2,
+      "price": "64467.00",
+      "source_row": 161
+    },
+    {
+      "designator_id": 1197,
+      "package_id": 2,
+      "price": "66875.00",
+      "source_row": 163
+    },
+    {
+      "designator_id": 1198,
+      "package_id": 2,
+      "price": "33195.00",
+      "source_row": 165
+    },
+    {
+      "designator_id": 1199,
+      "package_id": 2,
+      "price": "33195.00",
+      "source_row": 167
+    },
+    {
+      "designator_id": 1200,
+      "package_id": 2,
+      "price": "31500.00",
+      "source_row": 168
+    },
+    {
+      "designator_id": 1201,
+      "package_id": 2,
+      "price": "33132.00",
+      "source_row": 169
+    },
+    {
+      "designator_id": 1202,
+      "package_id": 2,
+      "price": "20021587.00",
+      "source_row": 171
+    },
+    {
+      "designator_id": 1203,
+      "package_id": 2,
+      "price": "30032380.00",
+      "source_row": 173
+    },
+    {
+      "designator_id": 1204,
+      "package_id": 2,
+      "price": "40043173.00",
+      "source_row": 175
+    },
+    {
+      "designator_id": 1205,
+      "package_id": 2,
+      "price": "218056.00",
+      "source_row": 177
+    },
+    {
+      "designator_id": 1206,
+      "package_id": 2,
+      "price": "436110.00",
+      "source_row": 179
+    },
+    {
+      "designator_id": 1207,
+      "package_id": 2,
+      "price": "218056.00",
+      "source_row": 181
+    },
+    {
+      "designator_id": 1208,
+      "package_id": 2,
+      "price": "436110.00",
+      "source_row": 183
+    },
+    {
+      "designator_id": 1209,
+      "package_id": 2,
+      "price": "661115.00",
+      "source_row": 185
+    },
+    {
+      "designator_id": 1210,
+      "package_id": 2,
+      "price": "230649.00",
+      "source_row": 187
+    },
+    {
+      "designator_id": 1211,
+      "package_id": 2,
+      "price": "436110.00",
+      "source_row": 189
+    },
+    {
+      "designator_id": 1212,
+      "package_id": 2,
+      "price": "872220.00",
+      "source_row": 191
+    },
+    {
+      "designator_id": 1213,
+      "package_id": 2,
+      "price": "428020.00",
+      "source_row": 193
+    },
+    {
+      "designator_id": 1214,
+      "package_id": 2,
+      "price": "152639.00",
+      "source_row": 195
+    },
+    {
+      "designator_id": 1215,
+      "package_id": 2,
+      "price": "1338.00",
+      "source_row": 197
+    },
+    {
+      "designator_id": 1216,
+      "package_id": 2,
+      "price": "1407.00",
+      "source_row": 199
+    },
+    {
+      "designator_id": 1217,
+      "package_id": 2,
+      "price": "1702.00",
+      "source_row": 201
+    },
+    {
+      "designator_id": 1218,
+      "package_id": 2,
+      "price": "1702.00",
+      "source_row": 203
+    },
+    {
+      "designator_id": 1219,
+      "package_id": 2,
+      "price": "1407.00",
+      "source_row": 205
+    },
+    {
+      "designator_id": 1220,
+      "package_id": 2,
+      "price": "1702.00",
+      "source_row": 207
+    },
+    {
+      "designator_id": 1221,
+      "package_id": 2,
+      "price": "4287.00",
+      "source_row": 209
+    },
+    {
+      "designator_id": 1222,
+      "package_id": 2,
+      "price": "4992.00",
+      "source_row": 211
+    },
+    {
+      "designator_id": 1223,
+      "package_id": 2,
+      "price": "2455.00",
+      "source_row": 213
+    },
+    {
+      "designator_id": 1224,
+      "package_id": 2,
+      "price": "3172.00",
+      "source_row": 215
+    },
+    {
+      "designator_id": 1225,
+      "package_id": 2,
+      "price": "3993.00",
+      "source_row": 217
+    },
+    {
+      "designator_id": 1226,
+      "package_id": 2,
+      "price": "5697.00",
+      "source_row": 219
+    },
+    {
+      "designator_id": 1227,
+      "package_id": 2,
+      "price": "3230.00",
+      "source_row": 221
+    },
+    {
+      "designator_id": 1228,
+      "package_id": 2,
+      "price": "3700.00",
+      "source_row": 223
+    },
+    {
+      "designator_id": 1229,
+      "package_id": 2,
+      "price": "4581.00",
+      "source_row": 225
+    },
+    {
+      "designator_id": 1230,
+      "package_id": 2,
+      "price": "3700.00",
+      "source_row": 227
+    },
+    {
+      "designator_id": 1231,
+      "package_id": 2,
+      "price": "4229.00",
+      "source_row": 229
+    },
+    {
+      "designator_id": 1232,
+      "package_id": 2,
+      "price": "5653.00",
+      "source_row": 231
+    },
+    {
+      "designator_id": 1233,
+      "package_id": 2,
+      "price": "3730.00",
+      "source_row": 233
+    },
+    {
+      "designator_id": 1234,
+      "package_id": 2,
+      "price": "4874.00",
+      "source_row": 235
+    },
+    {
+      "designator_id": 1235,
+      "package_id": 2,
+      "price": "6108.00",
+      "source_row": 237
+    },
+    {
+      "designator_id": 1236,
+      "package_id": 2,
+      "price": "2923.00",
+      "source_row": 239
+    },
+    {
+      "designator_id": 1237,
+      "package_id": 2,
+      "price": "3403.00",
+      "source_row": 241
+    },
+    {
+      "designator_id": 1238,
+      "package_id": 2,
+      "price": "1673.00",
+      "source_row": 243
+    },
+    {
+      "designator_id": 1239,
+      "package_id": 2,
+      "price": "2162.00",
+      "source_row": 245
+    },
+    {
+      "designator_id": 1240,
+      "package_id": 2,
+      "price": "2723.00",
+      "source_row": 247
+    },
+    {
+      "designator_id": 1241,
+      "package_id": 2,
+      "price": "2880.00",
+      "source_row": 249
+    },
+    {
+      "designator_id": 1242,
+      "package_id": 2,
+      "price": "3885.00",
+      "source_row": 251
+    },
+    {
+      "designator_id": 1243,
+      "package_id": 2,
+      "price": "2203.00",
+      "source_row": 253
+    },
+    {
+      "designator_id": 1244,
+      "package_id": 2,
+      "price": "2522.00",
+      "source_row": 255
+    },
+    {
+      "designator_id": 1245,
+      "package_id": 2,
+      "price": "3124.00",
+      "source_row": 257
+    },
+    {
+      "designator_id": 1246,
+      "package_id": 2,
+      "price": "3304.00",
+      "source_row": 259
+    },
+    {
+      "designator_id": 1247,
+      "package_id": 2,
+      "price": "2522.00",
+      "source_row": 261
+    },
+    {
+      "designator_id": 1248,
+      "package_id": 2,
+      "price": "2883.00",
+      "source_row": 263
+    },
+    {
+      "designator_id": 1249,
+      "package_id": 2,
+      "price": "3886.00",
+      "source_row": 265
+    },
+    {
+      "designator_id": 1250,
+      "package_id": 2,
+      "price": "2543.00",
+      "source_row": 267
+    },
+    {
+      "designator_id": 1251,
+      "package_id": 2,
+      "price": "3324.00",
+      "source_row": 269
+    },
+    {
+      "designator_id": 1252,
+      "package_id": 2,
+      "price": "4164.00",
+      "source_row": 271
+    },
+    {
+      "designator_id": 1253,
+      "package_id": 2,
+      "price": "468.00",
+      "source_row": 273
+    },
+    {
+      "designator_id": 1254,
+      "package_id": 2,
+      "price": "468.00",
+      "source_row": 275
+    },
+    {
+      "designator_id": 1255,
+      "package_id": 2,
+      "price": "468.00",
+      "source_row": 277
+    },
+    {
+      "designator_id": 1256,
+      "package_id": 2,
+      "price": "468.00",
+      "source_row": 279
+    },
+    {
+      "designator_id": 1257,
+      "package_id": 2,
+      "price": "468.00",
+      "source_row": 281
+    },
+    {
+      "designator_id": 1258,
+      "package_id": 2,
+      "price": "468.00",
+      "source_row": 283
+    },
+    {
+      "designator_id": 1259,
+      "package_id": 2,
+      "price": "1817.00",
+      "source_row": 284
+    },
+    {
+      "designator_id": 1260,
+      "package_id": 2,
+      "price": "72685.00",
+      "source_row": 286
+    },
+    {
+      "designator_id": 1261,
+      "package_id": 2,
+      "price": "654166.00",
+      "source_row": 288
+    },
+    {
+      "designator_id": 1262,
+      "package_id": 2,
+      "price": "54514.00",
+      "source_row": 290
+    },
+    {
+      "designator_id": 1263,
+      "package_id": 2,
+      "price": "72685.00",
+      "source_row": 292
+    },
+    {
+      "designator_id": 1264,
+      "package_id": 2,
+      "price": "109027.00",
+      "source_row": 294
+    },
+    {
+      "designator_id": 1265,
+      "package_id": 2,
+      "price": "54514.00",
+      "source_row": 296
+    },
+    {
+      "designator_id": 1266,
+      "package_id": 2,
+      "price": "72796.00",
+      "source_row": 298
+    },
+    {
+      "designator_id": 1267,
+      "package_id": 2,
+      "price": "54514.00",
+      "source_row": 300
+    },
+    {
+      "designator_id": 1268,
+      "package_id": 2,
+      "price": "72685.00",
+      "source_row": 302
+    },
+    {
+      "designator_id": 1269,
+      "package_id": 2,
+      "price": "12400.00",
+      "source_row": 303
+    },
+    {
+      "designator_id": 1270,
+      "package_id": 2,
+      "price": "3100000.00",
+      "source_row": 304
+    },
+    {
+      "designator_id": 1271,
+      "package_id": 2,
+      "price": "10560.00",
+      "source_row": 305
+    },
+    {
+      "designator_id": 1272,
+      "package_id": 2,
+      "price": "36470.00",
+      "source_row": 306
+    },
+    {
+      "designator_id": 1273,
+      "package_id": 2,
+      "price": "12400.00",
+      "source_row": 307
+    },
+    {
+      "designator_id": 1274,
+      "package_id": 2,
+      "price": "5010.00",
+      "source_row": 308
+    },
+    {
+      "designator_id": 1275,
+      "package_id": 2,
+      "price": "31000.00",
+      "source_row": 309
+    },
+    {
+      "designator_id": 1276,
+      "package_id": 2,
+      "price": "17240.00",
+      "source_row": 310
+    },
+    {
+      "designator_id": 1277,
+      "package_id": 2,
+      "price": "9680.00",
+      "source_row": 311
+    },
+    {
+      "designator_id": 1278,
+      "package_id": 2,
+      "price": "1660.00",
+      "source_row": 313
+    },
+    {
+      "designator_id": 1279,
+      "package_id": 2,
+      "price": "650.00",
+      "source_row": 315
+    },
+    {
+      "designator_id": 1280,
+      "package_id": 2,
+      "price": "89000.00",
+      "source_row": 316
+    },
+    {
+      "designator_id": 1281,
+      "package_id": 2,
+      "price": "54833.00",
+      "source_row": 318
+    },
+    {
+      "designator_id": 1282,
+      "package_id": 2,
+      "price": "1815.00",
+      "source_row": 320
+    },
+    {
+      "designator_id": 1283,
+      "package_id": 2,
+      "price": "1815.00",
+      "source_row": 322
+    },
+    {
+      "designator_id": 1284,
+      "package_id": 2,
+      "price": "1815.00",
+      "source_row": 324
+    },
+    {
+      "designator_id": 1285,
+      "package_id": 2,
+      "price": "985.00",
+      "source_row": 326
+    },
+    {
+      "designator_id": 1286,
+      "package_id": 2,
+      "price": "375000.00",
+      "source_row": 328
+    },
+    {
+      "designator_id": 1287,
+      "package_id": 2,
+      "price": "14930.00",
+      "source_row": 329
+    },
+    {
+      "designator_id": 1288,
+      "package_id": 2,
+      "price": "8850.00",
+      "source_row": 331
+    },
+    {
+      "designator_id": 1289,
+      "package_id": 2,
+      "price": "340000.00",
+      "source_row": 333
+    },
+    {
+      "designator_id": 1290,
+      "package_id": 2,
+      "price": "121000.00",
+      "source_row": 335
+    },
+    {
+      "designator_id": 1291,
+      "package_id": 2,
+      "price": "54448.00",
+      "source_row": 337
+    },
+    {
+      "designator_id": 1292,
+      "package_id": 2,
+      "price": "36470.00",
+      "source_row": 338
+    },
+    {
+      "designator_id": 1293,
+      "package_id": 2,
+      "price": "2270.00",
+      "source_row": 339
+    },
+    {
+      "designator_id": 1294,
+      "package_id": 2,
+      "price": "1017.00",
+      "source_row": 341
+    },
+    {
+      "designator_id": 1295,
+      "package_id": 2,
+      "price": "119000.00",
+      "source_row": 343
+    },
+    {
+      "designator_id": 1296,
+      "package_id": 2,
+      "price": "9950.00",
+      "source_row": 344
+    },
+    {
+      "designator_id": 1297,
+      "package_id": 2,
+      "price": "14600.00",
+      "source_row": 345
+    },
+    {
+      "designator_id": 1298,
+      "package_id": 2,
+      "price": "2490.00",
+      "source_row": 346
+    },
+    {
+      "designator_id": 1299,
+      "package_id": 2,
+      "price": "60094.00",
+      "source_row": 348
+    },
+    {
+      "designator_id": 1300,
+      "package_id": 2,
+      "price": "77890.00",
+      "source_row": 350
+    },
+    {
+      "designator_id": 1301,
+      "package_id": 2,
+      "price": "54274.00",
+      "source_row": 352
+    },
+    {
+      "designator_id": 1302,
+      "package_id": 2,
+      "price": "9150.00",
+      "source_row": 353
+    },
+    {
+      "designator_id": 1303,
+      "package_id": 2,
+      "price": "54400.00",
+      "source_row": 355
+    },
+    {
+      "designator_id": 1304,
+      "package_id": 2,
+      "price": "8767000.00",
+      "source_row": 356
+    },
+    {
+      "designator_id": 1305,
+      "package_id": 2,
+      "price": "8807500.00",
+      "source_row": 357
+    },
+    {
+      "designator_id": 1306,
+      "package_id": 2,
+      "price": "7371844.00",
+      "source_row": 358
+    },
+    {
+      "designator_id": 1307,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 359
+    },
+    {
+      "designator_id": 1308,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 360
+    },
+    {
+      "designator_id": 1309,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 361
+    },
+    {
+      "designator_id": 1310,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 362
+    },
+    {
+      "designator_id": 1311,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 363
+    },
+    {
+      "designator_id": 1312,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 364
+    },
+    {
+      "designator_id": 1313,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 365
+    },
+    {
+      "designator_id": 1314,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 366
+    },
+    {
+      "designator_id": 1315,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 367
+    },
+    {
+      "designator_id": 1316,
+      "package_id": 2,
+      "price": "260000.00",
+      "source_row": 368
+    },
+    {
+      "designator_id": 1317,
+      "package_id": 2,
+      "price": "0.00",
+      "source_row": 370
+    },
+    {
+      "designator_id": 1318,
+      "package_id": 2,
+      "price": "147857.00",
+      "source_row": 372
+    },
+    {
+      "designator_id": 1319,
+      "package_id": 2,
+      "price": "366974.00",
+      "source_row": 374
+    },
+    {
+      "designator_id": 1320,
+      "package_id": 2,
+      "price": "425430.00",
+      "source_row": 376
+    },
+    {
+      "designator_id": 1321,
+      "package_id": 2,
+      "price": "1862.00",
+      "source_row": 378
+    },
+    {
+      "designator_id": 1322,
+      "package_id": 2,
+      "price": "415000.00",
+      "source_row": 380
+    },
+    {
+      "designator_id": 1323,
+      "package_id": 2,
+      "price": "415000.00",
+      "source_row": 382
+    },
+    {
+      "designator_id": 1324,
+      "package_id": 2,
+      "price": "54597.00",
+      "source_row": 384
+    },
+    {
+      "designator_id": 1325,
+      "package_id": 2,
+      "price": "12000.00",
+      "source_row": 386
+    },
+    {
+      "designator_id": 1326,
+      "package_id": 2,
+      "price": "44121.00",
+      "source_row": 388
+    },
+    {
+      "designator_id": 1327,
+      "package_id": 2,
+      "price": "36767.00",
+      "source_row": 390
+    },
+    {
+      "designator_id": 1328,
+      "package_id": 2,
+      "price": "41712.00",
+      "source_row": 392
+    },
+    {
+      "designator_id": 1329,
+      "package_id": 2,
+      "price": "48664.00",
+      "source_row": 394
+    },
+    {
+      "designator_id": 1330,
+      "package_id": 2,
+      "price": "614510.00",
+      "source_row": 396
+    },
+    {
+      "designator_id": 1331,
+      "package_id": 2,
+      "price": "350000.00",
+      "source_row": 398
+    },
+    {
+      "designator_id": 1332,
+      "package_id": 2,
+      "price": "310000.00",
+      "source_row": 400
+    },
+    {
+      "designator_id": 1333,
+      "package_id": 2,
+      "price": "164830.00",
+      "source_row": 402
+    },
+    {
+      "designator_id": 1334,
+      "package_id": 2,
+      "price": "463918.00",
+      "source_row": 404
+    },
+    {
+      "designator_id": 1335,
+      "package_id": 2,
+      "price": "245863.00",
+      "source_row": 406
+    },
+    {
+      "designator_id": 1336,
+      "package_id": 2,
+      "price": "10000.00",
+      "source_row": 408
+    },
+    {
+      "designator_id": 1337,
+      "package_id": 2,
+      "price": "391.00",
+      "source_row": 409
+    },
+    {
+      "designator_id": 1338,
+      "package_id": 2,
+      "price": "164900.00",
+      "source_row": 410
+    },
+    {
+      "designator_id": 1339,
+      "package_id": 2,
+      "price": "48100.00",
+      "source_row": 411
+    },
+    {
+      "designator_id": 1340,
+      "package_id": 2,
+      "price": "1891.00",
+      "source_row": 413
+    },
+    {
+      "designator_id": 1341,
+      "package_id": 2,
+      "price": "2300.00",
+      "source_row": 415
+    },
+    {
+      "designator_id": 1342,
+      "package_id": 2,
+      "price": "122902.00",
+      "source_row": 418
+    },
+    {
+      "designator_id": 1343,
+      "package_id": 2,
+      "price": "4736.00",
+      "source_row": 420
+    },
+    {
+      "designator_id": 1344,
+      "package_id": 2,
+      "price": "680000.00",
+      "source_row": 422
+    },
+    {
+      "designator_id": 1345,
+      "package_id": 2,
+      "price": "233000.00",
+      "source_row": 424
+    },
+    {
+      "designator_id": 1346,
+      "package_id": 2,
+      "price": "642872.00",
+      "source_row": 426
+    },
+    {
+      "designator_id": 1347,
+      "package_id": 2,
+      "price": "2440933.00",
+      "source_row": 428
+    },
+    {
+      "designator_id": 1348,
+      "package_id": 2,
+      "price": "1965570.00",
+      "source_row": 430
+    },
+    {
+      "designator_id": 1349,
+      "package_id": 2,
+      "price": "20830.00",
+      "source_row": 431
+    },
+    {
+      "designator_id": 1350,
+      "package_id": 2,
+      "price": "26080.00",
+      "source_row": 432
+    },
+    {
+      "designator_id": 1351,
+      "package_id": 2,
+      "price": "21540.00",
+      "source_row": 434
+    },
+    {
+      "designator_id": 1352,
+      "package_id": 2,
+      "price": "11100.00",
+      "source_row": 435
+    },
+    {
+      "designator_id": 1353,
+      "package_id": 2,
+      "price": "9950.00",
+      "source_row": 436
+    },
+    {
+      "designator_id": 1354,
+      "package_id": 2,
+      "price": "9950.00",
+      "source_row": 437
+    },
+    {
+      "designator_id": 1355,
+      "package_id": 2,
+      "price": "38780.00",
+      "source_row": 438
+    },
+    {
+      "designator_id": 1356,
+      "package_id": 2,
+      "price": "3400000.00",
+      "source_row": 439
+    },
+    {
+      "designator_id": 1357,
+      "package_id": 2,
+      "price": "30160.00",
+      "source_row": 440
+    },
+    {
+      "designator_id": 1358,
+      "package_id": 2,
+      "price": "40.00",
+      "source_row": 442
+    },
+    {
+      "designator_id": 1359,
+      "package_id": 2,
+      "price": "10560.00",
+      "source_row": 443
+    },
+    {
+      "designator_id": 1360,
+      "package_id": 2,
+      "price": "129270.00",
+      "source_row": 444
+    },
+    {
+      "designator_id": 1361,
+      "package_id": 2,
+      "price": "36470.00",
+      "source_row": 445
+    },
+    {
+      "designator_id": 1362,
+      "package_id": 2,
+      "price": "10570.00",
+      "source_row": 446
+    },
+    {
+      "designator_id": 1363,
+      "package_id": 2,
+      "price": "2270.00",
+      "source_row": 447
+    },
+    {
+      "designator_id": 1364,
+      "package_id": 2,
+      "price": "81870.00",
+      "source_row": 448
+    },
+    {
+      "designator_id": 1365,
+      "package_id": 2,
+      "price": "2490.00",
+      "source_row": 449
+    },
+    {
+      "designator_id": 1366,
+      "package_id": 2,
+      "price": "30160.00",
+      "source_row": 450
+    },
+    {
+      "designator_id": 1367,
+      "package_id": 2,
+      "price": "217520.00",
+      "source_row": 451
+    },
+    {
+      "designator_id": 1368,
+      "package_id": 2,
+      "price": "94800.00",
+      "source_row": 453
+    },
+    {
+      "designator_id": 1369,
+      "package_id": 2,
+      "price": "111300.00",
+      "source_row": 455
+    },
+    {
+      "designator_id": 1370,
+      "package_id": 2,
+      "price": "94800.00",
+      "source_row": 457
+    },
+    {
+      "designator_id": 1371,
+      "package_id": 2,
+      "price": "9950.00",
+      "source_row": 458
+    },
+    {
+      "designator_id": 1372,
+      "package_id": 2,
+      "price": "3604.00",
+      "source_row": 460
+    },
+    {
+      "designator_id": 1373,
+      "package_id": 2,
+      "price": "21540.00",
+      "source_row": 462
+    },
+    {
+      "designator_id": 1374,
+      "package_id": 2,
+      "price": "5073962.00",
+      "source_row": 464
+    },
+    {
+      "designator_id": 1375,
+      "package_id": 2,
+      "price": "8238471.00",
+      "source_row": 466
+    },
+    {
+      "designator_id": 1376,
+      "package_id": 2,
+      "price": "7762405.00",
+      "source_row": 468
+    },
+    {
+      "designator_id": 1377,
+      "package_id": 2,
+      "price": "5112251.00",
+      "source_row": 470
+    },
+    {
+      "designator_id": 1378,
+      "package_id": 2,
+      "price": "8276760.00",
+      "source_row": 472
+    },
+    {
+      "designator_id": 1379,
+      "package_id": 2,
+      "price": "7800693.00",
+      "source_row": 474
+    },
+    {
+      "designator_id": 1380,
+      "package_id": 2,
+      "price": "3754981.00",
+      "source_row": 476
+    },
+    {
+      "designator_id": 1381,
+      "package_id": 2,
+      "price": "5072168.00",
+      "source_row": 478
+    },
+    {
+      "designator_id": 1382,
+      "package_id": 2,
+      "price": "4699000.00",
+      "source_row": 480
+    },
+    {
+      "designator_id": 1383,
+      "package_id": 2,
+      "price": "27500.00",
+      "source_row": 482
+    },
+    {
+      "designator_id": 1384,
+      "package_id": 2,
+      "price": "27500.00",
+      "source_row": 484
+    },
+    {
+      "designator_id": 1385,
+      "package_id": 2,
+      "price": "36470.00",
+      "source_row": 485
+    },
+    {
+      "designator_id": 1386,
+      "package_id": 2,
+      "price": "2270.00",
+      "source_row": 486
+    },
+    {
+      "designator_id": 1387,
+      "package_id": 2,
+      "price": "9950.00",
+      "source_row": 487
+    },
+    {
+      "designator_id": 1388,
+      "package_id": 2,
+      "price": "14600.00",
+      "source_row": 488
+    },
+    {
+      "designator_id": 1389,
+      "package_id": 2,
+      "price": "1240.00",
+      "source_row": 490
+    },
+    {
+      "designator_id": 1390,
+      "package_id": 2,
+      "price": "58000.00",
+      "source_row": 492
+    },
+    {
+      "designator_id": 1391,
+      "package_id": 2,
+      "price": "58000.00",
+      "source_row": 494
+    },
+    {
+      "designator_id": 1392,
+      "package_id": 2,
+      "price": "2490.00",
+      "source_row": 495
+    },
+    {
+      "designator_id": 1393,
+      "package_id": 2,
+      "price": "3400000.00",
+      "source_row": 496
+    },
+    {
+      "designator_id": 1394,
+      "package_id": 2,
+      "price": "700000.00",
+      "source_row": 498
+    },
+    {
+      "designator_id": 1395,
+      "package_id": 2,
+      "price": "750000.00",
+      "source_row": 500
+    },
+    {
+      "designator_id": 1396,
+      "package_id": 2,
+      "price": "2500000.00",
+      "source_row": 501
+    },
+    {
+      "designator_id": 1397,
+      "package_id": 2,
+      "price": "10560.00",
+      "source_row": 502
+    },
+    {
+      "designator_id": 1398,
+      "package_id": 2,
+      "price": "9250.00",
+      "source_row": 503
+    },
+    {
+      "designator_id": 1399,
+      "package_id": 2,
+      "price": "141810.00",
+      "source_row": 505
+    },
+    {
+      "designator_id": 1400,
+      "package_id": 2,
+      "price": "145000.00",
+      "source_row": 507
+    },
+    {
+      "designator_id": 1401,
+      "package_id": 2,
+      "price": "10560.00",
+      "source_row": 508
+    },
+    {
+      "designator_id": 1402,
+      "package_id": 2,
+      "price": "36470.00",
+      "source_row": 509
+    },
+    {
+      "designator_id": 1403,
+      "package_id": 2,
+      "price": "10340.00",
+      "source_row": 511
+    },
+    {
+      "designator_id": 1404,
+      "package_id": 2,
+      "price": "24000.00",
+      "source_row": 513
+    },
+    {
+      "designator_id": 1405,
+      "package_id": 2,
+      "price": "24000.00",
+      "source_row": 515
+    },
+    {
+      "designator_id": 1406,
+      "package_id": 2,
+      "price": "5010.00",
+      "source_row": 516
+    },
+    {
+      "designator_id": 1407,
+      "package_id": 2,
+      "price": "5010.00",
+      "source_row": 517
+    },
+    {
+      "designator_id": 1408,
+      "package_id": 2,
+      "price": "5010.00",
+      "source_row": 518
+    },
+    {
+      "designator_id": 1409,
+      "package_id": 2,
+      "price": "1544.00",
+      "source_row": 520
+    },
+    {
+      "designator_id": 1410,
+      "package_id": 2,
+      "price": "12000.00",
+      "source_row": 522
+    },
+    {
+      "designator_id": 1411,
+      "package_id": 2,
+      "price": "147750.00",
+      "source_row": 524
+    },
+    {
+      "designator_id": 1412,
+      "package_id": 2,
+      "price": "142285.00",
+      "source_row": 526
+    },
+    {
+      "designator_id": 1413,
+      "package_id": 2,
+      "price": "122902.00",
+      "source_row": 528
+    },
+    {
+      "designator_id": 1414,
+      "package_id": 2,
+      "price": "122902.00",
+      "source_row": 530
+    },
+    {
+      "designator_id": 1415,
+      "package_id": 2,
+      "price": "10560.00",
+      "source_row": 531
+    },
+    {
+      "designator_id": 1416,
+      "package_id": 2,
+      "price": "2490.00",
+      "source_row": 532
+    },
+    {
+      "designator_id": 1417,
+      "package_id": 2,
+      "price": "17240.00",
+      "source_row": 533
+    },
+    {
+      "designator_id": 1418,
+      "package_id": 2,
+      "price": "9250.00",
+      "source_row": 534
+    },
+    {
+      "designator_id": 1419,
+      "package_id": 2,
+      "price": "47000.00",
+      "source_row": 535
+    },
+    {
+      "designator_id": 1420,
+      "package_id": 2,
+      "price": "7776.00",
+      "source_row": 537
+    },
+    {
+      "designator_id": 1421,
+      "package_id": 2,
+      "price": "44970.00",
+      "source_row": 538
+    },
+    {
+      "designator_id": 1422,
+      "package_id": 2,
+      "price": "56220.00",
+      "source_row": 539
+    },
+    {
+      "designator_id": 1423,
+      "package_id": 2,
+      "price": "252790.00",
+      "source_row": 540
+    },
+    {
+      "designator_id": 1424,
+      "package_id": 2,
+      "price": "348260.00",
+      "source_row": 541
+    },
+    {
+      "designator_id": 1425,
+      "package_id": 2,
+      "price": "104040.00",
+      "source_row": 542
+    },
+    {
+      "designator_id": 1426,
+      "package_id": 2,
+      "price": "520040.00",
+      "source_row": 543
+    },
+    {
+      "designator_id": 1427,
+      "package_id": 2,
+      "price": "95470.00",
+      "source_row": 544
+    },
+    {
+      "designator_id": 1428,
+      "package_id": 2,
+      "price": "2730.00",
+      "source_row": 546
+    },
+    {
+      "designator_id": 1429,
+      "package_id": 2,
+      "price": "2730.00",
+      "source_row": 548
+    },
+    {
+      "designator_id": 1430,
+      "package_id": 2,
+      "price": "2600.00",
+      "source_row": 550
+    },
+    {
+      "designator_id": 1431,
+      "package_id": 2,
+      "price": "1352.00",
+      "source_row": 552
+    },
+    {
+      "designator_id": 1432,
+      "package_id": 2,
+      "price": "1352.00",
+      "source_row": 554
+    },
+    {
+      "designator_id": 1433,
+      "package_id": 2,
+      "price": "1300.00",
+      "source_row": 556
+    },
+    {
+      "designator_id": 1434,
+      "package_id": 2,
+      "price": "52070.00",
+      "source_row": 558
+    },
+    {
+      "designator_id": 1435,
+      "package_id": 2,
+      "price": "2888.00",
+      "source_row": 560
+    },
+    {
+      "designator_id": 1436,
+      "package_id": 2,
+      "price": "2730.00",
+      "source_row": 562
+    },
+    {
+      "designator_id": 1437,
+      "package_id": 2,
+      "price": "2730.00",
+      "source_row": 564
+    },
+    {
+      "designator_id": 1438,
+      "package_id": 2,
+      "price": "0.00",
+      "source_row": 566
+    },
+    {
+      "designator_id": 1439,
+      "package_id": 2,
+      "price": "55886.00",
+      "source_row": 568
+    },
+    {
+      "designator_id": 1440,
+      "package_id": 2,
+      "price": "12000.00",
+      "source_row": 570
+    },
+    {
+      "designator_id": 1441,
+      "package_id": 2,
+      "price": "12000.00",
+      "source_row": 572
+    },
+    {
+      "designator_id": 1442,
+      "package_id": 2,
+      "price": "10871.00",
+      "source_row": 574
+    },
+    {
+      "designator_id": 1443,
+      "package_id": 2,
+      "price": "1550450.00",
+      "source_row": 576
+    },
+    {
+      "designator_id": 1444,
+      "package_id": 2,
+      "price": "3634.00",
+      "source_row": 578
+    },
+    {
+      "designator_id": 1445,
+      "package_id": 2,
+      "price": "3844.00",
+      "source_row": 580
+    },
+    {
+      "designator_id": 1446,
+      "package_id": 2,
+      "price": "29800.00",
+      "source_row": 582
+    },
+    {
+      "designator_id": 1447,
+      "package_id": 2,
+      "price": "0.00",
+      "source_row": 583
+    },
+    {
+      "designator_id": 1448,
+      "package_id": 2,
+      "price": "495.00",
+      "source_row": 585
+    },
+    {
+      "designator_id": 1449,
+      "package_id": 2,
+      "price": "30575.00",
+      "source_row": 587
+    },
+    {
+      "designator_id": 1450,
+      "package_id": 2,
+      "price": "30575.00",
+      "source_row": 589
+    },
+    {
+      "designator_id": 1451,
+      "package_id": 2,
+      "price": "30575.00",
+      "source_row": 591
+    },
+    {
+      "designator_id": 1452,
+      "package_id": 2,
+      "price": "35000.00",
+      "source_row": 593
+    },
+    {
+      "designator_id": 1453,
+      "package_id": 2,
+      "price": "32341.00",
+      "source_row": 595
+    },
+    {
+      "designator_id": 1454,
+      "package_id": 2,
+      "price": "30575.00",
+      "source_row": 597
+    },
+    {
+      "designator_id": 1455,
+      "package_id": 2,
+      "price": "30575.00",
+      "source_row": 599
+    },
+    {
+      "designator_id": 1456,
+      "package_id": 2,
+      "price": "30575.00",
+      "source_row": 601
+    },
+    {
+      "designator_id": 1457,
+      "package_id": 2,
+      "price": "30797.00",
+      "source_row": 603
+    },
+    {
+      "designator_id": 1458,
+      "package_id": 2,
+      "price": "30797.00",
+      "source_row": 605
+    },
+    {
+      "designator_id": 1459,
+      "package_id": 2,
+      "price": "35000.00",
+      "source_row": 607
+    },
+    {
+      "designator_id": 1460,
+      "package_id": 2,
+      "price": "11240.00",
+      "source_row": 609
+    },
+    {
+      "designator_id": 1461,
+      "package_id": 2,
+      "price": "106720.00",
+      "source_row": 610
+    },
+    {
+      "designator_id": 1462,
+      "package_id": 2,
+      "price": "7702.00",
+      "source_row": 612
+    },
+    {
+      "designator_id": 1463,
+      "package_id": 2,
+      "price": "7992.00",
+      "source_row": 614
+    },
+    {
+      "designator_id": 1464,
+      "package_id": 2,
+      "price": "7903.00",
+      "source_row": 616
+    },
+    {
+      "designator_id": 1465,
+      "package_id": 2,
+      "price": "596000.00",
+      "source_row": 618
+    },
+    {
+      "designator_id": 1466,
+      "package_id": 2,
+      "price": "746000.00",
+      "source_row": 620
+    },
+    {
+      "designator_id": 1467,
+      "package_id": 2,
+      "price": "231683.00",
+      "source_row": 622
+    },
+    {
+      "designator_id": 1468,
+      "package_id": 2,
+      "price": "231683.00",
+      "source_row": 624
+    },
+    {
+      "designator_id": 1469,
+      "package_id": 2,
+      "price": "163554.00",
+      "source_row": 626
+    },
+    {
+      "designator_id": 1470,
+      "package_id": 2,
+      "price": "220000.00",
+      "source_row": 628
+    },
+    {
+      "designator_id": 1471,
+      "package_id": 2,
+      "price": "203261.00",
+      "source_row": 630
+    },
+    {
+      "designator_id": 1472,
+      "package_id": 2,
+      "price": "220590.00",
+      "source_row": 632
+    },
+    {
+      "designator_id": 1473,
+      "package_id": 2,
+      "price": "229165.00",
+      "source_row": 634
+    },
+    {
+      "designator_id": 1056,
+      "package_id": 2,
+      "price": "397068.00",
+      "source_row": 636
+    },
+    {
+      "designator_id": 1057,
+      "package_id": 2,
+      "price": "0.00",
+      "source_row": 637
+    },
+    {
+      "designator_id": 1058,
+      "package_id": 2,
+      "price": "0.00",
+      "source_row": 638
+    },
+    {
+      "designator_id": 1059,
+      "package_id": 2,
+      "price": "280.00",
+      "source_row": 639
+    },
+    {
+      "designator_id": 1060,
+      "package_id": 2,
+      "price": "550.00",
+      "source_row": 640
+    },
+    {
+      "designator_id": 1061,
+      "package_id": 2,
+      "price": "550.00",
+      "source_row": 641
+    },
+    {
+      "designator_id": 1062,
+      "package_id": 2,
+      "price": "0.00",
+      "source_row": 643
+    },
+    {
+      "designator_id": 1063,
+      "package_id": 2,
+      "price": "599860.00",
+      "source_row": 644
+    },
+    {
+      "designator_id": 1064,
+      "package_id": 2,
+      "price": "36470.00",
+      "source_row": 645
+    },
+    {
+      "designator_id": 1065,
+      "package_id": 2,
+      "price": "9950.00",
+      "source_row": 646
+    },
+    {
+      "designator_id": 1066,
+      "package_id": 2,
+      "price": "142270.00",
+      "source_row": 647
+    },
+    {
+      "designator_id": 1067,
+      "package_id": 2,
+      "price": "33730.00",
+      "source_row": 649
+    },
+    {
+      "designator_id": 1068,
+      "package_id": 2,
+      "price": "39350.00",
+      "source_row": 651
+    },
+    {
+      "designator_id": 1069,
+      "package_id": 2,
+      "price": "44970.00",
+      "source_row": 653
+    },
+    {
+      "designator_id": 1070,
+      "package_id": 2,
+      "price": "12000.00",
+      "source_row": 655
+    },
+    {
+      "designator_id": 1071,
+      "package_id": 2,
+      "price": "30726.00",
+      "source_row": 657
+    },
+    {
+      "designator_id": 1072,
+      "package_id": 2,
+      "price": "32500.00",
+      "source_row": 659
+    },
+    {
+      "designator_id": 1073,
+      "package_id": 2,
+      "price": "30726.00",
+      "source_row": 661
+    },
+    {
+      "designator_id": 1074,
+      "package_id": 2,
+      "price": "32500.00",
+      "source_row": 663
+    },
+    {
+      "designator_id": 1075,
+      "package_id": 2,
+      "price": "30726.00",
+      "source_row": 665
+    },
+    {
+      "designator_id": 1076,
+      "package_id": 2,
+      "price": "6673862.00",
+      "source_row": 666
+    },
+    {
+      "designator_id": 1077,
+      "package_id": 2,
+      "price": "34271.00",
+      "source_row": 668
+    },
+    {
+      "designator_id": 1078,
+      "package_id": 2,
+      "price": "36250.00",
+      "source_row": 670
+    },
+    {
+      "designator_id": 1079,
+      "package_id": 2,
+      "price": "16000.00",
+      "source_row": 672
+    },
+    {
+      "designator_id": 1080,
+      "package_id": 2,
+      "price": "142347.00",
+      "source_row": 674
+    },
+    {
+      "designator_id": 1081,
+      "package_id": 2,
+      "price": "153763.00",
+      "source_row": 676
+    },
+    {
+      "designator_id": 1082,
+      "package_id": 2,
+      "price": "169142.00",
+      "source_row": 678
+    },
+    {
+      "designator_id": 1083,
+      "package_id": 2,
+      "price": "186057.00",
+      "source_row": 680
+    },
+    {
+      "designator_id": 1084,
+      "package_id": 2,
+      "price": "5712.00",
+      "source_row": 682
+    },
+    {
+      "designator_id": 1085,
+      "package_id": 2,
+      "price": "212961.00",
+      "source_row": 683
+    },
+    {
+      "designator_id": 1086,
+      "package_id": 2,
+      "price": "14000.00",
+      "source_row": 685
+    },
+    {
+      "designator_id": 1087,
+      "package_id": 2,
+      "price": "13977.00",
+      "source_row": 687
+    },
+    {
+      "designator_id": 1088,
+      "package_id": 2,
+      "price": "9030.00",
+      "source_row": 689
+    },
+    {
+      "designator_id": 1089,
+      "package_id": 2,
+      "price": "14100.00",
+      "source_row": 691
+    },
+    {
+      "designator_id": 1090,
+      "package_id": 2,
+      "price": "12440.00",
+      "source_row": 693
+    },
+    {
+      "designator_id": 1091,
+      "package_id": 2,
+      "price": "58000.00",
+      "source_row": 696
+    },
+    {
+      "designator_id": 1092,
+      "package_id": 2,
+      "price": "765.00",
+      "source_row": 698
+    },
+    {
+      "designator_id": 1093,
+      "package_id": 2,
+      "price": "3604.00",
+      "source_row": 700
+    },
+    {
+      "designator_id": 1094,
+      "package_id": 2,
+      "price": "280000.00",
+      "source_row": 702
+    },
+    {
+      "designator_id": 1095,
+      "package_id": 2,
+      "price": "85000.00",
+      "source_row": 704
+    },
+    {
+      "designator_id": 1096,
+      "package_id": 2,
+      "price": "650000.00",
+      "source_row": 706
+    },
+    {
+      "designator_id": 1097,
+      "package_id": 2,
+      "price": "1850000.00",
+      "source_row": 708
+    },
+    {
+      "designator_id": 1098,
+      "package_id": 2,
+      "price": "5339090.00",
+      "source_row": 710
+    },
+    {
+      "designator_id": 1099,
+      "package_id": 2,
+      "price": "39800.00",
+      "source_row": 713
+    },
+    {
+      "designator_id": 1100,
+      "package_id": 2,
+      "price": "39800.00",
+      "source_row": 715
+    },
+    {
+      "designator_id": 1101,
+      "package_id": 2,
+      "price": "41961.00",
+      "source_row": 717
+    },
+    {
+      "designator_id": 1102,
+      "package_id": 2,
+      "price": "41863.00",
+      "source_row": 719
+    },
+    {
+      "designator_id": 1103,
+      "package_id": 2,
+      "price": "42500.00",
+      "source_row": 721
+    },
+    {
+      "designator_id": 1104,
+      "package_id": 2,
+      "price": "40180.00",
+      "source_row": 723
+    },
+    {
+      "designator_id": 1105,
+      "package_id": 2,
+      "price": "4500.00",
+      "source_row": 725
+    },
+    {
+      "designator_id": 1106,
+      "package_id": 2,
+      "price": "415000.00",
+      "source_row": 727
+    },
+    {
+      "designator_id": 1107,
+      "package_id": 2,
+      "price": "711.00",
+      "source_row": 729
+    },
+    {
+      "designator_id": 1108,
+      "package_id": 2,
+      "price": "37550.00",
+      "source_row": 731
+    },
+    {
+      "designator_id": 1109,
+      "package_id": 2,
+      "price": "161250.00",
+      "source_row": 732
+    }
+  ]
+}

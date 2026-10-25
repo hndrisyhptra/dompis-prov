@@ -1,4 +1,37 @@
 @import 'tailwindcss';
+
+.revenue-stats .stat strong, .revenue-stages .stat strong { font-size:clamp(19px,2vw,25px); overflow-wrap:anywhere; }
+.revenue-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.revenue-mobile { display:none; }
+.revenue-stat-link { color:var(--text)!important; text-decoration:none!important; }
+.revenue-stat-link:hover { border-color:var(--primary); background:var(--soft); }
+.revenue-filter-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px 18px; }
+.revenue-filter label { margin-top:0; }
+.revenue-filter .form-actions p { margin:0 auto 0 0; max-width:600px; }
+.revenue-months, .revenue-branch-summary { max-height:370px; overflow:auto; }
+.revenue-month + .revenue-month { margin-top:20px; }
+.revenue-month .row { justify-content:space-between; font-size:13px; }
+.revenue-bar-track { height:10px; background:var(--soft); border-radius:3px; margin-top:6px; overflow:hidden; }
+.revenue-bar { background:var(--primary); height:100%; }
+.dark .revenue-bar { background:#8eb8e5; }
+.revenue-orders { min-width:1100px; }
+.revenue-bima { max-width:230px; overflow-wrap:anywhere; }
+.number { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+@media(max-width:850px) { .revenue-filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:700px) { .revenue-stats { grid-template-columns:minmax(0,1fr); } .revenue-desktop { display:none; } .revenue-mobile { display:block; } .revenue-order-card + .revenue-order-card { border-top:1px solid var(--border); } .revenue-order-values { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; } .revenue-order-values strong { display:block; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; } .revenue-order-values .full { grid-column:1/-1; } }
+@media(max-width:500px) { .revenue-filter-grid { grid-template-columns:minmax(0,1fr); } .revenue-filter .form-actions { align-items:stretch; } }
+
+.kml-map { height:480px; min-height:300px; border:1px solid var(--border); border-radius:6px; background:var(--canvas); z-index:0; }
+.kml-map.leaflet-container { background:var(--canvas); font-family:var(--font-sans); }
+.dark .kml-map .leaflet-tile-pane { filter:brightness(.65) contrast(1.15) saturate(.65); }
+.dark .kml-map .leaflet-interactive { stroke:#8eb8e5; }
+.kml-toolbar { margin-bottom:12px; }
+.kml-map .leaflet-control-zoom a, .kml-map .leaflet-popup-content-wrapper, .kml-map .leaflet-popup-tip, .kml-map .leaflet-control-attribution { background:var(--surface); color:var(--text); }
+.kml-map .leaflet-popup-content-wrapper { border-radius:6px; }
+.kml-map .leaflet-popup-content { overflow-wrap:anywhere; max-width:240px; }
+.kml-map .leaflet-control-attribution a { color:var(--primary); }
+.dark .kml-map .leaflet-control-attribution a { color:#a5c9f4; }
+@media(max-width:700px) { .kml-map { height:360px; } }
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @custom-variant dark (&:where(.dark, .dark *));
@@ -444,3 +477,11 @@ a.kpi-link:hover { border-color:var(--primary); text-decoration:none; }
 .compact-button { min-height: 30px; padding: 5px 9px; font-size: 12px; }
 @media(max-width:600px) { .dashboard-order-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); } .dashboard-order-dialog .panel-head, .dashboard-dialog-footer { padding: 12px 16px; } .dashboard-dialog-footer > .button { flex: 1; } }
 @media(prefers-reduced-motion:reduce) { .region-chevron { transition: none; } }
+
+[data-jt-boq-options][hidden] { display: none; }
+.boq-items-table { min-width: 900px; }
+.boq-items-table td:nth-child(2) { white-space: normal; min-width: 250px; max-width: 480px; }
+.boq-items-table td:nth-child(n+5) { text-align: right; font-variant-numeric: tabular-nums; }
+.boq-items-table tfoot { background: var(--soft); font-weight: 650; }
+.stat strong.boq-time { font-size: 16px; }
+[data-normal-progress-save][hidden] { display: none; }

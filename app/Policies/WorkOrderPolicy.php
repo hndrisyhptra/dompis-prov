@@ -8,6 +8,16 @@ use App\Models\WorkOrder;
 
 class WorkOrderPolicy
 {
+    public function uploadKml(User $user, WorkOrder $workOrder): bool
+    {
+        return $user->active && $user->role->progress() && $this->view($user, $workOrder);
+    }
+
+    public function importBoq(User $user, WorkOrder $workOrder): bool
+    {
+        return $user->active && $user->role->progress() && $this->view($user, $workOrder);
+    }
+
     public function prioritize(User $user, WorkOrder $workOrder): bool
     {
         return $user->active && $user->role->priorityOrders() && $this->view($user, $workOrder);
