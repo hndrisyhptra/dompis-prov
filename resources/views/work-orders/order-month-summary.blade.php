@@ -3,7 +3,7 @@
     <div class="table-wrap" tabindex="0" aria-label="Rekap penyelesaian per bulan order, geser untuk melihat seluruh kolom"><table class="area-type-table order-month-table"><thead><tr><th scope="col">Bulan order</th><th scope="col">Total WO</th><th scope="col">Progress CLOSE</th><th scope="col">Sudah PS</th><th scope="col">Outstanding</th></tr></thead><tbody>
     @forelse($orderMonths['rows'] as $row)<tr><th scope="row">{{ $row['label'] }}</th>
         @foreach(['total'=>'all', 'closed'=>'closed', 'ps'=>'complete', 'outstanding'=>'outstanding'] as $metric=>$queue)
-        <td class="numeric">@if($row[$metric])<a href="{{ route('work-orders.index', array_replace($monthScopeFilters, ['order_month'=>$row['month'], 'queue'=>$queue])) }}" aria-label="{{ $row['label'] }} · {{ ['total'=>'Total WO', 'closed'=>'Progress CLOSE', 'ps'=>'Sudah PS', 'outstanding'=>'Outstanding'][$metric] }} · {{ $row[$metric] }} order">{{ number_format($row[$metric]) }}</a>@else<span class="zero-count">0</span>@endif</td>
+        <td class="numeric"><x-order-count :count="$row[$metric]" :filters="array_replace($monthScopeFilters, ['order_month'=>$row['month'], 'queue'=>$queue])" :label="$row['label'].' · '.['total'=>'Total WO', 'closed'=>'Progress CLOSE', 'ps'=>'Sudah PS', 'outstanding'=>'Outstanding'][$metric]"/></td>
         @endforeach
     </tr>@empty<tr><td colspan="5"><div class="empty"><h3>Belum ada order bertanggal</h3><p>Rekap terisi setelah order dengan TGL ORDER tersedia pada cakupan ini.</p></div></td></tr>@endforelse
     </tbody></table></div>

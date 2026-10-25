@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\AuditLog;
+use App\Models\Branch;
 use App\Models\SyncJob;
 use App\Models\WorkOrder;
 
@@ -19,9 +21,18 @@ class WorkOrderSourceWriter
                 unset($data[$field]);
             }
         }
-        $order->fill($data + ['id_branches' => $branch, 'source_tab' => $tab, 'last_pulled_at' => now()])->save();
+        $assignmentChanged = $existing && $order->id_branches !== $branch;
+        $routingBefore = $order->only(['id_branches', 'branch', 'sto']);
+        $order->fill($data + ['id_branches' => $branch, 'source_tab' => $tab, 'last_pulled_at' => now()]);
+        if ($assignmentChanged) {
+            $order->revision++;
+        }
+        $order->save();
         $changes = [];
         if ($existing) {
+            if ($assignmentChanged) {
+                $changes['id_branches'] = ['label' => 'BRANCH PENUGASAN', 'before' => $routingBefore['id_branches'], 'after' => $branch];
+            }
             foreach (ExcelWorkOrderMapper::FIELDS as $field => $label) {
                 if (! array_key_exists($field, $data) && ! in_array($field, ['status_order', 'mapping_order'], true)) {
                     continue;
@@ -56,7 +67,20 @@ class WorkOrderSourceWriter
                 'new_status_order' => $order->status_order, 'field_changes' => $changes, 'id_sync_jobs' => $job->getKey(), 'id_users' => $job->id_users, 'changed_at' => now()]);
         }
 
-        app(BimaAutoCloseService::class)->apply($order, $job->actor, $job->getKey());
+        if ($existing && $routingBefore !== $order->only(array_keys($routingBefore))) {
+            AuditLog::create(['id_users' => $job->id_users, 'action' => 'work_order.routing_updated_from_bima', 'entity_type' => 'work_order', 'id_entity' => $order->getKey(),
+                'metadata' => ['id_sync_jobs' => $job->getKey(), 'before' => $routingBefore, 'after' => $order->only(array_keys($routingBefore)), 'revision' => $order->revision]]);
+        }
+        if ($assignmentChanged) {
+            $oldBranch = Branch::withTrashed()->whereKey($routingBefore['id_branches'])->value('name') ?? 'Belum ditugaskan';
+            $newBranch = Branch::whereKey($branch)->value('name');
+            $order->events()->create(['id_users' => $job->id_users, 'old_status' => $order->operational_status, 'new_status' => $order->operational_status,
+                'old_progress_category' => $order->progress_category, 'new_progress_category' => $order->progress_category, 'revision' => $order->revision,
+                'notes' => 'Penugasan Branch mengikuti import BIMA terbaru: '.$oldBranch.' → '.$newBranch
+                    .'. STO: '.($routingBefore['sto'] ?: '—').' → '.($order->sto ?: '—').'. Riwayat progress dan catatan sebelumnya tetap tersimpan.']);
+        }
+
+        app(BimaAutoProgressService::class)->apply($order, $job->actor, $job->getKey());
 
         return $order->refresh();
     }

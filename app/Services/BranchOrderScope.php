@@ -27,6 +27,12 @@ class BranchOrderScope
         if (! empty($filters['region'])) {
             $query->whereIn('id_branches', Branch::withTrashed()->where('region_id', $filters['region'])->select('id_branches'));
         }
+        if (! empty($filters['without_region'])) {
+            $query->where(fn ($q) => $q->whereNull('id_branches')->orWhereIn('id_branches', Branch::withTrashed()->whereNull('region_id')->select('id_branches')));
+        }
+        if (! empty($filters['unassigned'])) {
+            $query->whereNull('id_branches');
+        }
         if (! empty($filters['service'])) {
             $query->where('layanan', $filters['service']);
         }

@@ -6,6 +6,7 @@ use App\Http\Controllers\BranchDashboardController;
 use App\Http\Controllers\BranchMappingController;
 use App\Http\Controllers\BranchProgressController;
 use App\Http\Controllers\MasterDataController;
+use App\Http\Controllers\PriorityOrderController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkOrderController;
@@ -35,8 +36,12 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
     Route::get('/branch/material', [BranchDashboardController::class, 'material'])->name('branch.material');
     Route::post('/issues/{issue}/notes', [BranchProgressController::class, 'addIssueNote'])->name('issues.notes');
     Route::resource('users', UserManagementController::class)->only(['index', 'create', 'store', 'edit', 'update'])->middleware('can:administer');
+    Route::view('/logout/confirm', 'auth.logout-confirm')->name('logout.confirm');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
+    Route::get('/priority-orders', [PriorityOrderController::class, 'index'])->middleware('can:priority-orders')->name('priorities.index');
+    Route::post('/work-orders/{workOrder}/priority', [PriorityOrderController::class, 'store'])->name('priorities.store');
+    Route::delete('/work-orders/{workOrder}/priority', [PriorityOrderController::class, 'destroy'])->name('priorities.destroy');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
     Route::get('/work-orders/{workOrder}/actions/{mode}', [WorkOrderController::class, 'editAction'])->whereIn('mode', ['progress', 'issue', 'close'])->name('work-orders.action.edit');
     Route::patch('/work-orders/{workOrder}/actions/{mode}', [BranchProgressController::class, 'updateAction'])->whereIn('mode', ['progress', 'issue', 'close'])->name('work-orders.action.update');
@@ -45,6 +50,7 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
     Route::post('/work-orders/{workOrder}/issues', [BranchProgressController::class, 'storeIssue'])->name('work-orders.issues');
     Route::patch('/issues/{issue}/resolve', [BranchProgressController::class, 'resolveIssue'])->name('issues.resolve');
     Route::get('/sync', [SyncController::class, 'index'])->name('sync.index');
+    Route::get('/sync/history', [SyncController::class, 'history'])->name('sync.history');
     Route::post('/imports/excel', [WorkOrderImportController::class, 'upload'])->middleware('throttle:6,1')->name('imports.upload');
     Route::get('/imports/{syncJob}/mapping', [WorkOrderImportController::class, 'mapping'])->name('imports.mapping');
     Route::post('/imports/{syncJob}/preview', [WorkOrderImportController::class, 'preview'])->middleware('throttle:6,1')->name('imports.preview');

@@ -44,10 +44,12 @@ class WorkOrderPresentationTest extends OloTestCase
     {
         $this->pull([$this->row('FIELD-CLOSE', [14 => 'Activate Service', 13 => 'STARTWORK'])]);
         $order = WorkOrder::sole();
+        $this->assertSame('INSTALASI', $order->progress_category);
+        $this->assertSame(1, $order->revision);
         $hash = $order->source_snapshot_hash;
         $user = $this->user();
         $user->branches()->attach($this->branch);
-        $this->actingAs($user)->patch(route('work-orders.progress', $order), ['revision' => 0, 'progress_category' => 'CLOSE', 'notes' => 'Instalasi dan pengujian lapangan selesai.'])->assertSessionHasNoErrors()->assertRedirect();
+        $this->actingAs($user)->patch(route('work-orders.progress', $order), ['revision' => 1, 'progress_category' => 'CLOSE', 'notes' => 'Instalasi dan pengujian lapangan selesai.'])->assertSessionHasNoErrors()->assertRedirect();
         $order->refresh();
         $this->assertSame('CLOSE', $order->progress_category);
         $this->assertSame('FIELD_DONE', $order->operational_status);
@@ -57,10 +59,10 @@ class WorkOrderPresentationTest extends OloTestCase
         $this->assertSame(0, WorkOrder::psEligible()->count());
         $this->pull([$this->row('FIELD-CLOSE', [14 => 'Approval E2E Testing Manual', 13 => 'COMPLETE'])]);
         $this->assertTrue($order->fresh()->isPsEligible());
-        $this->assertSame(1, $order->fresh()->revision);
+        $this->assertSame(2, $order->fresh()->revision);
         $this->assertSame(1, WorkOrder::psEligible()->count());
         $this->get(route('branch.dashboard'))->assertViewHas('ps_total', 1)->assertViewHas('waiting_bima', 0)->assertViewHas('complete', 0);
         $this->assertNull($order->fresh()->tgl_ps);
-        $this->assertDatabaseCount('wo_status_events', 1);
+        $this->assertDatabaseCount('wo_status_events', 2);
     }
 }

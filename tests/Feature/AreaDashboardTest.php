@@ -63,7 +63,8 @@ class AreaDashboardTest extends OloTestCase
         $this->assertSame(['total' => 11, 'ps_total' => 4, 'ps_today' => 1, 'incoming_today' => 11, 'outstanding' => 4, 'open_issues' => 1, 'waiting_bima' => 1, 'missing_ps_date' => 1, 'future_ps_date' => 1, 'unmapped' => 0, 'unupdated' => 4, 'closed_by_branch' => 5, 'potential_ps' => 0, 'new_order' => 0], $summary);
         $grand = $response->viewData('grand');
         $this->assertSame(11, $grand['total']);
-        $this->assertSame(11, array_sum(array_diff_key($grand, ['total' => true, 'ps_today' => true])));
+        $this->assertSame(11, array_sum(array_diff_key($grand, ['total' => true, 'ps_today' => true, 'incoming_today' => true])));
+        $this->assertSame(11, $grand['incoming_today']);
         $this->assertSame(5, $grand['close']);
         $this->assertSame(2, $grand['bima']);
         $this->assertSame(2, $response->viewData('month_ps'));

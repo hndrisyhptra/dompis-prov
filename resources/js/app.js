@@ -1,3 +1,9 @@
+import { setupDashboardTables } from './dashboard-tables';
+import { setupFormConfirmation } from './form-confirmation';
+
+setupFormConfirmation(document, message => window.confirm(message));
+setupDashboardTables(document);
+
 const themeButtons = document.querySelectorAll('[data-theme-toggle]');
 function themeLabel() {
     const dark = document.documentElement.classList.contains('dark');
@@ -35,6 +41,7 @@ document.addEventListener('keydown', event => {
     }
 });
 document.querySelectorAll('form[data-loading]').forEach(form => form.addEventListener('submit', event => {
+    if (event.defaultPrevented) return;
     if (form.dataset.submitting) { event.preventDefault(); return; }
     form.dataset.submitting = '1';
     form.querySelectorAll('button[type="submit"], button:not([type])').forEach(button => { button.disabled = true; button.setAttribute('aria-busy', 'true'); button.textContent = form.dataset.loading; });
@@ -205,3 +212,20 @@ if (masterTooltipTargets.length) {
 }
 
 if (location.hash === '#order-devices') { const devicePanel = document.getElementById('order-devices'); if (devicePanel) devicePanel.open = true; }
+
+const logoutDialog = document.querySelector('#logout-confirmation');
+const logoutTrigger = document.querySelector('[data-logout-open]');
+if (logoutDialog && logoutTrigger && typeof logoutDialog.showModal === 'function') {
+    logoutTrigger.addEventListener('click', event => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        if (!logoutDialog.open) logoutDialog.showModal();
+    });
+    logoutDialog.querySelector('[data-logout-cancel]').addEventListener('click', () => logoutDialog.close());
+    logoutDialog.querySelector('[data-logout-confirm]').addEventListener('submit', () => {
+        logoutDialog.querySelector('[data-logout-cancel]').disabled = true;
+    });
+    logoutDialog.addEventListener('cancel', event => {
+        if (logoutDialog.querySelector('[data-logout-confirm]').dataset.submitting) event.preventDefault();
+    });
+}

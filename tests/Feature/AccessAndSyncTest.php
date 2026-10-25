@@ -17,6 +17,10 @@ class AccessAndSyncTest extends OloTestCase
         $this->get('/login')->assertOk()->assertSee('Masuk ke workspace');
         $this->post('/login', ['email' => $this->area->email, 'password' => 'password'])->assertRedirect(route('sync.index'));
         $this->assertAuthenticatedAs($this->area);
+        $this->get(route('logout.confirm'))->assertOk()->assertSee('Apakah Anda yakin ingin Logout?')->assertSee('Ya, Logout')->assertSee('Tidak');
+        $this->assertAuthenticatedAs($this->area);
+        $this->get('/work-orders')->assertOk();
+        $this->assertAuthenticatedAs($this->area);
         $this->post('/logout')->assertRedirect('/login');
         $this->assertGuest();
         $this->area->forceFill(['active' => false])->save();

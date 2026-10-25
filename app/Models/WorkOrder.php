@@ -74,6 +74,11 @@ class WorkOrder extends Model
         return $this->hasMany(BimaTaskLog::class, 'id_work_orders')->latest('id_bima_task_logs');
     }
 
+    public function priorities()
+    {
+        return $this->hasMany(WorkOrderPriority::class, 'id_work_orders');
+    }
+
     public function orderMapping()
     {
         return $this->belongsTo(MappingOrder::class, 'id_mapping_order');

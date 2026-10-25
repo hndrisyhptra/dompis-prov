@@ -63,7 +63,7 @@ class RegionAndStoTest extends OloTestCase
         }
     }
 
-    public function test_sto_mapping_can_route_new_orders_but_cannot_move_existing_orders_or_override_explicit_mapping(): void
+    public function test_sto_fallback_remaps_existing_orders_and_latest_explicit_branch_overrides_sto_ownership(): void
     {
         $this->branch->update(['regional' => 'REGION JATIM']);
         $this->artisan('olo:sto-map', ['workzone' => 'DMO', 'branch' => $this->branch->code])->assertSuccessful();
@@ -77,12 +77,15 @@ class RegionAndStoTest extends OloTestCase
         $other = Branch::create(['code' => 'OTHER', 'name' => 'Other', 'regional' => 'REGION JATIM']);
         $this->artisan('olo:sto-map', ['workzone' => 'DMO', 'branch' => $other->code])->assertSuccessful();
         $job = $this->pull([$this->row(changes: [5 => 'UNMAPPED BIMA LABEL', 6 => 'DMO'])]);
-        $this->assertSame(1, $job->stats['conflict']);
-        $this->assertSame($this->branch->getKey(), $order->fresh()->id_branches);
+        $this->assertSame(1, $job->stats['updated']);
+        $this->assertSame($other->getKey(), $order->fresh()->id_branches);
         $this->assertSame('IN_PROGRESS', $order->fresh()->operational_status);
-        $this->assertSame(5, $order->fresh()->revision);
+        $this->assertSame(6, $order->fresh()->revision);
         $job = $this->preview([$this->row('NEW-ID', [6 => 'DMO'])]);
-        $this->assertSame(1, $job->stats['conflict']);
+        $this->assertSame(1, $job->stats['new']);
+        $job->update(['stage' => 'commit']);
+        app(BimaSheetPullService::class)->pull($job);
+        $this->assertSame($this->branch->getKey(), WorkOrder::where('no_tq_sc_id', 'NEW-ID')->sole()->id_branches);
         $this->assertSame(2, AuditLog::where('action', 'sto.branch_mapped_cli')->count());
     }
 

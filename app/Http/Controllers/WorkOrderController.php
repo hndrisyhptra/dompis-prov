@@ -26,10 +26,12 @@ class WorkOrderController extends Controller
             'region' => 'nullable|integer|exists:regions,id_regions', 'service' => 'nullable|string|max:255',
             'order_month' => 'nullable|date_format:Y-m|after_or_equal:2000-01|before_or_equal:2100-12',
             'owner_group' => ['nullable', Rule::in([...MappingOwnergrup::GROUPS, 'unmapped'])],
-            'bucket' => ['nullable', Rule::in([...array_keys(ProgressSummary::GROUPS), 'other'])],
+            'bucket' => ['nullable', Rule::in([...array_keys(ProgressSummary::GROUPS), 'other', 'cndc'])],
+            'without_region' => 'nullable|boolean', 'unassigned' => 'nullable|boolean', 'modal' => 'nullable|boolean',
+            'ps_date' => 'nullable|date_format:Y-m-d|after_or_equal:2000-01-01|before_or_equal:2100-12-31',
             'queue' => ['nullable', Rule::in(['all', 'today', 'ps_today', 'complete', 'closed', 'outstanding', 'issues', 'unupdated', 'waiting_bima', 'missing_ps_date', 'future_ps_date', 'unmapped', 'potential_ps', 'new_order'])]]);
         $base = $scope->orders($request->user(), $filters);
-        $query = (clone $base)->with('assignedBranch')->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')])
+        $query = (clone $base)->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($request->user())])->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')])
             ->when($filters['q'] ?? null, fn ($q, $value) => $q->where(fn ($q) => $q->where('no_tq_sc_id', 'like', '%'.$value.'%')->orWhere('sid', 'like', '%'.$value.'%')->orWhere('nama_olo', 'like', '%'.$value.'%')))
             ->when($filters['status'] ?? null, fn ($q, $value) => $q->where(ProgressCategory::tryFrom($value) ? 'progress_category' : 'operational_status', $value));
         $queue = $filters['queue'] ?? 'all';
@@ -37,6 +39,17 @@ class WorkOrderController extends Controller
             ProgressSummary::filter($query, $filters['bucket']);
         }
         $today = CarbonImmutable::now('Asia/Jakarta')->startOfDay();
+        if (! empty($filters['ps_date'])) {
+            $query->psOnDate($filters['ps_date']);
+        }
+        if ($request->boolean('modal')) {
+            // Apply the same queue before pagination; never return an unscoped dashboard list.
+            $queues->apply($query, $queue, $today);
+            $orders = $query->latest('tgl_order')->latest('id_work_orders')->paginate(25)->withQueryString();
+
+            return response()->view('dashboard.orders', ['orders' => $orders, 'listUrl' => route('work-orders.index', array_diff_key($filters, ['modal' => true]))])
+                ->header('X-Dashboard-Fragment', 'orders')->header('Cache-Control', 'private, no-store');
+        }
         $queueCounts = $queues->counts(clone $query, $today);
         $queues->apply($query, $queue, $today);
 
@@ -56,7 +69,7 @@ class WorkOrderController extends Controller
             return redirect()->route('work-orders.action.edit', [$workOrder, $request->input('action')]);
         }
 
-        return view('work-orders.show', ['order' => $workOrder->load(['assignedBranch', 'events.actor', 'issues.notes.actor']), 'taskLogs' => $workOrder->taskLogs()->with('actor')->paginate(20, ['*'], 'task_page')]);
+        return view('work-orders.show', ['order' => $workOrder->load(['assignedBranch', 'events.actor', 'issues.notes.actor', 'priorities' => fn ($q) => $q->visibleTo($request->user())]), 'taskLogs' => $workOrder->taskLogs()->with('actor')->paginate(20, ['*'], 'task_page')]);
     }
 
     public function editAction(Request $request, WorkOrder $workOrder, string $mode)

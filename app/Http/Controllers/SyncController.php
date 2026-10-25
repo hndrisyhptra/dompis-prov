@@ -25,12 +25,19 @@ class SyncController extends Controller
             ? 'https://docs.google.com/spreadsheets/d/'.$spreadsheetId.'/edit' : null;
         $credentialsReadable = $credentialsPath && is_file($credentialsPath) && is_readable($credentialsPath);
 
-        return view('sync.index', ['uploadLimitBytes' => WorkOrderUpload::limitBytes(), 'uploadLimitMb' => WorkOrderUpload::limitBytes() / 1024 / 1024, 'jobs' => SyncJob::with('actor')->latest()->paginate(15),
+        return view('sync.index', ['uploadLimitBytes' => WorkOrderUpload::limitBytes(), 'uploadLimitMb' => WorkOrderUpload::limitBytes() / 1024 / 1024, 'jobs' => SyncJob::with('actor')->latest('id_sync_jobs')->limit(5)->get(), 'jobCount' => SyncJob::count(),
             'lastImport' => SyncJob::where('direction', 'import')->where('stage', 'commit')->whereIn('state', ['success', 'partial_success'])->latest('finished_at')->first(),
             'spreadsheetUrl' => $spreadsheetUrl, 'credentialsReadable' => $credentialsReadable,
             'lastRead' => SyncJob::where('direction', 'pull')->where('connection_hash', BimaSheetPullService::connectionHash())
                 ->whereIn('state', ['preview_ready', 'success', 'partial_success'])->whereNotNull('finished_at')->latest('finished_at')->first(),
             'lastPull' => SyncJob::where('direction', 'pull')->where('stage', 'commit')->whereIn('state', ['success', 'partial_success'])->latest('finished_at')->first()]);
+    }
+
+    public function history()
+    {
+        Gate::authorize('sync');
+
+        return view('sync.all-history', ['jobs' => SyncJob::with('actor')->latest('id_sync_jobs')->paginate(20)]);
     }
 
     public function preview(Request $request)

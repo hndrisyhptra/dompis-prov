@@ -14,7 +14,8 @@ class WorkOrderActionPagesTest extends OloTestCase
 {
     private function order(string $id = 'ACTION-ORDER'): WorkOrder
     {
-        $this->pull([$this->row($id, [14 => 'Activate Service', 13 => 'STARTWORK'])]);
+        // Keep action/authorization fixtures outside the automatic progress mapping.
+        $this->pull([$this->row($id, [14 => 'Review Order TSQ', 13 => 'STARTWORK'])]);
 
         return WorkOrder::where('no_tq_sc_id', $id)->firstOrFail();
     }

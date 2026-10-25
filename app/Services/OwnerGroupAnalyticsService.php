@@ -25,13 +25,15 @@ class OwnerGroupAnalyticsService
         // Unique source owner_grup ensures one order contributes to exactly one column.
         $aggregates = self::joinMapping(clone $base, 'owner_mapping')->select(['work_orders.id_branches', 'owner_mapping.kelompok_ownergrup'])
             ->selectRaw('COUNT(*) as order_count')->groupBy('work_orders.id_branches', 'owner_mapping.kelompok_ownergrup')->get();
-        $branches = Branch::withTrashed()->whereIn('id_branches', $aggregates->pluck('id_branches')->filter()->unique())->get()->keyBy('id_branches');
+        $branches = Branch::withTrashed()->with(['region' => fn ($q) => $q->withTrashed()])->whereIn('id_branches', $aggregates->pluck('id_branches')->filter()->unique())->get()->keyBy('id_branches');
         $zero = array_fill_keys([...MappingOwnergrup::GROUPS, 'unmapped'], 0);
         $rows = [];
         $totals = $zero;
         foreach ($aggregates as $aggregate) {
             $key = $aggregate->id_branches ?? 'unassigned';
-            $rows[$key] ??= ['branch_id' => $aggregate->id_branches, 'name' => $branches->get($aggregate->id_branches)?->name ?? 'Belum terpetakan', 'counts' => $zero, 'total' => 0];
+            $branch = $branches->get($aggregate->id_branches);
+            $rows[$key] ??= ['branch_id' => $aggregate->id_branches, 'name' => $branch?->name ?? 'Belum terpetakan',
+                'region_id' => $branch?->region_id, 'region_name' => $branch?->region?->name ?? 'Tanpa regional', 'counts' => $zero, 'total' => 0];
             $group = $aggregate->kelompok_ownergrup ?? 'unmapped';
             $count = (int) $aggregate->order_count;
             $rows[$key]['counts'][$group] += $count;
@@ -39,8 +41,19 @@ class OwnerGroupAnalyticsService
             $totals[$group] += $count;
         }
         uasort($rows, fn ($a, $b) => strnatcasecmp($a['name'], $b['name']));
+        $regions = [];
+        foreach ($rows as $row) {
+            $key = $row['region_id'] ?? 'unmapped';
+            $regions[$key] ??= ['region_id' => $row['region_id'], 'name' => $row['region_name'], 'rows' => [], 'totals' => $zero, 'total' => 0];
+            $regions[$key]['rows'][] = $row;
+            $regions[$key]['total'] += $row['total'];
+            foreach ($row['counts'] as $group => $count) {
+                $regions[$key]['totals'][$group] += $count;
+            }
+        }
+        uasort($regions, fn ($a, $b) => strnatcasecmp($a['name'], $b['name']));
 
-        return ['groups' => MappingOwnergrup::GROUPS, 'rows' => array_values($rows), 'totals' => $totals,
+        return ['groups' => MappingOwnergrup::GROUPS, 'rows' => array_values($rows), 'regions' => $regions, 'totals' => $totals,
             'total' => array_sum($totals), 'has_mapping' => MappingOwnergrup::where('active', true)->whereIn('kelompok_ownergrup', MappingOwnergrup::GROUPS)->exists()];
     }
 

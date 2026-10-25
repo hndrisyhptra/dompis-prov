@@ -44,6 +44,11 @@ enum Role: string
         return in_array($this, [self::SuperAdmin, self::AreaCoordinator, self::AreaAdmin, self::AreaHd], true);
     }
 
+    public function priorityOrders(): bool
+    {
+        return in_array($this, [self::SuperAdmin, self::AreaAdmin, self::AreaHd, self::BranchAdmin, self::BranchHd, self::TeamLeader], true);
+    }
+
     public function progress(): bool
     {
         return $this->areaScope() || in_array($this, [self::BranchAdmin, self::BranchHd, self::TeamLeader], true);

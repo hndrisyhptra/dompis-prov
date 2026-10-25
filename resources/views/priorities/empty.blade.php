@@ -1,0 +1,1 @@
+<div class="empty"><span class="master-empty-icon"><x-icon name="bookmark"/></span><h3>Belum ada order prioritas sesuai filter</h3><p>Ubah pencarian atau buka Work Order, cari No WO, lalu pilih ikon bookmark untuk mulai memantau.</p><a class="button secondary" href="{{ route('work-orders.index',['jenis_pekerjaan'=>'all']) }}">Pilih Work Order</a></div>

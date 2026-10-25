@@ -21,6 +21,9 @@
             <a class="nav-link {{ request()->routeIs('branch.dashboard') ? 'active' : '' }}" href="{{ route('branch.dashboard') }}"><x-icon name="dashboard"/> Dashboard Branch</a>
             @endif
             <a class="nav-link {{ request()->routeIs('work-orders.*') ? 'active' : '' }}" href="{{ route('work-orders.index') }}"><x-icon name="orders"/> {{ auth()->user()->role->areaScope() ? 'Work Orders' : 'Work Order' }}</a>
+            @can('priority-orders')
+            <a class="nav-link {{ request()->routeIs('priorities.*') ? 'active' : '' }}" href="{{ route('priorities.index') }}"><x-icon name="bookmark"/> Order Prioritas</a>
+            @endcan
             @if(! auth()->user()->role->areaScope())<a class="nav-link {{ request()->routeIs('branch.material') ? 'active' : '' }}" href="{{ route('branch.material') }}"><x-icon name="material"/> Laporan Material</a>@endif
             @can('sync')
             <a class="nav-link {{ request()->routeIs('sync.*', 'imports.*') ? 'active' : '' }}" href="{{ route('sync.index') }}"><x-icon name="sync"/> Sync Center</a>
@@ -39,16 +42,32 @@
             <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}"><x-icon name="users"/> User Management</a>
             @endcan
         </nav>
-        <div class="sidebar-foot"><div class="small muted">{{ auth()->user()->role->areaScope() ? 'Operasional Area' : 'Ruang kerja Branch' }}</div><strong>{{ auth()->user()->name }}</strong><div class="small muted">{{ str_replace('_', ' ', auth()->user()->role->value) }}</div><div class="row gap-top"><form method="POST" action="{{ route('logout') }}">@csrf<button class="button secondary">Keluar</button></form></div></div>
+        <div class="sidebar-foot"><div class="small muted">{{ auth()->user()->role->areaScope() ? 'Operasional Area' : 'Ruang kerja Branch' }}</div><strong>{{ auth()->user()->name }}</strong><div class="small muted">{{ str_replace('_', ' ', auth()->user()->role->value) }}</div></div>
     </aside>
 @endauth
 <main class="{{ auth()->check() ? 'main' : 'guest-main' }}">
-    @auth<div class="topbar"><span>{{ auth()->user()->role->areaScope() ? 'Operasional Area' : 'Operasional Branch' }} <span class="muted">/ @yield('title', 'Monitoring')</span></span><div class="topbar-actions"><span class="small muted">{{ now()->timezone('Asia/Jakarta')->translatedFormat('d M Y') }} · WIB</span><button type="button" class="button secondary icon-button" data-theme-toggle aria-label="Aktifkan mode gelap" title="Aktifkan mode gelap"><span class="theme-moon"><x-icon name="moon"/></span><span class="theme-sun"><x-icon name="sun"/></span></button></div></div>@endauth
+    @auth<div class="topbar"><span>{{ auth()->user()->role->areaScope() ? 'Operasional Area' : 'Operasional Branch' }} <span class="muted">/ @yield('title', 'Monitoring')</span></span><div class="topbar-actions"><span class="small muted topbar-date">{{ now()->timezone('Asia/Jakarta')->translatedFormat('d M Y') }} · WIB</span><button type="button" class="button secondary icon-button" data-theme-toggle aria-label="Aktifkan mode gelap" title="Aktifkan mode gelap"><span class="theme-moon"><x-icon name="moon"/></span><span class="theme-sun"><x-icon name="sun"/></span></button><a class="button secondary logout-trigger" href="{{ route('logout.confirm') }}" data-logout-open aria-haspopup="dialog" aria-controls="logout-confirmation" title="Logout"><x-icon name="log-out"/><span>Logout</span></a></div></div>@endauth
     <div class="page">
         @if(session('status'))<div class="notice success" role="status">{{ session('status') }}</div>@endif
         @if($errors->any())<div class="notice danger" role="alert"><strong>Periksa kembali input.</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
         @yield('content')
     </div>
 </main>
+@auth
+<dialog id="logout-confirmation" class="logout-dialog" aria-labelledby="logout-title" aria-describedby="logout-description">
+    <div class="logout-dialog-heading"><x-icon name="log-out"/><h2 id="logout-title">Konfirmasi Logout</h2></div>
+    <p id="logout-description" class="muted">Apakah Anda yakin ingin Logout?</p>
+    <form method="POST" action="{{ route('logout') }}" data-loading="Logout…" data-logout-confirm>
+        @csrf
+        <div class="logout-dialog-actions"><button class="button secondary" type="button" data-logout-cancel autofocus>Tidak</button><button class="button primary" type="submit"><x-icon name="log-out"/>Ya, Logout</button></div>
+    </form>
+</dialog>
+<dialog id="data-confirmation" class="logout-dialog" aria-labelledby="data-confirm-title" aria-describedby="data-confirm-description">
+    <div class="logout-dialog-heading"><x-icon name="alert"/><h2 id="data-confirm-title" data-confirm-title>Konfirmasi simpan data</h2></div>
+    <p id="data-confirm-description" class="muted" data-confirm-description>Apakah Anda yakin ingin menyimpan data ini?</p>
+    <p class="small muted" data-confirm-context></p>
+    <div class="logout-dialog-actions"><button class="button secondary" type="button" data-confirm-no autofocus>Tidak</button><button class="button primary" type="button" data-confirm-yes>Ya, Simpan</button></div>
+</dialog>
+@endauth
 </body>
 </html>

@@ -13,7 +13,7 @@ class SingleBranchMigrationTest extends TestCase
 
     public function test_second_branch_is_archived_and_removed_without_changing_operational_data_and_can_be_restored(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 7, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 8, '--force' => true])->assertSuccessful();
         foreach (['DISTRICT LAMA', '', null] as $i => $district) {
             DB::table('work_orders')->insert(['source_system' => 'BIMA', 'external_order_id' => '000'.$i, 'source_branch_name' => 'BRANCH UJI', 'source_district' => $district,
                 'source_bima_fields' => json_encode(['BRANCH' => 'BRANCH UJI', 'SN' => '000SN']), 'source_snapshot_hash' => str_repeat('a', 64),
@@ -42,7 +42,7 @@ class SingleBranchMigrationTest extends TestCase
                 $this->assertSame($old->source_district, $source['_legacy_source_district']);
             }
         }
-        $this->artisan('migrate:rollback', ['--step' => 7, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 8, '--force' => true])->assertSuccessful();
         $this->assertSame(['DISTRICT LAMA', '', null], DB::table('work_orders')->orderBy('id_work_orders')->pluck('source_district')->all());
         $this->artisan('migrate', ['--force' => true])->assertSuccessful();
         $this->assertDatabaseCount('work_orders', 3);

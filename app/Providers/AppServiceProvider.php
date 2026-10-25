@@ -46,5 +46,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('sync', fn (User $user) => $user->canSync());
         Gate::define('administer', fn (User $user) => $user->active && $user->role === Role::SuperAdmin);
         Gate::define('manage-master-data', fn (User $user) => $user->active && $user->role->managesMasterData());
+        Gate::define('priority-orders', fn (User $user) => $user->active && $user->role->priorityOrders());
     }
 }

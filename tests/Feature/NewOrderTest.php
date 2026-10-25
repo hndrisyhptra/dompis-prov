@@ -74,18 +74,22 @@ class NewOrderTest extends OloTestCase
         }
     }
 
-    public function test_reimport_moves_order_between_new_order_and_potential_ps_without_losing_progress(): void
+    public function test_reimport_moves_order_between_new_order_and_potential_ps_with_automatic_progress_and_preserved_history(): void
     {
         $this->pull([$this->row('MOVING', [14 => 'Review Order TSQ', 13 => 'STARTWORK'])]);
         $order = WorkOrder::firstOrFail();
-        $order->update(['progress_category' => 'SURVEY', 'last_progress_at' => now()]);
+        $branchActor = $this->user();
+        $branchActor->branches()->attach($this->branch);
+        $this->actingAs($branchActor)->patch(route('work-orders.progress', $order), ['revision' => 0, 'progress_category' => 'SURVEY', 'notes' => 'Survey awal oleh Branch.'])->assertSessionHasNoErrors();
         $this->pull([$this->row('MOVING', [14 => 'Review Order TSQ', 13 => 'STARTWORK'])]);
         $this->assertSame(1, WorkOrder::newOrder()->count());
         $this->pull([$this->row('MOVING', [14 => 'Activate Service', 13 => 'STARTWORK'])]);
         $this->assertSame(0, WorkOrder::newOrder()->count());
         $this->assertSame(1, WorkOrder::potentialPs()->count());
         $this->assertSame(1, WorkOrder::count());
-        $this->assertSame('SURVEY', $order->fresh()->progress_category);
+        $this->assertSame('INSTALASI', $order->fresh()->progress_category);
+        $this->assertSame('Survey awal oleh Branch.', $order->events()->where('revision', 1)->sole()->notes);
+        $this->assertSame('SURVEY', $order->events()->where('revision', 2)->sole()->old_progress_category);
         $this->actingAs($this->area)->get(route('area.dashboard'))->assertViewHas('summary', fn ($summary) => $summary['new_order'] === 0 && $summary['potential_ps'] === 1);
         $this->get(route('work-orders.index', ['queue' => 'new_order']))->assertOk()->assertViewHas('total', 0)->assertSee('Belum ada WO untuk filter ini');
         $this->actingAs($this->user())->get(route('branch.dashboard'))->assertOk()->assertViewHas('new_order', 0)->assertViewHas('potential_ps', 0);

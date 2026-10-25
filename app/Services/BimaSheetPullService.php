@@ -61,7 +61,7 @@ class BimaSheetPullService
             $logs[] = ['row_index' => $index, 'external_key' => isset($row[7]) && is_scalar($row[7]) ? mb_substr((string) $row[7], 0, 191) : null,
                 'action' => $action, 'error' => $error, 'field_changes' => $changes];
             if (in_array($action, ['new', 'changed', 'unchanged'], true)) {
-                $snapshot[(string) $index] = ['data' => $data, 'expected_hash' => $existing?->source_snapshot_hash, 'id_branches' => $branch];
+                $snapshot[(string) $index] = ['data' => $data, 'expected_hash' => $existing?->source_snapshot_hash, 'id_branches' => $branch, 'expected_id_branches' => $existing?->id_branches];
             }
         }
         DB::transaction(function () use ($job, $snapshot, $logs, $stats) {
@@ -92,7 +92,8 @@ class BimaSheetPullService
                 $existing = WorkOrder::where('source_system', 'BIMA')->where('no_tq_sc_id', $data['no_tq_sc_id'])->lockForUpdate()->first();
                 $branch = $this->resolver->resolve($data);
                 [$action, $error] = $this->resolver->classify($data, $existing, $branch);
-                if ($branch !== ($entry['id_branches'] ?? $entry['branch_id'] ?? null) || ($existing?->source_snapshot_hash !== $entry['expected_hash'] && $existing?->source_snapshot_hash !== $data['source_snapshot_hash'])) {
+                if ($branch !== ($entry['id_branches'] ?? $entry['branch_id'] ?? null) || ($existing?->source_snapshot_hash !== $entry['expected_hash'] && $existing?->source_snapshot_hash !== $data['source_snapshot_hash'])
+                    || (array_key_exists('expected_id_branches', $entry) && $existing?->id_branches !== $entry['expected_id_branches'] && $existing?->id_branches !== $branch)) {
                     $action = 'conflict';
                     $error = 'Data sumber/mapping berubah sesudah preview. Buat preview baru.';
                 }
@@ -104,7 +105,7 @@ class BimaSheetPullService
                         'metadata' => ['id_sync_jobs' => $job->getKey(), 'fields' => $log->field_changes]]);
                 }
                 if ($action === 'unchanged' && $existing) {
-                    app(BimaAutoCloseService::class)->apply($existing, $job->actor, $job->getKey());
+                    app(BimaAutoProgressService::class)->apply($existing, $job->actor, $job->getKey());
                 }
                 $log->update(['action' => $action, 'error' => $error, 'applied_at' => now()]);
             }, 3);

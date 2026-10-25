@@ -36,37 +36,13 @@
     @if($summary['unmapped'])<a href="{{ $listUrl(['queue' => 'unmapped']) }}"><strong>{{ $summary['unmapped'] }}</strong><span>Belum terpetakan<small>Perlu penetapan Branch oleh Area</small></span><span aria-hidden="true">→</span></a>@endif
 </div>
 @endif
-<section class="panel gap-top" aria-labelledby="progress-summary-title">
-    <div class="panel-head"><div><h2 id="progress-summary-title">Progress regional & Branch</h2><p class="small muted">Jawa–Bali · Distribusi kategori progress operasional</p></div><span class="badge">{{ count($groups) }} regional · {{ $branch_count }} Branch sesuai filter</span></div>
-    @if(! $summary['total'])<div class="notice area-empty-notice">Belum ada order dalam filter ini. Rekap menampilkan angka nol; periksa filter atau hasil import order.</div>@endif
-    <div class="table-wrap area-matrix-wrap" tabindex="0" aria-label="Rekap progress Branch, geser horizontal untuk melihat semua kolom"><table class="area-matrix"><caption class="sr-only">Kategori progress per Branch, subtotal regional dan grand total Jawa–Bali</caption>
-        <thead><tr><th rowspan="2" scope="col" class="branch-sticky">Regional / district</th><th colspan="6" scope="colgroup">Dalam proses</th><th colspan="2" scope="colgroup">Penutupan</th><th rowspan="2" scope="col">PS hari ini</th><th rowspan="2" scope="col">Total order</th></tr><tr>@foreach(array_slice($columns, 0, 8, true) as $key => $label)<th scope="col">{{ $label }}</th>@endforeach</tr></thead>
-        <tbody>
-        @forelse($groups as $group)
-            <tr class="region-band"><th colspan="11" scope="rowgroup">{{ $group['name'] }} <span class="small muted">· {{ count($group['rows']) }} Branch</span></th></tr>
-            @foreach($group['rows'] as $row)
-            <tr><th scope="row" class="branch-sticky">{{ $row['name'] }} @if($row['inactive'])<span class="small muted">· nonaktif</span>@endif</th>
-                @foreach($columns as $key => $label)@php
-                    $extra = $row['branch_id'] ? ['branch' => $row['branch_id']] : ['queue' => 'unmapped'];
-                    if ($key === 'ps_today') $extra['queue'] = 'ps_today';
-                    elseif ($key !== 'total') $extra['bucket'] = $key;
-                @endphp
-                <td class="numeric {{ $key === 'ps_today' ? 'ps-cell' : '' }} {{ $key === 'total' ? 'total-cell' : '' }}">@if($row['counts'][$key] && $row['branch_id'])<a href="{{ $listUrl($extra) }}" aria-label="{{ $row['name'] }} · {{ $label }} · {{ $row['counts'][$key] }} order">{{ number_format($row['counts'][$key]) }}</a>@else<span class="{{ $row['counts'][$key] ? '' : 'zero-count' }}">{{ number_format($row['counts'][$key]) }}</span>@endif</td>
-                @endforeach
-            </tr>
-            @endforeach
-            <tr class="regional-total"><th scope="row" class="branch-sticky">Total {{ $group['name'] }}</th>@foreach($columns as $key => $label)<td class="numeric">{{ number_format($group['totals'][$key]) }}</td>@endforeach</tr>
-        @empty<tr><td colspan="11"><div class="empty"><h3>Tidak ada Branch sesuai filter</h3><p>Ubah pilihan regional atau Branch untuk melihat rekap.</p></div></td></tr>@endforelse
-        </tbody><tfoot><tr><th scope="row" class="branch-sticky">Grand total Jawa–Bali</th>@foreach($columns as $key => $label)<td class="numeric">{{ number_format($grand[$key]) }}</td>@endforeach</tr></tfoot>
-    </table></div>
-    <div class="area-table-note small muted"><strong>Proses BIMA:</strong> OGP BIMA + RESUBMIT AO. <strong>Lainnya:</strong> progress belum diisi, PERIZINAN, KONFIRMASI PIC, DELIVERY MATERIAL, HOLD, BUTUH QE, INSTALASI, CLOSE ON DESK, dan status lama lainnya. Setiap order masuk tepat satu kelompok; PS hari ini adalah bagian dari Close.</div>
-</section>
+@include('area.progress-matrix')
 @include('owner-groups.summary', ['ownerScopeFilters' => $scopeFilters])
 @include('work-orders.order-month-summary', ['monthScopeFilters' => $scopeFilters])
 <section class="panel gap-top" aria-labelledby="type-recap-title"><div class="panel-head"><div><h2 id="type-recap-title">Rekap jenis pekerjaan</h2><p class="small muted">Volume order dan penyelesaian sesuai filter aktif</p></div><span class="badge">{{ $summary['incoming_today'] }} order hari ini</span></div>
     <div class="table-wrap" tabindex="0" aria-label="Rekap jenis pekerjaan, geser horizontal"><table class="area-type-table"><thead><tr><th scope="col" class="branch-sticky">Keterangan</th>@foreach($recap as $type => $values)<th scope="col">{{ $type }}</th>@endforeach<th scope="col">Total</th></tr></thead><tbody>
     @foreach(['total' => 'WO total', 'incoming_today' => 'WO hari ini', 'ps_total' => 'Completed total', 'ps_today' => 'Completed hari ini', 'outstanding' => 'Order open'] as $metric => $label)
-        <tr><th scope="row" class="branch-sticky">{{ $label }}</th>@foreach($recap as $type => $values)<td class="numeric">@if($values[$metric])<a href="{{ $listUrl(['jenis_pekerjaan' => $type, 'queue' => match($metric) {'incoming_today' => 'today', 'ps_total' => 'complete', 'ps_today' => 'ps_today', 'outstanding' => 'outstanding', default => 'all'}]) }}">{{ number_format($values[$metric]) }}</a>@else<span class="zero-count">0</span>@endif</td>@endforeach<td class="numeric total-cell">{{ number_format($summary[$metric]) }}</td></tr>
+        <tr><th scope="row" class="branch-sticky">{{ $label }}</th>@foreach($recap as $type => $values)<td class="numeric"><x-order-count :count="$values[$metric]" :filters="array_replace($scopeFilters, ['jenis_pekerjaan' => $type, 'queue' => match($metric) {'incoming_today' => 'today', 'ps_total' => 'complete', 'ps_today' => 'ps_today', 'outstanding' => 'outstanding', default => 'all'}])" :label="$type.' · '.$label"/></td>@endforeach<td class="numeric total-cell"><x-order-count :count="$summary[$metric]" :filters="array_replace($scopeFilters, ['queue' => match($metric) {'incoming_today' => 'today', 'ps_total' => 'complete', 'ps_today' => 'ps_today', 'outstanding' => 'outstanding', default => 'all'}])" :label="'Total · '.$label"/></td></tr>
     @endforeach
     </tbody></table></div>
     <div class="area-table-note small muted">Completed / PS = progress order <strong>CLOSE</strong> dan <strong>status_order memenuhi daftar 14 kombinasi PS</strong>. Close hanya berarti instalasi lapangan selesai. CLOSE ON DESK dan status BIMA di luar daftar tidak dihitung PS.</div>
@@ -85,6 +61,7 @@
             @if($loop->first || $loop->last || ($point['day'] % 5 === 0 && count($series) - $point['day'] >= 3))<text x="{{ $x }}" y="244" text-anchor="middle" class="chart-label">{{ $point['label'] }}</text>@endif
         @endforeach
     </svg></div><p class="small muted" data-chart-caption aria-live="polite">Pilih titik grafik untuk melihat perolehan harian. Tanggal setelah hari ini belum dihitung.</p>
-    <details class="gap-top"><summary>Lihat data PS harian</summary><div class="table-wrap gap-top"><table><thead><tr><th scope="col">Tanggal PS</th><th scope="col">Jumlah PS</th></tr></thead><tbody>@foreach($series as $point)<tr><td>{{ $point['date'] }}</td><td>{{ $point['future'] ? 'Belum berjalan' : $point['count'] }}</td></tr>@endforeach</tbody></table></div></details>
+    <details class="gap-top"><summary>Lihat data PS harian</summary><div class="table-wrap gap-top"><table><thead><tr><th scope="col">Tanggal PS</th><th scope="col">Jumlah PS</th></tr></thead><tbody>@foreach($series as $point)<tr><td>{{ $point['date'] }}</td><td>@if($point['future'])Belum berjalan@else<x-order-count :count="$point['count']" :filters="array_replace($scopeFilters, ['ps_date' => $point['date']])" :label="'PS · '.$point['label']"/>@endif</td></tr>@endforeach</tbody></table></div></details>
 </div></section>
+@include('dashboard.order-dialog')
 @endsection

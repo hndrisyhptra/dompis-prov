@@ -65,14 +65,15 @@ class BimaPullTest extends OloTestCase
         $this->assertDatabaseCount('work_orders', 1);
     }
 
-    public function test_branch_change_unknown_mapping_and_stale_source_become_conflicts(): void
+    public function test_branch_change_follows_latest_source_while_unknown_mapping_and_stale_source_still_conflict(): void
     {
         $this->pull([$this->row()]);
         $other = Branch::create(['code' => 'OTHER', 'name' => 'Other']);
         BranchMapping::create(['bima_branch' => 'OTHER', 'id_branches' => $other->getKey()]);
         $job = $this->pull([$this->row(changes: [5 => 'OTHER']), $this->row('NEW', [5 => 'UNKNOWN'])]);
-        $this->assertSame(2, $job->stats['conflict']);
-        $this->assertSame($this->branch->getKey(), WorkOrder::first()->id_branches);
+        $this->assertSame(1, $job->stats['conflict']);
+        $this->assertSame(1, $job->stats['updated']);
+        $this->assertSame($other->getKey(), WorkOrder::first()->id_branches);
         $stale = $this->preview([$this->row(changes: [13 => 'CLOSE'])]);
         $this->pull([$this->row(changes: [13 => 'CHANGED AGAIN'])]);
         app(BimaSheetPullService::class)->pull($stale);

@@ -16,7 +16,7 @@ class BranchProgressMigrationTest extends TestCase
 
     public function test_legacy_data_is_preserved_only_evidenced_completion_dates_are_backfilled_and_rollback_works(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 9, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 10, '--force' => true])->assertSuccessful();
         $user = User::factory()->create();
         $branch = Branch::create(['code' => 'SAFE', 'name' => 'Branch Uji']);
         foreach (['NEW', 'SURVEY', 'COMPLETED', 'COMPLETED', 'CANCELLED', 'FIELD_DONE'] as $index => $status) {
@@ -50,7 +50,7 @@ class BranchProgressMigrationTest extends TestCase
         } catch (QueryException) {
             $this->assertDatabaseCount('wo_issue_notes', 1);
         }
-        $this->artisan('migrate:rollback', ['--step' => 9, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 10, '--force' => true])->assertSuccessful();
         $this->assertFalse(Schema::hasTable('wo_issue_notes'));
         $this->assertFalse(Schema::hasColumn('work_orders', 'progress_category'));
         foreach ($before as $table => $rows) {

@@ -9,13 +9,13 @@ class ProgressSummary
 {
     public const GROUPS = [
         'survey' => ['SURVEY'], 'bima' => ['OGP BIMA', 'RESUBMIT AO'],
-        'cndc' => ['CNDC'], 'kendala' => ['KENDALA', 'HOLD', 'BUTUH QE', 'PERIZINAN'], 'jt' => ['JT'],
+        'instalasi' => ['INSTALASI'], 'kendala' => ['KENDALA', 'HOLD', 'BUTUH QE', 'PERIZINAN'], 'jt' => ['JT'],
         'cancel' => ['CANCEL'], 'close' => ['CLOSE'],
     ];
 
-    public const LABELS = ['survey' => 'Survey', 'bima' => 'Proses BIMA', 'cndc' => 'CNDC',
-        'kendala' => 'Kendala', 'jt' => 'Proses JT', 'other' => 'Lainnya',
-        'cancel' => 'Cancel', 'close' => 'Close', 'ps_today' => 'PS hari ini', 'total' => 'Total order'];
+    public const LABELS = ['survey' => 'Survey', 'bima' => 'OGP BIMA', 'instalasi' => 'Instalasi',
+        'kendala' => 'Kendala', 'jt' => 'JT', 'other' => 'Lainnya',
+        'cancel' => 'Cancel', 'close' => 'CLOSE', 'incoming_today' => 'New Order Hari ini', 'ps_today' => 'PS Hari ini', 'total' => 'Total Order'];
 
     public const EXPRESSION = "COALESCE(NULLIF(UPPER(TRIM(progress_category)), ''), CASE operational_status WHEN 'COMPLETED' THEN 'CLOSE' WHEN 'CANCELLED' THEN 'CANCEL' WHEN 'BLOCKED' THEN 'KENDALA' ELSE operational_status END)";
 
@@ -35,6 +35,9 @@ class ProgressSummary
 
     public static function filter(Builder $query, string $bucket): Builder
     {
+        if ($bucket === 'cndc') {
+            return $query->whereRaw(self::EXPRESSION.' = ?', ['CNDC']);
+        }
         if ($bucket === 'other') {
             $values = array_merge(...array_values(self::GROUPS));
 

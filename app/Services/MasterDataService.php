@@ -10,6 +10,7 @@ use App\Models\Region;
 use App\Models\ServiceArea;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderPriority;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -139,7 +140,7 @@ class MasterDataService
             $definition = $this->definition($type);
             $record = $definition['model']::lockForUpdate()->findOrFail($id);
             abort_unless(hash_equals($this->version($record), $version), 409, 'Data sudah berubah. Periksa kembali sebelum menghapus.');
-            if ($this->usage($type, $record)) {
+            if ($this->usage($type, $record) || ($type === 'branches' && WorkOrderPriority::where('id_branches', $id)->exists())) {
                 throw ValidationException::withMessages(['delete' => 'Data masih digunakan dan tidak dapat dihapus. Periksa daftar referensi yang terhubung.']);
             }
             $before = $record->getAttributes();

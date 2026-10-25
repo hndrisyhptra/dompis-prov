@@ -57,7 +57,7 @@ class ExcelWorkOrderImportService
                     $data['source_snapshot_hash'] = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
                     [$action,$error] = $this->resolver->classify($data, $existing, $branch);
                     $fields = array_keys(array_filter($data, fn ($value, $key) => ! $existing || $existing->getAttribute($key) != $value, ARRAY_FILTER_USE_BOTH));
-                    $prepared = ['data' => $data, 'expected_hash' => $existing?->source_snapshot_hash, 'id_branches' => $branch];
+                    $prepared = ['data' => $data, 'expected_hash' => $existing?->source_snapshot_hash, 'id_branches' => $branch, 'expected_id_branches' => $existing?->id_branches];
                 } catch (InvalidArgumentException $exception) {
                     $action = 'rejected';
                     $error = $exception->getMessage();
@@ -89,7 +89,8 @@ class ExcelWorkOrderImportService
                 $existing = WorkOrder::where('source_system', 'BIMA')->where('no_tq_sc_id', $data['no_tq_sc_id'])->lockForUpdate()->first();
                 $branch = $this->resolver->resolve($data + ['branch' => $existing?->branch ?? '', 'sto' => $existing?->sto ?? '']);
                 [$action,$error] = $this->resolver->classify($data, $existing, $branch);
-                if ($branch !== $prepared['id_branches'] || ($existing?->source_snapshot_hash !== $prepared['expected_hash'] && $existing?->source_snapshot_hash !== $data['source_snapshot_hash'])) {
+                if ($branch !== $prepared['id_branches'] || ($existing?->source_snapshot_hash !== $prepared['expected_hash'] && $existing?->source_snapshot_hash !== $data['source_snapshot_hash'])
+                    || (array_key_exists('expected_id_branches', $prepared) && $existing?->id_branches !== $prepared['expected_id_branches'] && $existing?->id_branches !== $branch)) {
                     $action = 'conflict';
                     $error = 'Data sumber atau mapping berubah sesudah preview. Upload dan preview ulang.';
                 }
@@ -101,7 +102,7 @@ class ExcelWorkOrderImportService
                         'metadata' => ['id_sync_jobs' => $job->getKey(), 'fields' => $log->field_changes]]);
                 }
                 if ($action === 'unchanged' && $existing) {
-                    app(BimaAutoCloseService::class)->apply($existing, $job->actor, $job->getKey());
+                    app(BimaAutoProgressService::class)->apply($existing, $job->actor, $job->getKey());
                 }
                 $log->update(['action' => $action, 'error' => $error, 'applied_at' => now(), 'payload' => null]);
             }, 3);

@@ -57,6 +57,7 @@ class AreaAnalyticsService
             if ($order->tgl_order?->toDateString() === $today->toDateString()) {
                 $summary['incoming_today']++;
                 $types[$type]['incoming_today']++;
+                $rows[$branchKey]['counts']['incoming_today']++;
             }
             if (! $order->terminal() && ! $order->branch_completed_at) {
                 $summary['outstanding']++;

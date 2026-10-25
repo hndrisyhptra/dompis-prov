@@ -8,6 +8,11 @@ use App\Models\WorkOrder;
 
 class WorkOrderPolicy
 {
+    public function prioritize(User $user, WorkOrder $workOrder): bool
+    {
+        return $user->active && $user->role->priorityOrders() && $this->view($user, $workOrder);
+    }
+
     public function view(User $user, WorkOrder $workOrder): bool
     {
         return WorkOrder::visibleTo($user)->whereKey($workOrder->getKey())->exists();

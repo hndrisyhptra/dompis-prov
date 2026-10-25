@@ -17,7 +17,7 @@ class BranchRegionMigrationTest extends TestCase
 
     public function test_backfill_matches_names_and_codes_without_guessing_or_changing_existing_data_and_rolls_back(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 10, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 11, '--force' => true])->assertSuccessful();
         $user = User::factory()->create();
         foreach (['REGION JATIM', ' jatengDIY ', 'REGION BALNUS', 'UNKNOWN', null] as $offset => $label) {
             DB::table('branches')->insert(['code' => 'B'.$offset, 'name' => 'Branch '.$offset, 'regional' => $label, 'created_at' => '2026-10-01 00:00:00', 'updated_at' => '2026-10-02 00:00:00']);
@@ -43,7 +43,7 @@ class BranchRegionMigrationTest extends TestCase
         } catch (QueryException) {
             $this->assertNotNull(Region::find(1));
         }
-        $this->artisan('migrate:rollback', ['--step' => 10, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 11, '--force' => true])->assertSuccessful();
         $this->assertFalse(Schema::hasColumn('branches', 'region_id'));
         $this->assertFalse(Schema::hasColumn('users', 'management_revision'));
         $this->assertSame($before, DB::table('branches')->orderBy('id_branches')->get()->map(fn ($row) => (array) $row)->all());
