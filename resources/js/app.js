@@ -2,10 +2,12 @@ import { setupJtBoq } from './jt-boq';
 import { setupPasswordVisibility } from './password-visibility';
 import { setupMaterialTemplate } from './material-template';
 import { setupDashboardTables } from './dashboard-tables';
+import { setupDashboardExports } from './dashboard-exports';
 import { setupFormConfirmation } from './form-confirmation';
 
 setupFormConfirmation(document, message => window.confirm(message));
 setupDashboardTables(document);
+setupDashboardExports(document);
 setupJtBoq(document);
 setupPasswordVisibility(document);
 setupMaterialTemplate(document);

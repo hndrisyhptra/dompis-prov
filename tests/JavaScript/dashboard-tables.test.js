@@ -15,7 +15,7 @@ function fixture(supported = true) {
     });
     const bodies = [{ hidden: false }, { hidden: false }];
     const buttons = bodies.map((_, i) => Object.assign(new EventTarget(), { attributes: { 'aria-controls': `region-${i}` }, getAttribute(k) { return this.attributes[k]; }, setAttribute(k, v) { this.attributes[k] = v; } }));
-    root.querySelectorAll = () => buttons;
+    root.querySelectorAll = selector => selector === '[data-region-toggle]' ? buttons : [];
     root.querySelector = () => dialog;
     root.getElementById = id => bodies[Number(id.split('-')[1])];
     const requests = [];
@@ -35,6 +35,22 @@ function fixture(supported = true) {
     return { root, content, title, fullList, dialog, buttons, bodies, requests, click, link };
 }
 const settle = () => new Promise(resolve => setImmediate(resolve));
+test('expand all controls affect only their own table and remain synchronized with individual regions', async () => {
+    const bodies = [{ hidden: false }, { hidden: false }, { hidden: false }];
+    const buttons = bodies.map((_, index) => Object.assign(new EventTarget(), { attrs: { 'aria-controls': String(index) }, getAttribute(key) { return this.attrs[key]; }, setAttribute(key, value) { this.attrs[key] = value; } }));
+    const controls = [[buttons[0], buttons[1]], [buttons[2]]].map(group => Object.assign(new EventTarget(), { attrs: { 'aria-pressed': 'false' }, closest: () => ({ querySelectorAll: () => group }), getAttribute(key) { return this.attrs[key]; }, setAttribute(key, value) { this.attrs[key] = value; } }));
+    setupDashboardTables({ querySelectorAll: selector => selector === '[data-region-expand]' ? controls : buttons, querySelector: () => null, getElementById: id => bodies[Number(id)] }, undefined, 'https://olo.test/dashboard');
+    controls[0].dispatchEvent(new Event('click'));
+    assert.deepEqual(bodies.map(body => body.hidden), [false, false, true]);
+    assert.equal(controls[0].textContent, 'Tutup semua');
+    buttons[0].dispatchEvent(new Event('click'));
+    await settle();
+    assert.equal(controls[0].textContent, 'Buka semua');
+    controls[1].dispatchEvent(new Event('click'));
+    assert.deepEqual(bodies.map(body => body.hidden), [true, false, false]);
+    controls[1].dispatchEvent(new Event('click'));
+    assert.equal(bodies[2].hidden, true);
+});
 test('SVG line chart points open the same scoped dialog with SVGAnimatedString href', async () => {
     const f = fixture();
     const href = 'https://olo.test/work-orders?order_month=2026-07&queue=complete&branch=4';

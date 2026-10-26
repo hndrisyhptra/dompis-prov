@@ -6,6 +6,7 @@ use App\Http\Controllers\BoqController;
 use App\Http\Controllers\BranchDashboardController;
 use App\Http\Controllers\BranchMappingController;
 use App\Http\Controllers\BranchProgressController;
+use App\Http\Controllers\DashboardExportController;
 use App\Http\Controllers\MasterDataController;
 use App\Http\Controllers\MaterialReportController;
 use App\Http\Controllers\PriorityOrderController;
@@ -38,6 +39,9 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
         Route::delete('/{masterType}/{record}', [MasterDataController::class, 'destroy'])->whereNumber('record')->name('destroy');
     });
     Route::get('/dashboard', [AreaDashboardController::class, 'index'])->middleware('can:area-dashboard')->name('area.dashboard');
+    Route::get('/dashboard/exports/{table}', [DashboardExportController::class, 'table'])->middleware(['can:area-dashboard', 'throttle:20,1'])->name('area.dashboard.export');
+    Route::get('/branch/dashboard/exports/{table}', [DashboardExportController::class, 'table'])->middleware('throttle:20,1')->name('branch.dashboard.export');
+    Route::get('/dashboard/orders/export', [DashboardExportController::class, 'orders'])->middleware('throttle:20,1')->name('dashboard.orders.export');
     Route::get('/revenue', [RevenueOverviewController::class, 'index'])->middleware('can:revenue-overview')->name('revenue.index');
     Route::get('/branch/dashboard', [BranchDashboardController::class, 'index'])->name('branch.dashboard');
     Route::get('/branch/material', fn () => redirect()->route('materials.index'))->name('branch.material');

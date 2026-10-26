@@ -1,7 +1,7 @@
 <section class="panel gap-top" aria-labelledby="owner-group-title">
-    <div class="panel-head"><div><h2 id="owner-group-title">Distribusi Owner Group</h2><p class="small muted">Klik Region untuk melihat Branch dan kelompok penanggung jawab.</p></div><span class="badge">{{ number_format($ownerGroups['total']) }} order</span></div>
+    <div class="panel-head dashboard-table-heading"><div><h2 id="owner-group-title">Distribusi Owner Group</h2><p class="small muted">{{ number_format($ownerGroups['total']) }} order sesuai filter · Klik Region untuk melihat Branch.</p></div><div class="dashboard-table-tools"><button type="button" class="button secondary compact-button" data-region-expand aria-pressed="false" title="Buka atau tutup semua Region pada tabel Owner Group">Buka semua</button><x-dashboard-export table="owners" label="Distribusi Owner Group" :filters="$filters"/></div></div>
     @if(!$ownerGroups['has_mapping'])<div class="notice owner-group-note">Referensi mapping Owner Group belum tersedia. Menunggu file Excel mapping; order tetap dihitung pada kolom Belum dipetakan.</div>@endif
-    <div class="table-wrap" tabindex="0" aria-label="Rekap Owner Group per Region dan Branch, geser horizontal untuk melihat semua kelompok"><table class="owner-group-matrix">
+    <div class="table-wrap dashboard-table-scroll" tabindex="0" aria-label="Rekap Owner Group per Region dan Branch, geser horizontal untuk melihat semua kelompok"><table class="owner-group-matrix dashboard-table">
         <caption class="sr-only">Distribusi order berdasarkan Owner Group per Region dan Branch beserta Grand Total</caption>
         <thead><tr><th scope="col" class="branch-sticky">Region / Branch</th>@foreach($ownerGroups['groups'] as $group)<th scope="col">{{ $group }}</th>@endforeach<th scope="col">Belum dipetakan</th><th scope="col">Grand Total</th></tr></thead>
         @forelse($ownerGroups['regions'] as $region)

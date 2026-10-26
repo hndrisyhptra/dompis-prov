@@ -1,5 +1,5 @@
 <section class="panel gap-top" aria-labelledby="order-month-title">
-    <div class="panel-head"><div><h2 id="order-month-title">Penyelesaian berdasarkan bulan order</h2><p class="small muted">Kelompok berdasarkan TGL ORDER · Status penyelesaian terkini sesuai filter aktif</p></div></div>
+    <div class="panel-head dashboard-table-heading"><div><h2 id="order-month-title">Penyelesaian berdasarkan bulan order</h2><p class="small muted">Kelompok berdasarkan TGL ORDER · Status penyelesaian terkini sesuai filter aktif</p></div><div class="dashboard-table-tools"><x-dashboard-export table="months" label="Penyelesaian berdasarkan bulan order" :filters="$filters"/></div></div>
     <div class="panel-body">
     @if(count($orderMonths['rows']))
     @php
@@ -26,8 +26,8 @@
     </svg></div><p class="small muted">Pilih titik grafik untuk membuka daftar order sesuai bulan dan kategori.</p>
     @else<div class="empty"><h3>Belum ada order bertanggal</h3><p>Grafik terisi setelah TGL ORDER tersedia pada cakupan ini.</p></div>@endif
     <details class="gap-top"><summary>Lihat data bulanan</summary>
-    <div class="table-wrap" tabindex="0" aria-label="Rekap penyelesaian per bulan order, geser untuk melihat seluruh kolom"><table class="area-type-table order-month-table"><thead><tr><th scope="col">Bulan order</th><th scope="col">Total WO</th><th scope="col">Progress CLOSE</th><th scope="col">Sudah PS</th><th scope="col">Outstanding</th></tr></thead><tbody>
-    @forelse($orderMonths['rows'] as $row)<tr><th scope="row">{{ $row['label'] }}</th>
+    <div class="table-wrap dashboard-table-scroll" tabindex="0" aria-label="Rekap penyelesaian per bulan order, geser untuk melihat seluruh kolom"><table class="area-type-table order-month-table dashboard-table"><thead><tr><th scope="col" class="branch-sticky">Bulan order</th><th scope="col">Total WO</th><th scope="col">Progress CLOSE</th><th scope="col">Sudah PS</th><th scope="col">Outstanding</th></tr></thead><tbody>
+    @forelse($orderMonths['rows'] as $row)<tr><th scope="row" class="branch-sticky">{{ $row['label'] }}</th>
         @foreach(['total'=>'all', 'closed'=>'closed', 'ps'=>'complete', 'outstanding'=>'outstanding'] as $metric=>$queue)
         <td class="numeric"><x-order-count :count="$row[$metric]" :filters="array_replace($monthScopeFilters, ['order_month'=>$row['month'], 'queue'=>$queue])" :label="$row['label'].' · '.['total'=>'Total WO', 'closed'=>'Progress CLOSE', 'ps'=>'Sudah PS', 'outstanding'=>'Outstanding'][$metric]"/></td>
         @endforeach

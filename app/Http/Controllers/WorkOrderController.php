@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ProgressCategory;
-use App\Models\MappingOwnergrup;
+use App\Http\Requests\WorkOrderListRequest;
 use App\Models\Region;
 use App\Models\WorkOrder;
 use App\Services\Boq\BoqImportService;
 use App\Services\BranchOrderScope;
+use App\Services\WorkOrderListQuery;
 use App\Services\WorkOrderQueueService;
-use App\Support\ProgressSummary;
 use App\Support\WorkOrderActions;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -18,31 +17,13 @@ use Illuminate\Validation\Rule;
 
 class WorkOrderController extends Controller
 {
-    public function index(Request $request, BranchOrderScope $scope, WorkOrderQueueService $queues)
+    public function index(WorkOrderListRequest $request, BranchOrderScope $scope, WorkOrderQueueService $queues, WorkOrderListQuery $list)
     {
-        if (! $request->has('jenis_pekerjaan') && $request->has('job_type')) {
-            $request->merge(['jenis_pekerjaan' => $request->input('job_type')]);
-        }
-        $filters = $request->validate(['q' => 'nullable|string|max:191', 'jenis_pekerjaan' => 'nullable|string|max:80', 'status' => 'nullable|string|max:80', 'branch' => 'nullable|integer',
-            'region' => 'nullable|integer|exists:regions,id_regions', 'service' => 'nullable|string|max:255',
-            'order_month' => 'nullable|date_format:Y-m|after_or_equal:2000-01|before_or_equal:2100-12',
-            'owner_group' => ['nullable', Rule::in([...MappingOwnergrup::GROUPS, 'unmapped'])],
-            'bucket' => ['nullable', Rule::in([...array_keys(ProgressSummary::GROUPS), 'other', 'cndc'])],
-            'without_region' => 'nullable|boolean', 'unassigned' => 'nullable|boolean', 'modal' => 'nullable|boolean',
-            'ps_date' => 'nullable|date_format:Y-m-d|after_or_equal:2000-01-01|before_or_equal:2100-12-31',
-            'queue' => ['nullable', Rule::in(['all', 'today', 'ps_today', 'complete', 'closed', 'outstanding', 'issues', 'unupdated', 'waiting_bima', 'missing_ps_date', 'future_ps_date', 'unmapped', 'potential_ps', 'new_order'])]]);
+        $filters = $request->validated();
         $base = $scope->orders($request->user(), $filters);
-        $query = (clone $base)->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($request->user())])->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')])
-            ->when($filters['q'] ?? null, fn ($q, $value) => $q->where(fn ($q) => $q->where('no_tq_sc_id', 'like', '%'.$value.'%')->orWhere('sid', 'like', '%'.$value.'%')->orWhere('nama_olo', 'like', '%'.$value.'%')))
-            ->when($filters['status'] ?? null, fn ($q, $value) => $q->where(ProgressCategory::tryFrom($value) ? 'progress_category' : 'operational_status', $value));
+        $query = $list->query($request->user(), $filters)->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($request->user())])->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')]);
         $queue = $filters['queue'] ?? 'all';
-        if (! empty($filters['bucket'])) {
-            ProgressSummary::filter($query, $filters['bucket']);
-        }
         $today = CarbonImmutable::now('Asia/Jakarta')->startOfDay();
-        if (! empty($filters['ps_date'])) {
-            $query->psOnDate($filters['ps_date']);
-        }
         if ($request->boolean('modal')) {
             // Apply the same queue before pagination; never return an unscoped dashboard list.
             $queues->apply($query, $queue, $today);

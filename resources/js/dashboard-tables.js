@@ -1,4 +1,21 @@
 export function setupDashboardTables(root, fetcher = fetch, baseUrl = location.href) {
+    root.querySelectorAll('[data-region-expand]').forEach(control => {
+        const buttons = control.closest('section').querySelectorAll('[data-region-toggle]');
+        const synchronize = () => {
+            const allOpen = [...buttons].length > 0 && [...buttons].every(button => button.getAttribute('aria-expanded') === 'true');
+            control.textContent = allOpen ? 'Tutup semua' : 'Buka semua';
+            control.setAttribute('aria-pressed', String(allOpen));
+        };
+        control.addEventListener('click', () => {
+            const open = control.getAttribute('aria-pressed') !== 'true';
+            buttons.forEach(button => {
+                const body = root.getElementById(button.getAttribute('aria-controls'));
+                if (body) { body.hidden = !open; button.setAttribute('aria-expanded', String(open)); }
+            });
+            synchronize();
+        });
+        buttons.forEach(button => button.addEventListener('click', () => queueMicrotask(synchronize)));
+    });
     root.querySelectorAll('[data-region-toggle]').forEach(button => {
         const body = root.getElementById(button.getAttribute('aria-controls'));
         if (!body) return;

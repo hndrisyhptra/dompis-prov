@@ -2,20 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DashboardRequest;
 use App\Models\WorkOrder;
 use App\Services\BranchAnalyticsService;
 use App\Services\BranchOrderScope;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class BranchDashboardController extends Controller
 {
-    public function index(Request $request, BranchAnalyticsService $analytics, BranchOrderScope $scope)
+    public function index(DashboardRequest $request, BranchAnalyticsService $analytics, BranchOrderScope $scope)
     {
-        if (! $request->has('jenis_pekerjaan') && $request->has('job_type')) {
-            $request->merge(['jenis_pekerjaan' => $request->input('job_type')]);
-        }
-        $filters = $request->validate(['branch' => 'nullable|integer', 'jenis_pekerjaan' => 'nullable|string|max:80', 'days' => ['nullable', Rule::in([7, 14, 30])]]);
+        $filters = $request->validated();
 
         return view('branch.dashboard', $analytics->summary($request->user(), $filters) + [
             'branches' => $scope->branches($request->user()), 'filters' => $filters,
