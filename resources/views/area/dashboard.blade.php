@@ -39,7 +39,7 @@
 @include('area.progress-matrix')
 @include('owner-groups.summary', ['ownerScopeFilters' => $scopeFilters])
 @include('work-orders.order-month-summary', ['monthScopeFilters' => $scopeFilters])
-<section class="panel gap-top" aria-labelledby="type-recap-title"><div class="panel-head dashboard-table-heading"><div><h2 id="type-recap-title">Rekap jenis pekerjaan</h2><p class="small muted">Volume order dan penyelesaian sesuai filter aktif</p></div><div class="dashboard-table-tools"><x-dashboard-export table="types" label="Rekap jenis pekerjaan" :filters="$filters"/></div></div>
+<section class="panel gap-top" aria-labelledby="type-recap-title"><div class="panel-head dashboard-table-heading"><div><h2 id="type-recap-title">Rekap jenis pekerjaan</h2><p class="small muted">Volume order dan penyelesaian sesuai filter aktif</p></div></div>
     <div class="table-wrap dashboard-table-scroll" tabindex="0" aria-label="Rekap jenis pekerjaan, geser horizontal"><table class="area-type-table dashboard-table"><thead><tr><th scope="col" class="branch-sticky">Keterangan</th>@foreach($recap as $type => $values)<th scope="col">{{ $type }}</th>@endforeach<th scope="col">Total</th></tr></thead><tbody>
     @foreach(['total' => 'WO total', 'incoming_today' => 'WO hari ini', 'ps_total' => 'Completed total', 'ps_today' => 'Completed hari ini', 'outstanding' => 'Order open'] as $metric => $label)
         <tr><th scope="row" class="branch-sticky">{{ $label }}</th>@foreach($recap as $type => $values)<td class="numeric"><x-order-count :count="$values[$metric]" :filters="array_replace($scopeFilters, ['jenis_pekerjaan' => $type, 'queue' => match($metric) {'incoming_today' => 'today', 'ps_total' => 'complete', 'ps_today' => 'ps_today', 'outstanding' => 'outstanding', default => 'all'}])" :label="$type.' · '.$label"/></td>@endforeach<td class="numeric total-cell"><x-order-count :count="$summary[$metric]" :filters="array_replace($scopeFilters, ['queue' => match($metric) {'incoming_today' => 'today', 'ps_total' => 'complete', 'ps_today' => 'ps_today', 'outstanding' => 'outstanding', default => 'all'}])" :label="'Total · '.$label"/></td></tr>
@@ -47,7 +47,7 @@
     </tbody></table></div>
     <div class="area-table-note small muted">Completed / PS = progress order <strong>CLOSE</strong> dan <strong>status_order memenuhi daftar 14 kombinasi PS</strong>. Close hanya berarti instalasi lapangan selesai. CLOSE ON DESK dan status BIMA di luar daftar tidak dihitung PS.</div>
 </section>
-<section class="panel gap-top" aria-labelledby="area-chart-title"><div class="panel-head dashboard-table-heading"><div><h2 id="area-chart-title">Perolehan PS harian</h2><p class="small muted">{{ $month->locale('id')->translatedFormat('F Y') }} · {{ number_format($month_ps) }} PS · berdasarkan TGL PS BIMA</p></div><div class="dashboard-table-tools"><x-dashboard-export table="daily" label="Perolehan PS harian" :filters="$filters"/></div></div><div class="panel-body">
+<section class="panel gap-top" aria-labelledby="area-chart-title"><div class="panel-head dashboard-table-heading"><div><h2 id="area-chart-title">Perolehan PS harian</h2><p class="small muted">{{ $month->locale('id')->translatedFormat('F Y') }} · {{ number_format($month_ps) }} PS · berdasarkan TGL PS BIMA</p></div></div><div class="panel-body">
     @if(! $month_ps)<p class="small muted area-chart-empty">Belum ada perolehan PS dalam bulan ini. Grafik akan terisi setelah kedua status dan TGL PS BIMA memenuhi ketentuan.</p>@endif
     @php
         $step = 910 / max(1, count($series) - 1);

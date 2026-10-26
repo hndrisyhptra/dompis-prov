@@ -1,5 +1,7 @@
 # Tabel dashboard dan unduhan Excel
 
+**Riwayat implementasi, sudah dikoreksi pemilik:** tombol dan endpoint ekspor dashboard dihapus sesuai arahan terbaru. Download Excel hanya pada Work Order dan Order Prioritas. Perapian tabel dashboard tetap. Panduan/manifest terkini: [ORDER_LIST_EXPORTS.md](ORDER_LIST_EXPORTS.md). Bagian di bawah merekam tahap sebelumnya, bukan requirement aktif untuk penempatan tombol.
+
 ## Checklist dan dependensi
 
 - [x] Inspect Laravel/Blade, layanan analytics, filter, otorisasi, tabel dan pengujian existing.

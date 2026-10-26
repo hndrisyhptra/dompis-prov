@@ -1,4 +1,4 @@
-<div class="panel-body dashboard-order-meta"><div><strong>{{ number_format($orders->total()) }} order</strong><p class="small muted">Halaman {{ $orders->currentPage() }} dari {{ $orders->lastPage() }} · Pilih Detail untuk membuka order.</p></div><x-dashboard-export label="Daftar order hasil pilihan dashboard" :url="route('dashboard.orders.export', request()->except(['modal', 'page']))"/></div>
+<div class="panel-body dashboard-order-meta"><div><strong>{{ number_format($orders->total()) }} order</strong><p class="small muted">Halaman {{ $orders->currentPage() }} dari {{ $orders->lastPage() }} · Pilih Detail untuk membuka order.</p></div></div>
 <div class="table-wrap dashboard-dialog-table" tabindex="0" aria-label="Daftar order hasil pilihan dashboard">
     <table class="dashboard-table"><thead><tr><th class="branch-sticky">No WO</th><th>Branch / STO</th><th>Nama OLO</th><th>Status Progress</th><th>Status BIMA</th><th>Aksi</th></tr></thead><tbody>
     @forelse($orders as $order)

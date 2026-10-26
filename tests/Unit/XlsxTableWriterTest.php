@@ -2,13 +2,13 @@
 
 namespace Tests\Unit;
 
-use App\Services\Exports\DashboardXlsxWriter;
+use App\Services\Exports\XlsxTableWriter;
 use DOMDocument;
 use DOMXPath;
 use PHPUnit\Framework\TestCase;
 use ZipArchive;
 
-class DashboardXlsxWriterTest extends TestCase
+class XlsxTableWriterTest extends TestCase
 {
     public function test_large_generator_exports_all_rows_as_valid_xml_with_typed_dates_counts_text_and_actual_blank_cells(): void
     {
@@ -17,7 +17,7 @@ class DashboardXlsxWriterTest extends TestCase
                 yield [str_pad((string) $i, 8, '0', STR_PAD_LEFT), $i, '2026-10-26', null, "=1+1 & <TEST>\x01"];
             }
         })();
-        $path = (new DashboardXlsxWriter)->create(['title' => 'Data uji', 'columns' => [['label' => 'No WO'], ['label' => 'Jumlah', 'type' => 'number'], ['label' => 'Tanggal', 'type' => 'date'], ['label' => 'Belum berjalan', 'type' => 'number'], ['label' => 'Teks sumber']], 'rows' => $rows],
+        $path = (new XlsxTableWriter)->create(['title' => 'Data uji', 'columns' => [['label' => 'No WO'], ['label' => 'Jumlah', 'type' => 'number'], ['label' => 'Tanggal', 'type' => 'date'], ['label' => 'Belum berjalan', 'type' => 'number'], ['label' => 'Teks sumber']], 'rows' => $rows],
             ['scope' => 'Branch', 'filters' => 'Jenis pekerjaan: Semua jenis', 'at' => '26 Oct 2026 08:00:00']);
         try {
             $zip = new ZipArchive;

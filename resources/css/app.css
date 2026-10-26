@@ -533,9 +533,11 @@ a.kpi-link:hover { border-color:var(--primary); text-decoration:none; }
 .dashboard-table-heading h2 { font-size:15px; line-height:1.5; }
 .dashboard-table-heading p { margin-top:4px; max-width:680px; line-height:1.6; }
 .dashboard-table-tools { display:flex; align-items:flex-start; justify-content:flex-end; gap:8px; flex:0 1 auto; margin-left:auto; flex-wrap:wrap; }
-.dashboard-export-control { display:flex; flex-direction:column; align-items:flex-end; gap:5px; min-width:0; }
-.dashboard-export-control .button { white-space:nowrap; }
-.dashboard-export-control .button[aria-busy="true"] { opacity:.7; cursor:wait; }
+.excel-download-control { display:flex; flex-direction:column; align-items:flex-end; gap:5px; min-width:0; }
+.excel-download-control .button { white-space:nowrap; }
+.excel-download-control .button[aria-busy="true"] { opacity:.7; cursor:wait; }
+.order-list-heading { justify-content:space-between; align-items:flex-start; }
+.order-list-heading > div:first-child { flex:1 1 240px; }
 .export-status { max-width:260px; white-space:normal; color:var(--muted); text-align:right; }
 .export-status:empty { display:none; }
 .export-status.danger { color:var(--danger-text); }
@@ -576,7 +578,7 @@ a.kpi-link:hover { border-color:var(--primary); text-decoration:none; }
 @media(max-width:600px) {
     .dashboard-table-heading { padding:16px; gap:12px; }
     .dashboard-table-tools { margin-left:0; justify-content:flex-start; }
-    .dashboard-export-control { align-items:flex-start; }
+    .excel-download-control { align-items:flex-start; }
     .export-status { text-align:left; max-width:270px; }
     .dashboard-table th,.dashboard-table td { padding:11px 12px; }
     .dashboard-table .branch-sticky { min-width:155px!important; width:155px; max-width:155px; }

@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { setupDashboardExports } from '../../resources/js/dashboard-exports.js';
+import { setupExcelDownloads } from '../../resources/js/excel-downloads.js';
 
 function fixture() {
     const calls = [];
     const status = { textContent: '', classList: { add() {}, remove() {} } };
-    const link = { href: 'https://olo.test/dashboard/exports/progress?branch=4&month=2026-10', innerHTML: 'Download Excel', attrs: {}, getAttribute(key) { return this.attrs[key]; }, setAttribute(key, value) { this.attrs[key] = value; }, removeAttribute(key) { delete this.attrs[key]; }, closest() { return { querySelector: () => status }; } };
+    const link = { href: 'https://olo.test/work-orders/export?branch=4&month=2026-10', innerHTML: 'Download Excel', attrs: {}, getAttribute(key) { return this.attrs[key]; }, setAttribute(key, value) { this.attrs[key] = value; }, removeAttribute(key) { delete this.attrs[key]; }, closest() { return { querySelector: () => status }; } };
     const downloads = [];
     const revoked = [];
     const timers = [];
     const root = { addEventListener(_, handler) { this.handler = handler; }, body: { append() {} }, createElement() { return { click() { downloads.push({ href: this.href, filename: this.download }); }, remove() {} }; } };
     const fetcher = (url, options) => new Promise((resolve, reject) => calls.push({ url, options, resolve, reject }));
     const browser = { location: { href: 'https://olo.test/dashboard' }, URL: { createObjectURL: () => 'blob:test-export', revokeObjectURL: url => revoked.push(url) }, setTimeout: callback => timers.push(callback) };
-    setupDashboardExports(root, fetcher, browser);
+    setupExcelDownloads(root, fetcher, browser);
     function click(extras = {}) {
         const event = { target: { closest: () => link }, button: 0, preventDefault() { this.defaultPrevented = true; }, ...extras };
         return { event, done: root.handler(event) };
@@ -30,9 +30,9 @@ test('Excel download preserves filters, prevents duplicate clicks, restores cont
     assert.equal(f.calls.length, 1);
     assert.equal(new URL(f.calls[0].url).searchParams.get('branch'), '4');
     assert.equal(f.calls[0].options.credentials, 'same-origin');
-    f.calls[0].resolve({ ok: true, headers: { get: name => name === 'Content-Type' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'attachment; filename="dompis-progress-20261026.xlsx"' }, blob: async () => ({}) });
+    f.calls[0].resolve({ ok: true, headers: { get: name => name === 'Content-Type' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'attachment; filename="dompis-work-orders-20261026.xlsx"' }, blob: async () => ({}) });
     await first.done;
-    assert.deepEqual(f.downloads, [{ href: 'blob:test-export', filename: 'dompis-progress-20261026.xlsx' }]);
+    assert.deepEqual(f.downloads, [{ href: 'blob:test-export', filename: 'dompis-work-orders-20261026.xlsx' }]);
     assert.equal(f.link.innerHTML, 'Download Excel');
     assert.equal(f.link.attrs['aria-busy'], undefined);
     assert.match(f.status.textContent, /siap diunduh/);
@@ -69,4 +69,14 @@ test('modified clicks and external URLs retain normal browser behavior', async (
     f.link.href = 'https://other.test/export';
     await f.click().done;
     assert.equal(f.calls.length, 0);
+});
+
+test('export validation explains an oversized database value without downloading a truncated workbook', async () => {
+    const f = fixture();
+    const click = f.click();
+    f.calls[0].resolve({ ok: false, status: 422, headers: { get: () => 'application/json' }, json: async () => ({ errors: { export: ['Kolom source_bima_fields melebihi batas Excel; file tidak dibuat.'] } }) });
+    await click.done;
+    assert.equal(f.downloads.length, 0);
+    assert.match(f.status.textContent, /source_bima_fields.*batas Excel/);
+    assert.equal(f.link.attrs['aria-busy'], undefined);
 });

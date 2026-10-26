@@ -1,5 +1,5 @@
 <section class="panel gap-top" aria-labelledby="order-month-title">
-    <div class="panel-head dashboard-table-heading"><div><h2 id="order-month-title">Penyelesaian berdasarkan bulan order</h2><p class="small muted">Kelompok berdasarkan TGL ORDER · Status penyelesaian terkini sesuai filter aktif</p></div><div class="dashboard-table-tools"><x-dashboard-export table="months" label="Penyelesaian berdasarkan bulan order" :filters="$filters"/></div></div>
+    <div class="panel-head dashboard-table-heading"><div><h2 id="order-month-title">Penyelesaian berdasarkan bulan order</h2><p class="small muted">Kelompok berdasarkan TGL ORDER · Status penyelesaian terkini sesuai filter aktif</p></div></div>
     <div class="panel-body">
     @if(count($orderMonths['rows']))
     @php
