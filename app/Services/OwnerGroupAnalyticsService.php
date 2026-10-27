@@ -24,7 +24,7 @@ class OwnerGroupAnalyticsService
     {
         // Unique source owner_grup ensures one order contributes to exactly one column.
         $aggregates = self::joinMapping(clone $base, 'owner_mapping')->select(['work_orders.id_branches', 'owner_mapping.kelompok_ownergrup'])
-            ->selectRaw('COUNT(*) as order_count')->groupBy('work_orders.id_branches', 'owner_mapping.kelompok_ownergrup')->get();
+            ->selectRaw('COUNT(*) as order_count')->groupBy('work_orders.id_branches', 'owner_mapping.kelompok_ownergrup')->toBase()->get();
         $branches = Branch::withTrashed()->with(['region' => fn ($q) => $q->withTrashed()])->whereIn('id_branches', $aggregates->pluck('id_branches')->filter()->unique())->get()->keyBy('id_branches');
         $zero = array_fill_keys([...MappingOwnergrup::GROUPS, 'unmapped'], 0);
         $rows = [];

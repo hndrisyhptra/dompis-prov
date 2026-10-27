@@ -77,7 +77,7 @@ class DashboardDrilldownTest extends OloTestCase
         $this->assertSame(4, $grand['other']); // CNDC, unset progress, and two orders without progress.
         $this->assertSame(9, $grand['incoming_today']);
         $this->assertSame(2, $grand['ps_today']);
-        foreach ($response->viewData('ownerGroups')['regions'] as $region) {
+        foreach ($ownerPage->viewData('ownerGroups')['regions'] as $region) {
             $this->assertSame($region['total'], array_sum(array_column($region['rows'], 'total')));
             $this->assertSame($region['total'], array_sum($region['totals']));
         }

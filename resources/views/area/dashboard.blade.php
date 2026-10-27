@@ -7,7 +7,7 @@
     $listUrl = fn ($extra = []) => route('work-orders.index', array_replace($scopeFilters, $extra));
 @endphp
 <div class="page-heading area-heading">
-    <div><div class="eyebrow">OLO · Jawa–Bali</div><h1>Dashboard Area</h1><p class="muted">Pantau distribusi order, progress Branch, dan perolehan PS dalam satu tampilan.</p></div>
+    <div><div class="eyebrow">OLO · Jawa–Bali</div><h1>Dashboard Area</h1><p class="muted">Monitoring distribusi order, progress Branch, dan perolehan PS dalam satu tampilan.</p></div>
     <div class="row">@can('sync')<a href="{{ route('sync.index') }}" class="button secondary"><x-icon name="sync"/> Sync Center</a>@endcan<a href="{{ $listUrl() }}" class="button primary">Lihat order</a></div>
 </div>
 <div class="area-context"><span>{{ $today->locale('id')->translatedFormat('l, d F Y') }} · WIB</span><span>Data diterima: {{ $latest_pull ? $latest_pull->timezone('Asia/Jakarta')->format('d M Y H:i').' WIB' : 'Belum ada data order dalam cakupan ini' }}</span></div>
@@ -53,14 +53,6 @@
 @include('area.open-transactions')
 @include('area.mapping-aging')
 @include('work-orders.order-month-summary', ['monthScopeFilters' => $scopeFilters])
-<section class="panel gap-top" aria-labelledby="type-recap-title"><div class="panel-head dashboard-table-heading"><div><h2 id="type-recap-title">Rekap jenis pekerjaan</h2><p class="small muted">Volume order dan penyelesaian sesuai filter aktif</p></div></div>
-    <div class="table-wrap dashboard-table-scroll" tabindex="0" aria-label="Rekap jenis pekerjaan, geser horizontal"><table class="area-type-table dashboard-table"><thead><tr><th scope="col" class="branch-sticky">Keterangan</th>@foreach($recap as $type => $values)<th scope="col">{{ $type }}</th>@endforeach<th scope="col">Total</th></tr></thead><tbody>
-    @foreach(['total' => 'WO total', 'incoming_today' => 'WO hari ini', 'ps_total' => 'Completed total', 'ps_today' => 'Completed hari ini', 'outstanding' => 'Order open'] as $metric => $label)
-        <tr><th scope="row" class="branch-sticky">{{ $label }}</th>@foreach($recap as $type => $values)<td class="numeric"><x-order-count :count="$values[$metric]" :filters="array_replace($scopeFilters, ['jenis_pekerjaan' => $type, 'queue' => match($metric) {'incoming_today' => 'today', 'ps_total' => 'complete', 'ps_today' => 'ps_today', 'outstanding' => 'outstanding', default => 'all'}])" :label="$type.' · '.$label"/></td>@endforeach<td class="numeric total-cell"><x-order-count :count="$summary[$metric]" :filters="array_replace($scopeFilters, ['queue' => match($metric) {'incoming_today' => 'today', 'ps_total' => 'complete', 'ps_today' => 'ps_today', 'outstanding' => 'outstanding', default => 'all'}])" :label="'Total · '.$label"/></td></tr>
-    @endforeach
-    </tbody></table></div>
-    <div class="area-table-note small muted">Completed / PS = progress order <strong>CLOSE</strong> dan <strong>status_order memenuhi daftar 14 kombinasi PS</strong>. Close hanya berarti instalasi lapangan selesai. CLOSE ON DESK dan status BIMA di luar daftar tidak dihitung PS.</div>
-</section>
 
 @endif
 </div>

@@ -17,7 +17,7 @@ class AreaDashboardTest extends OloTestCase
         $before = WorkOrder::orderBy('id_work_orders')->get()->toArray();
         $this->actingAs($this->area);
         $this->get(route('area.dashboard'))->assertOk()->assertViewHas('activeTab', 'progress')
-            ->assertSee('id="area-dashboard-progress"', false)->assertSee('Rekap jenis pekerjaan')->assertDontSee('Perolehan PS harian')
+            ->assertSee('id="area-dashboard-progress"', false)->assertDontSee('Rekap jenis pekerjaan')->assertDontSee('Perolehan PS harian')
             ->assertDontSee('id="owner-group-title"', false);
         $filters = ['region' => 1, 'branch' => $this->branch->getKey(), 'service' => 'METRO', 'jenis_pekerjaan' => 'MODIFY', 'month' => '2026-09'];
         $page = $this->get(route('area.dashboard', $filters + ['tab' => 'owner-group']))->assertOk()->assertViewHas('activeTab', 'owner-group')
@@ -77,7 +77,7 @@ class AreaDashboardTest extends OloTestCase
         foreach ([Role::SuperAdmin, Role::AreaCoordinator, Role::AreaAdmin, Role::AreaHd] as $role) {
             $user = $this->user($role);
             $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertRedirect(route('area.dashboard'));
-            $response = $this->get(route('area.dashboard'))->assertOk()->assertSee('Dashboard Area')->assertSee('Rekap jenis pekerjaan')->assertDontSee('Dashboard Branch');
+            $response = $this->get(route('area.dashboard'))->assertOk()->assertSee('Dashboard Area')->assertSee('Progress Region &amp; Branch', false)->assertDontSee('Rekap jenis pekerjaan')->assertDontSee('Dashboard Branch');
             if ($role === Role::AreaCoordinator) {
                 $response->assertDontSee('Sync Center');
             }
@@ -90,7 +90,7 @@ class AreaDashboardTest extends OloTestCase
         $this->actingAs($this->user(Role::SuperAdmin, false))->get(route('area.dashboard'))->assertForbidden();
     }
 
-    public function test_regional_totals_types_ps_rules_missing_dates_and_chart_reconcile_without_changing_data(): void
+    public function test_regional_totals_ps_rules_missing_dates_and_chart_reconcile_without_changing_data(): void
     {
         $this->fixtures();
         $before = WorkOrder::orderBy('id_work_orders')->get()->toArray();
@@ -103,16 +103,20 @@ class AreaDashboardTest extends OloTestCase
         $this->assertSame(11, $grand['incoming_today']);
         $this->assertSame(5, $grand['close']);
         $this->assertSame(2, $grand['bima']);
-        $this->assertSame(2, $response->viewData('month_ps'));
-        $series = collect($response->viewData('series'))->keyBy('date');
+        $this->assertNull($response->viewData('month_ps'));
+        $response->assertViewMissing('recap');
+        $chart = $this->get(route('area.dashboard', ['tab' => 'ach-ps', 'month' => '2026-10']))->assertOk();
+        $this->assertSame($summary, $chart->viewData('summary'));
+        $this->assertSame(2, $chart->viewData('month_ps'));
+        $series = collect($chart->viewData('series'))->keyBy('date');
         $this->assertSame(31, $series->count());
         $this->assertSame(1, $series['2026-10-18']['count']);
         $this->assertSame(1, $series['2026-10-17']['count']);
         $this->assertSame(0, $series['2026-10-19']['count']);
-        $recap = $response->viewData('recap');
-        $this->assertSame(1, $recap['MODIFY']['ps_total']);
-        $this->assertSame(3, $recap['NEW INSTALL']['ps_total']);
-        $this->assertSame(11, array_sum(array_column($recap, 'total')));
+        foreach (['MODIFY' => 1, 'NEW INSTALL' => 3] as $type => $expected) {
+            $this->get(route('area.dashboard', ['jenis_pekerjaan' => $type]))->assertOk()
+                ->assertViewHas('summary', fn ($data) => $data['ps_total'] === $expected);
+        }
         $this->assertSame(11, array_sum(array_map(fn ($group) => $group['totals']['total'], $response->viewData('groups'))));
         $this->assertSame($before, WorkOrder::orderBy('id_work_orders')->get()->toArray());
     }
@@ -124,9 +128,13 @@ class AreaDashboardTest extends OloTestCase
         $filtered = $this->get(route('area.dashboard', ['region' => 1, 'branch' => $this->branch->getKey(), 'service' => 'METRO', 'jenis_pekerjaan' => 'MODIFY', 'month' => '2026-09']))->assertOk();
         $this->assertSame(1, $filtered->viewData('summary')['total']);
         $this->assertSame(1, $filtered->viewData('branch_count'));
-        $this->assertSame(['MODIFY'], array_keys($filtered->viewData('recap')));
-        $this->assertSame(30, count($filtered->viewData('series')));
-        $this->assertSame(0, $filtered->viewData('month_ps'));
+        $this->assertSame(1, $filtered->viewData('summary')['ps_total']);
+        $this->assertSame([], $filtered->viewData('series'));
+        $this->assertNull($filtered->viewData('month_ps'));
+        $ach = $this->get(route('area.dashboard', ['tab' => 'ach-ps', 'region' => 1, 'branch' => $this->branch->getKey(), 'service' => 'METRO', 'jenis_pekerjaan' => 'MODIFY', 'month' => '2026-09']))->assertOk();
+        $this->assertSame(30, count($ach->viewData('series')));
+        $this->assertSame(0, $ach->viewData('month_ps'));
+        $this->assertSame($filtered->viewData('summary'), $ach->viewData('summary'));
         foreach (['2026-13', '2026-10-01', '1900-01', '2101-01'] as $month) {
             $this->get(route('area.dashboard', ['month' => $month]))->assertSessionHasErrors('month');
         }
@@ -145,7 +153,8 @@ class AreaDashboardTest extends OloTestCase
 
     public function test_empty_unmapped_inactive_and_additional_job_types_are_not_lost(): void
     {
-        $this->actingAs($this->area)->get(route('area.dashboard'))->assertOk()->assertViewHas('month_ps', 0)->assertSee('Belum ada order dalam filter ini');
+        $this->actingAs($this->area)->get(route('area.dashboard'))->assertOk()->assertSee('Belum ada order dalam filter ini');
+        $this->get(route('area.dashboard', ['tab' => 'ach-ps']))->assertOk()->assertViewHas('month_ps', 0);
         $this->pull([$this->row('UNMAPPED'), $this->row('ARCHIVED'), $this->row('NO-TYPE')]);
         WorkOrder::where('no_tq_sc_id', 'UNMAPPED')->update(['id_branches' => null, 'jenis_pekerjaan' => 'EXTRA']);
         WorkOrder::where('no_tq_sc_id', 'NO-TYPE')->update(['jenis_pekerjaan' => null]);

@@ -167,3 +167,7 @@ Untuk checkout baru, ikuti petunjuk instalasi di atas dan buat `.env` dari `.env
 Status BIMA, Log Task BIMA, perangkat cabang dan umur otomatis: [panduan dan hasil pengujian](docs/BIMA_STATUS_AND_DEVICES.md). Setelah deployment jalankan migrasi, restart worker, dan aktifkan Laravel scheduler untuk menyegarkan nilai umur SQL setiap hari.
 
 Referensi klasifikasi order BIMA (178 aturan): [implementasi dan backfill mapping](docs/ORDER_MAPPING_REFERENCE.md). Setelah migrasi jalankan `php artisan olo:apply-order-mapping --actor=superadmin`.
+
+## Optimasi sebelum deploy — 27 Oktober 2026
+
+Rekap jenis pekerjaan di dashboard Area dihapus. Laporan kini dihitung sesuai tab aktif, master Branch dipakai ulang dan modal order hanya memuat data yang diperlukan. [Hasil pengukuran, berkas berubah dan langkah deployment](docs/PREDEPLOY_OPTIMIZATION.md). Tidak ada migration/env baru pada tahap ini; server belum dideploy.

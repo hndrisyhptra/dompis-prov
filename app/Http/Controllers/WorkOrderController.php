@@ -22,17 +22,22 @@ class WorkOrderController extends Controller
     {
         $filters = $request->validated();
         $base = $list->query($request->user(), $filters);
-        $query = (clone $base)->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($request->user())])->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')]);
         $queue = $filters['queue'] ?? 'all';
         $today = CarbonImmutable::now('Asia/Jakarta')->startOfDay();
         if ($request->boolean('modal')) {
             // Apply the same queue before pagination; never return an unscoped dashboard list.
+            // This read-only fragment does not render bookmarks, source JSON or issue counts.
+            $query = (clone $base)->select(array_map(fn ($column) => 'work_orders.'.$column, [
+                'id_work_orders', 'id_branches', 'no_tq_sc_id', 'sto', 'nama_olo', 'progress_category', 'operational_status',
+                'status_order', 'task_bima', 'status_bima', 'tgl_order', 'tgl_ps', 'mapping_order',
+            ]))->with('assignedBranch');
             $queues->apply($query, $queue, $today);
             $orders = $query->latest('tgl_order')->latest('id_work_orders')->paginate(25)->withQueryString();
 
             return response()->view('dashboard.orders', ['orders' => $orders, 'listUrl' => route('work-orders.index', array_diff_key($filters, ['modal' => true]))])
                 ->header('X-Dashboard-Fragment', 'orders')->header('Cache-Control', 'private, no-store');
         }
+        $query = (clone $base)->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($request->user())])->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')]);
         $queueCounts = $queues->counts($base, $today);
         $queues->apply($query, $queue, $today);
         $orders = $query->orderByRaw('CASE WHEN last_progress_at IS NULL THEN 0 ELSE 1 END')->latest('tgl_order')->latest('id_work_orders')->paginate(25)->withQueryString();

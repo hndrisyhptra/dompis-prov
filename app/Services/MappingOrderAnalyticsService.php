@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Support\OrderAging;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class MappingOrderAnalyticsService
 {
@@ -27,7 +28,7 @@ class MappingOrderAnalyticsService
         return $query;
     }
 
-    public function summary(Builder $base, bool $area, string $jobType = 'all'): array
+    public function summary(Builder $base, bool $area, string $jobType = 'all', ?Collection $branches = null): array
     {
         $category = self::categoryExpression($base);
         // Classify within the scoped row query, then group plain derived columns.
@@ -51,7 +52,7 @@ class MappingOrderAnalyticsService
             $query->addSelect('job_type', 'aging_bucket')->groupBy('job_type', 'aging_bucket');
         }
         $aggregates = $query->get();
-        $branches = Branch::withTrashed()->with(['region' => fn ($q) => $q->withTrashed()])
+        $branches ??= Branch::withTrashed()->with(['region' => fn ($q) => $q->withTrashed()])
             ->whereIn('id_branches', $aggregates->pluck('id_branches')->filter()->unique())->get()->keyBy('id_branches');
         $zero = array_fill_keys([...self::CATEGORIES, 'unmapped'], 0);
         $rows = [];

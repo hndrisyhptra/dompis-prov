@@ -128,7 +128,7 @@ class AreaOpenTransactionsTest extends OloTestCase
             $this->assertSame('METRO', $query['service']);
         }
         $progress = $this->get(route('area.dashboard', array_replace($filters, ['tab' => 'progress'])))->assertOk()->assertDontSee('Perolehan PS harian')->assertSee('name="month" value="2026-10"', false);
-        $this->assertSame(2, $progress->viewData('month_ps'));
+        $this->assertNull($progress->viewData('month_ps'));
         $this->get(route('area.dashboard', array_replace($filters, ['month' => '2026-09'])))->assertOk()->assertSee('Belum ada perolehan PS dalam bulan ini.');
         $this->getJson(route('area.dashboard', ['tab' => 'ach-ps-unsafe']))->assertUnprocessable();
     }
