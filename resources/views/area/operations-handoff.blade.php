@@ -1,6 +1,0 @@
-<section class="panel operations-handoff" aria-label="Alur operasional Area"><div class="panel-head"><div><h2>Operasional Area ke Branch</h2><p class="small muted">Import terpusat oleh HD/Admin Area; tindak lanjut oleh TL, HD dan Admin Branch.</p></div>@can('sync')<a class="button secondary" href="{{ route('sync.index') }}">Import order BIMA</a>@endcan</div><div class="handoff-metrics">
-<a href="{{ $listUrl([]) }}"><span>Data terpusat</span><strong>{{ number_format($summary['total']) }}</strong><small>Order sesuai filter</small></a>
-<a href="{{ $listUrl(['queue'=>'unmapped']) }}"><span>Pemetaan Branch</span><strong>{{ number_format($summary['total'] - $summary['unmapped']) }}<small> / {{ number_format($summary['total']) }}</small></strong><small>{{ $summary['unmapped'] }} belum terpetakan</small></a>
-<a href="{{ $listUrl(['queue'=>'unupdated']) }}"><span>Belum diperbarui</span><strong>{{ number_format($summary['unupdated']) }}</strong><small>Perlu progress pertama dari Branch</small></a>
-<a href="{{ $listUrl(['queue'=>'closed']) }}"><span>Progress CLOSE</span><strong>{{ number_format($summary['closed_by_branch']) }}</strong><small>{{ $summary['waiting_bima'] }} masih menunggu BIMA</small></a>
-</div></section>

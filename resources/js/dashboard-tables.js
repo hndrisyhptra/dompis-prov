@@ -1,4 +1,15 @@
 export function setupDashboardTables(root, fetcher = fetch, baseUrl = location.href) {
+    root.querySelectorAll('[data-region-toggle]').forEach(button => {
+        const body = root.getElementById(button.getAttribute('aria-controls'));
+        if (!body) return;
+        const open = button.hasAttribute?.('data-region-open') === true;
+        body.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+        button.addEventListener('click', () => {
+            body.hidden = !body.hidden;
+            button.setAttribute('aria-expanded', String(!body.hidden));
+        });
+    });
     root.querySelectorAll('[data-region-expand]').forEach(control => {
         const buttons = control.closest('section').querySelectorAll('[data-region-toggle]');
         const synchronize = () => {
@@ -6,6 +17,7 @@ export function setupDashboardTables(root, fetcher = fetch, baseUrl = location.h
             control.textContent = allOpen ? 'Tutup semua' : 'Buka semua';
             control.setAttribute('aria-pressed', String(allOpen));
         };
+        synchronize();
         control.addEventListener('click', () => {
             const open = control.getAttribute('aria-pressed') !== 'true';
             buttons.forEach(button => {
@@ -16,17 +28,6 @@ export function setupDashboardTables(root, fetcher = fetch, baseUrl = location.h
         });
         buttons.forEach(button => button.addEventListener('click', () => queueMicrotask(synchronize)));
     });
-    root.querySelectorAll('[data-region-toggle]').forEach(button => {
-        const body = root.getElementById(button.getAttribute('aria-controls'));
-        if (!body) return;
-        body.hidden = true;
-        button.setAttribute('aria-expanded', 'false');
-        button.addEventListener('click', () => {
-            body.hidden = !body.hidden;
-            button.setAttribute('aria-expanded', String(!body.hidden));
-        });
-    });
-
     const dialog = root.querySelector('#dashboard-order-dialog');
     if (!dialog || typeof dialog.showModal !== 'function') return;
     const content = dialog.querySelector('[data-order-dialog-content]');

@@ -15,6 +15,11 @@ class WoIssue extends Model
         return $this->hasMany(WoIssueNote::class, 'id_wo_issues')->orderBy('id_wo_issue_notes');
     }
 
+    public function latestNote()
+    {
+        return $this->hasOne(WoIssueNote::class, 'id_wo_issues')->ofMany(['created_at' => 'max', 'id_wo_issue_notes' => 'max']);
+    }
+
     public function workOrder()
     {
         return $this->belongsTo(WorkOrder::class, 'id_work_orders');

@@ -1,4 +1,4 @@
-@can('prioritize', $order)
+@if(!$order->isPsEligible() && (isset($scopedOrderPermissions) ? $scopedOrderPermissions['prioritize'] : \Illuminate\Support\Facades\Gate::allows('prioritize', $order)))
 @php
 $priorityArea = auth()->user()->role->areaScope();
 $ownKey = $priorityArea ? 'area' : 'branch:'.$order->id_branches;
@@ -17,4 +17,4 @@ $bookmarkLabel = $ownPriority ? 'Lepas Prioritas '.$priorityScopeLabel : 'Pilih 
         @if(!$priorityArea && $ownPriority)<span class="badge">Prioritas Branch</span>@endif
     @endif
 </div>
-@endcan
+@endif

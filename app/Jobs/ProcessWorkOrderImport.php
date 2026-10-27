@@ -47,7 +47,7 @@ class ProcessWorkOrderImport implements ShouldQueue
                 throw new InvalidArgumentException('Hak import operator atau mode import sudah berubah.');
             }
             if ($job->connection_hash !== ExcelWorkOrderImportService::connectionHash()) {
-                throw new InvalidArgumentException('Versi import berubah. Upload ulang file.');
+                throw new InvalidArgumentException('Versi import tidak sesuai dengan worker. Muat ulang worker antrean. Jika versi upload masih berlaku, coba ulang preview; jika kontrak upload sudah berubah, upload file dan buat preview baru.');
             }
             $job->update(['state' => 'running', 'started_at' => $job->started_at ?? now(), 'attempts' => $job->attempts + 1, 'error' => null]);
             if ($job->stage === 'preview') {

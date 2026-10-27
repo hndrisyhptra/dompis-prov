@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Services\WorkOrderDerivedFields;
 use App\Services\WorkOrderMappingResolver;
 use App\Support\PsEligibility;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -109,6 +110,14 @@ class WorkOrder extends Model
         return PsEligibility::closedOrders($query, true);
     }
 
+    public function scopeNotPsEligible(Builder $query): Builder
+    {
+        $binary = $query->getConnection()->getDriverName() === 'mysql' ? 'BINARY ' : '';
+
+        return $query->where(fn ($q) => $q->whereRaw($binary."UPPER(TRIM(COALESCE(work_orders.progress_category, ''))) <> ?", ['CLOSE'])
+            ->orWhere(fn ($q) => PsEligibility::sourceOrders($q, false)));
+    }
+
     public function scopePotentialPs(Builder $query): Builder
     {
         return $query->whereIn('status_order', self::POTENTIAL_PS_STATUSES);
@@ -126,7 +135,7 @@ class WorkOrder extends Model
 
     public function scopePsOnDate(Builder $query, string $date): Builder
     {
-        return $query->psEligible()->whereDate('tgl_ps', $date);
+        return $query->psEligible()->where('tgl_ps', '>=', $date)->where('tgl_ps', '<', CarbonImmutable::parse($date)->addDay()->toDateString());
     }
 
     public function isPsEligible(): bool

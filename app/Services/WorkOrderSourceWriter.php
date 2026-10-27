@@ -50,12 +50,13 @@ class WorkOrderSourceWriter
                     $changes[$field] = ['label' => $label, 'before' => $old, 'after' => $new];
                 }
             }
-            foreach (array_unique(array_merge(array_keys($source), array_keys($order->source_bima_fields ?? []))) as $header) {
+            $afterSource = $order->source_bima_fields ?? [];
+            foreach (array_unique(array_merge(array_keys($source), array_keys($afterSource))) as $header) {
                 if (str_starts_with($header, '_')) {
                     continue;
                 }
                 $old = $source[$header] ?? null;
-                $new = ($order->source_bima_fields ?? [])[$header] ?? null;
+                $new = $afterSource[$header] ?? null;
                 $label = $header === 'STATUS' ? 'STATUS BIMA' : $header;
                 if ($old !== $new && ! in_array($label, array_column($changes, 'label'), true)) {
                     $changes['source:'.$header] = ['label' => $header.' (sumber BIMA)', 'before' => $old, 'after' => $new];

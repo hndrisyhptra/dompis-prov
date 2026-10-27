@@ -27,7 +27,7 @@ class MonitoringPushTest extends OloTestCase
                 ->assertDontSee('Kirim progress monitoring')->assertDontSee('Kirim snapshot monitoring')->assertDontSee('Outbound')
                 ->assertSee($mode === 'excel' ? 'Upload &amp; periksa kolom' : 'Buat preview BIMA_RAW', false);
         }
-        $this->get(route('area.dashboard'))->assertOk()->assertSee('Operasional Area ke Branch')->assertDontSee('cabang');
+        $this->get(route('area.dashboard'))->assertOk()->assertDontSee('Operasional Area ke Branch')->assertDontSee('cabang');
         $this->get(route('work-orders.index'))->assertOk()->assertDontSee('Cabang')->assertDontSee('cabang');
     }
 

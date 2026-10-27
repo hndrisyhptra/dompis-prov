@@ -31,10 +31,10 @@ class OwnerGroupAnalyticsTest extends OloTestCase
         $this->order('NO-BRANCH', 'RAW-0', null);
         $before = WorkOrder::orderBy('id_work_orders')->get()->toArray();
         $this->actingAs($this->area);
-        $dashboard = $this->get(route('area.dashboard'))->assertOk()->assertSee('Distribusi Owner Group')->assertSee('Grand Total');
+        $dashboard = $this->get(route('area.dashboard', ['tab' => 'owner-group']))->assertOk()->assertSee('Distribusi Owner Group')->assertSee('Grand Total');
         $matrix = $dashboard->viewData('ownerGroups');
         $this->assertSame(11, $matrix['total']);
-        $this->assertSame(['DISTRICT' => 2, 'PMD' => 1, 'ED REGIONAL' => 1, 'SDI REGIONAL' => 1, 'FF SO 3' => 1, 'FF SO 4' => 1, 'DCS' => 0, 'unmapped' => 4], $matrix['totals']);
+        $this->assertSame(['DISTRICT' => 2, 'PMD' => 1, 'ED REGIONAL' => 1, 'SDI REGIONAL' => 1, 'FF SO 3' => 1, 'FF SO 4' => 1, 'DCS' => 0, 'CSO' => 0, 'MSO' => 0, 'unmapped' => 4], $matrix['totals']);
         $this->assertSame(11, array_sum(array_column($matrix['rows'], 'total')));
         foreach ($matrix['rows'] as $row) {
             $this->assertSame($row['total'], array_sum($row['counts']));
@@ -61,7 +61,7 @@ class OwnerGroupAnalyticsTest extends OloTestCase
         $this->order('FOREIGN', 'OWNER-UJI', $other->getKey());
         $filters = ['region' => 1, 'branch' => $this->branch->getKey(), 'service' => 'METRO', 'jenis_pekerjaan' => 'MODIFY'];
         foreach ([Role::SuperAdmin, Role::AreaCoordinator, Role::AreaAdmin, Role::AreaHd] as $role) {
-            $this->actingAs($this->user($role))->get(route('area.dashboard', $filters))->assertOk()
+            $this->actingAs($this->user($role))->get(route('area.dashboard', $filters + ['tab' => 'owner-group']))->assertOk()
                 ->assertViewHas('ownerGroups', fn ($data) => $data['total'] === 1 && $data['totals']['DISTRICT'] === 1)
                 ->assertSee(route('work-orders.index', $filters + ['owner_group' => 'DISTRICT']));
             $this->get(route('work-orders.index', $filters + ['owner_group' => 'DISTRICT']))->assertOk()->assertViewHas('total', 1)->assertSee('OWN-MODIFY')->assertDontSee('FOREIGN');
@@ -78,7 +78,7 @@ class OwnerGroupAnalyticsTest extends OloTestCase
         }
         $before = WorkOrder::orderBy('id_work_orders')->get()->toArray();
         $rule->update(['kelompok_ownergrup' => 'PMD']);
-        $this->actingAs($this->area)->get(route('area.dashboard'))->assertViewHas('ownerGroups', fn ($data) => $data['totals']['DISTRICT'] === 0 && $data['totals']['PMD'] === 4);
+        $this->actingAs($this->area)->get(route('area.dashboard', ['tab' => 'owner-group']))->assertViewHas('ownerGroups', fn ($data) => $data['totals']['DISTRICT'] === 0 && $data['totals']['PMD'] === 4);
         $this->get(route('work-orders.index', ['jenis_pekerjaan' => 'all', 'owner_group' => 'DISTRICT']))->assertViewHas('total', 0);
         $rule->update(['active' => false]);
         $this->get(route('work-orders.index', ['jenis_pekerjaan' => 'all', 'owner_group' => 'unmapped']))->assertViewHas('total', 4);
@@ -88,7 +88,7 @@ class OwnerGroupAnalyticsTest extends OloTestCase
     public function test_empty_reference_and_empty_scope_are_explicit_and_filters_remain_in_forms_and_queue_links(): void
     {
         $this->order('WAITING', 'WAIT-FOR-REFERENCE', $this->branch->getKey());
-        $this->actingAs($this->area)->get(route('area.dashboard'))->assertOk()->assertSee('Menunggu file Excel mapping')
+        $this->actingAs($this->area)->get(route('area.dashboard', ['tab' => 'owner-group']))->assertOk()->assertSee('Menunggu file Excel mapping')
             ->assertViewHas('ownerGroups', fn ($data) => ! $data['has_mapping'] && $data['total'] === 1 && $data['totals']['unmapped'] === 1);
         $this->get(route('work-orders.index', ['owner_group' => 'unmapped']))->assertOk()->assertSee('Owner Group: Belum dipetakan')
             ->assertSee('name="owner_group" value="unmapped"', false)->assertSee('WAIT-FOR-REFERENCE')->assertSee('owner_group=unmapped', false);

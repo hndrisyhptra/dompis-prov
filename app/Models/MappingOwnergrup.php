@@ -12,7 +12,7 @@ class MappingOwnergrup extends Model
 
     protected $guarded = ['id_mapping_ownergrup'];
 
-    public const GROUPS = ['DISTRICT', 'PMD', 'ED REGIONAL', 'SDI REGIONAL', 'FF SO 3', 'FF SO 4', 'DCS'];
+    public const GROUPS = ['DISTRICT', 'PMD', 'ED REGIONAL', 'SDI REGIONAL', 'FF SO 3', 'FF SO 4', 'DCS', 'CSO', 'MSO'];
 
     protected function casts(): array
     {

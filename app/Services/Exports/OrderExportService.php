@@ -5,6 +5,7 @@ namespace App\Services\Exports;
 use App\Models\Branch;
 use App\Models\Region;
 use App\Models\User;
+use App\Support\OrderAging;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
@@ -47,10 +48,12 @@ class OrderExportService
         $labels[] = 'Branch: '.(! empty($filters['branch']) ? Branch::withTrashed()->find($filters['branch'])?->name : ($user->role->areaScope() ? 'Semua Branch' : 'Penugasan akun'));
         $type = $priority ? 'all' : ($filters['jenis_pekerjaan'] ?? 'NEW INSTALL');
         $labels[] = 'Jenis pekerjaan: '.($type === 'all' ? 'Semua jenis' : $type);
-        foreach (['service' => 'Layanan', 'q' => 'Pencarian', 'queue' => 'Antrean', 'owner_group' => 'Owner Group', 'bucket' => 'Kategori progress', 'order_month' => 'Bulan order', 'ps_date' => 'Tanggal PS', 'status' => 'Status', 'without_region' => 'Tanpa Region', 'unassigned' => 'Belum ditugaskan',
-            'source' => 'Sumber prioritas', 'state' => 'Status monitoring', 'sort' => 'Urutan'] as $key => $label) {
+        foreach (['service' => 'Layanan', 'q' => 'Pencarian', 'queue' => 'Antrean', 'owner_group' => 'Owner Group', 'mapping_order' => 'Mapping Order', 'aging_bucket' => 'Kategori umur', 'aging_on' => 'Umur per tanggal WIB', 'sto' => 'STO', 'sto_missing' => 'STO belum terisi', 'bucket' => 'Kategori progress', 'order_month' => 'Bulan order', 'ps_date' => 'Tanggal PS', 'ps_from' => 'Tanggal PS mulai', 'ps_to' => 'Tanggal PS sampai (maksimal hari ini WIB)', 'status' => 'Status', 'without_region' => 'Tanpa Region', 'unassigned' => 'Belum ditugaskan',
+            'source' => 'Sumber prioritas', 'state' => 'Status monitoring', 'sort' => 'Urutan', 'bima_status' => 'Status task BIMA', 'bima_task' => 'Task BIMA', 'bima_status_missing' => 'Status BIMA kosong', 'bima_task_missing' => 'Task BIMA kosong'] as $key => $label) {
             if (isset($filters[$key]) && $filters[$key] !== '') {
-                $labels[] = $label.': '.$filters[$key];
+                $value = $key === 'mapping_order' && $filters[$key] === 'open_stuck' ? 'OPEN & STUCK' : $filters[$key];
+                $value = $key === 'aging_bucket' ? OrderAging::LABELS[$value] : $value;
+                $labels[] = $label.': '.$value;
             }
         }
 

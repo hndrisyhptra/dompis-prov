@@ -18,6 +18,54 @@ use Tests\Fakes\XlsxFile;
 
 class ExcelWorkOrderImportTest extends OloTestCase
 {
+    public function test_upload_stages_encrypted_rows_in_bounded_batches_and_resolves_repeated_routing_once_per_stage(): void
+    {
+        $rows = [];
+        for ($i = 0; $i < 220; $i++) {
+            $rows[] = $this->excelRow('BATCH-'.str_pad($i, 4, '0', STR_PAD_LEFT));
+        }
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        try {
+            $job = $this->upload($rows);
+            $queries = DB::getQueryLog();
+        } finally {
+            DB::disableQueryLog();
+        }
+        $inserts = array_filter($queries, fn ($query) => preg_match('/insert into [`"]?sync_job_rows/i', $query['query']));
+        $this->assertCount(3, $inserts);
+        $this->assertSame(220, $job->rows()->count());
+        $this->assertSame('BATCH-0000', $job->rows()->orderBy('row_index')->first()->payload['raw'][0]['value']);
+        $this->assertStringNotContainsString('Pelanggan Privat Uji', DB::table('sync_job_rows')->value('payload'));
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        try {
+            $this->excelPreview($job);
+            $queries = DB::getQueryLog();
+        } finally {
+            DB::disableQueryLog();
+        }
+        $referenceQueries = array_filter($queries, fn ($query) => preg_match('/^select .*from [`"]?(branch_mappings|service_areas)[`"]?/i', $query['query']));
+        $this->assertLessThanOrEqual(2, count($referenceQueries));
+        $this->assertSame(220, $job->stats['new']);
+        $this->assertDatabaseCount('work_orders', 0);
+    }
+
+    public function test_routing_cache_never_carries_a_preview_decision_into_commit_with_changed_master(): void
+    {
+        $job = $this->upload([$this->excelRow('ROUTE-FRESH')]);
+        $service = app(ExcelWorkOrderImportService::class);
+        $snapshot = $job->snapshot;
+        $snapshot['import']['mapping'] = self::MAP;
+        $job->update(['snapshot' => $snapshot]);
+        $service->preview($job);
+        $this->assertSame(1, $job->fresh()->stats['new']);
+        $this->branch->update(['active' => false]);
+        $service->commit($job);
+        $this->assertSame(1, $job->fresh()->stats['conflict']);
+        $this->assertDatabaseCount('work_orders', 0);
+    }
+
     private const HEADERS = ['IDENTITAS', 'CABANG SUMBER', 'KODE STO', 'PELANGGAN', 'STATUS ORDER', 'TGL PS', 'SID', 'BRANCH', 'STATUS FINAL'];
 
     private const MAP = ['no_tq_sc_id' => 1, 'branch' => 2, 'sto' => 3, 'nama_olo' => 4, 'status_bima' => 5, 'tgl_ps' => 6, 'sid' => 7, 'status_final' => 9];

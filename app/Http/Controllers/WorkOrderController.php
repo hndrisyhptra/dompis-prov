@@ -9,6 +9,7 @@ use App\Services\Boq\BoqImportService;
 use App\Services\BranchOrderScope;
 use App\Services\WorkOrderListQuery;
 use App\Services\WorkOrderQueueService;
+use App\Support\ScopedOrderListPermissions;
 use App\Support\WorkOrderActions;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -20,8 +21,8 @@ class WorkOrderController extends Controller
     public function index(WorkOrderListRequest $request, BranchOrderScope $scope, WorkOrderQueueService $queues, WorkOrderListQuery $list)
     {
         $filters = $request->validated();
-        $base = $scope->orders($request->user(), $filters);
-        $query = $list->query($request->user(), $filters)->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($request->user())])->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')]);
+        $base = $list->query($request->user(), $filters);
+        $query = (clone $base)->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($request->user())])->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')]);
         $queue = $filters['queue'] ?? 'all';
         $today = CarbonImmutable::now('Asia/Jakarta')->startOfDay();
         if ($request->boolean('modal')) {
@@ -32,15 +33,15 @@ class WorkOrderController extends Controller
             return response()->view('dashboard.orders', ['orders' => $orders, 'listUrl' => route('work-orders.index', array_diff_key($filters, ['modal' => true]))])
                 ->header('X-Dashboard-Fragment', 'orders')->header('Cache-Control', 'private, no-store');
         }
-        $queueCounts = $queues->counts(clone $query, $today);
+        $queueCounts = $queues->counts($base, $today);
         $queues->apply($query, $queue, $today);
+        $orders = $query->orderByRaw('CASE WHEN last_progress_at IS NULL THEN 0 ELSE 1 END')->latest('tgl_order')->latest('id_work_orders')->paginate(25)->withQueryString();
 
-        return view('work-orders.index', ['orders' => $query->orderByRaw('CASE WHEN last_progress_at IS NULL THEN 0 ELSE 1 END')->latest('tgl_order')->latest('id_work_orders')->paginate(25)->withQueryString(),
+        return view('work-orders.index', ['orders' => $orders, 'scopedOrderPermissions' => ScopedOrderListPermissions::for($request->user()),
             'queueCounts' => $queueCounts, 'contextRegion' => ! empty($filters['region']) ? Region::withTrashed()->find($filters['region'])?->name : null,
             'types' => WorkOrder::visibleTo($request->user())->select('jenis_pekerjaan')->distinct()->orderBy('jenis_pekerjaan')->pluck('jenis_pekerjaan')->map(fn ($type) => strtoupper(trim($type ?? '', ' ')) ?: 'TANPA JENIS')->unique(),
             'branches' => $scope->branches($request->user()), 'filters' => $filters,
-            'total' => (clone $query)->count(), 'blocked' => (clone $base)->outstanding()->whereHas('issues', fn ($q) => $q->where('status', 'OPEN'))->count(),
-            'complete' => (clone $base)->psEligible()->count()]);
+            'total' => $orders->total()]);
     }
 
     public function show(Request $request, WorkOrder $workOrder)

@@ -19,8 +19,8 @@ class AreaAnalyticsService
         $zero = array_fill_keys(array_keys(ProgressSummary::LABELS), 0);
         $summary = array_fill_keys(['total', 'ps_total', 'ps_today', 'incoming_today', 'outstanding', 'open_issues', 'waiting_bima', 'missing_ps_date', 'future_ps_date', 'unmapped', 'unupdated', 'closed_by_branch'], 0);
         $rows = [];
-        $summary['potential_ps'] = (clone $base)->potentialPs()->count();
-        $summary['new_order'] = (clone $base)->newOrder()->count();
+        $summary['potential_ps'] = 0;
+        $summary['new_order'] = 0;
         $branches = Branch::withTrashed()->with(['region' => fn ($q) => $q->withTrashed()])->orderBy('name')->get()->keyBy('id_branches');
         foreach ($branches as $branch) {
             if (($filters['region'] ?? null) && (int) $branch->region_id !== (int) $filters['region']) {
@@ -39,62 +39,55 @@ class AreaAnalyticsService
             $date = $month->day($day);
             $series[$date->toDateString()] = ['date' => $date->toDateString(), 'label' => $date->format('d M'), 'day' => $day, 'count' => 0, 'future' => $date->isAfter($today)];
         }
+        $metrics = [
+            'total' => fn ($q) => $q,
+            'ps_total' => fn ($q) => $q->psEligible(),
+            'ps_today' => fn ($q) => $q->psOnDate($today->toDateString()),
+            'incoming_today' => fn ($q) => $q->where('tgl_order', '>=', $today->toDateString())->where('tgl_order', '<', $today->addDay()->toDateString()),
+            'outstanding' => fn ($q) => $q->outstanding(),
+            'open_issues' => fn ($q) => $q->outstanding()->whereHas('issues', fn ($q) => $q->where('status', 'OPEN')),
+            'waiting_bima' => fn ($q) => $q->waitingBima(),
+            'missing_ps_date' => fn ($q) => $q->psEligible()->whereNull('tgl_ps'),
+            'future_ps_date' => fn ($q) => $q->psEligible()->where('tgl_ps', '>=', $today->addDay()->toDateString()),
+            'unmapped' => fn ($q) => $q->whereNull('id_branches'),
+            'unupdated' => fn ($q) => $q->outstanding()->whereNull('last_progress_at'),
+            'closed_by_branch' => fn ($q) => $q->whereRaw('UPPER(TRIM(progress_category)) = ?', ['CLOSE']),
+            'potential_ps' => fn ($q) => $q->potentialPs(), 'new_order' => fn ($q) => $q->newOrder(),
+        ];
+        foreach ([...array_keys(ProgressSummary::GROUPS), 'other'] as $bucket) {
+            $metrics['bucket_'.$bucket] = fn ($q) => ProgressSummary::filter($q, $bucket);
+        }
+        $typeExpression = "COALESCE(NULLIF(UPPER(TRIM(work_orders.jenis_pekerjaan)), ''), 'TANPA JENIS')";
+        $aggregates = app(OrderMetricAggregate::class)->query($base, $metrics)
+            ->selectRaw('work_orders.id_branches, '.$typeExpression.' AS job_type, MAX(work_orders.last_pulled_at) AS latest_pull')
+            ->groupByRaw('work_orders.id_branches, '.$typeExpression)->toBase()->get();
         $lastPull = null;
-        foreach ((clone $base)->select(['id_work_orders', 'id_branches', 'jenis_pekerjaan', 'tgl_order', 'progress_category', 'operational_status', 'status_bima', 'status_order', 'task_bima', 'tgl_ps', 'branch_completed_at', 'last_pulled_at', 'last_progress_at'])
-            ->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')])->cursor() as $order) {
-            $branchKey = $order->id_branches ?? 'unmapped';
-            $rows[$branchKey] ??= $this->branchRow($branches->get($order->id_branches), $zero);
-            $bucket = ProgressSummary::bucket($order);
-            $rows[$branchKey]['counts'][$bucket]++;
-            $rows[$branchKey]['counts']['total']++;
-            $type = strtoupper(trim($order->jenis_pekerjaan ?? '', ' ')) ?: 'TANPA JENIS';
+        foreach ($aggregates as $aggregate) {
+            $branchKey = $aggregate->id_branches ?? 'unmapped';
+            $rows[$branchKey] ??= $this->branchRow($branches->get($aggregate->id_branches), $zero);
+            foreach (array_keys($zero) as $key) {
+                $metric = in_array($key, ['incoming_today', 'ps_today', 'total'], true) ? $key : 'bucket_'.$key;
+                $rows[$branchKey]['counts'][$key] += (int) $aggregate->$metric;
+            }
+            foreach (array_keys($summary) as $key) {
+                $summary[$key] += (int) $aggregate->$key;
+            }
+            $type = $aggregate->job_type;
             $types[$type] ??= array_fill_keys(array_keys($types['NEW INSTALL']), 0);
-            $summary['total']++;
-            $types[$type]['total']++;
-            if (! $order->id_branches) {
-                $summary['unmapped']++;
+            foreach (array_keys($types[$type]) as $key) {
+                $types[$type][$key] += (int) $aggregate->$key;
             }
-            if ($order->tgl_order?->toDateString() === $today->toDateString()) {
-                $summary['incoming_today']++;
-                $types[$type]['incoming_today']++;
-                $rows[$branchKey]['counts']['incoming_today']++;
+            if ($aggregate->latest_pull && (! $lastPull || $aggregate->latest_pull > $lastPull)) {
+                $lastPull = $aggregate->latest_pull;
             }
-            if (! $order->terminal() && ! $order->branch_completed_at) {
-                $summary['outstanding']++;
-                if (! $order->last_progress_at) {
-                    $summary['unupdated']++;
-                }
-                $types[$type]['outstanding']++;
-                if ($order->open_issues_count > 0) {
-                    $summary['open_issues']++;
-                }
-            }
-            if (strtoupper(trim($order->progress_category ?? '', ' ')) === 'CLOSE') {
-                $summary['closed_by_branch']++;
-            }
-            if (strtoupper(trim($order->progress_category ?? '', ' ')) === 'CLOSE' && ! $order->isPsEligible()) {
-                $summary['waiting_bima']++;
-            }
-            if ($order->isPsEligible()) {
-                $summary['ps_total']++;
-                $types[$type]['ps_total']++;
-                $date = $order->tgl_ps?->toDateString();
-                if (! $date) {
-                    $summary['missing_ps_date']++;
-                } elseif ($date > $today->toDateString()) {
-                    $summary['future_ps_date']++;
-                }
-                if ($date === $today->toDateString()) {
-                    $summary['ps_today']++;
-                    $types[$type]['ps_today']++;
-                    $rows[$branchKey]['counts']['ps_today']++;
-                }
-                if ($date && isset($series[$date]) && ! $series[$date]['future']) {
-                    $series[$date]['count']++;
-                }
-            }
-            if ($order->last_pulled_at && (! $lastPull || $order->last_pulled_at->gt($lastPull))) {
-                $lastPull = $order->last_pulled_at;
+        }
+        $lastPull = $lastPull ? CarbonImmutable::parse($lastPull, 'UTC') : null;
+        $dailyAggregates = (clone $base)->psEligible()->where('tgl_ps', '>=', $month->toDateString())->where('tgl_ps', '<', $month->addMonth()->toDateString())
+            ->where('tgl_ps', '<', $today->addDay()->toDateString())->selectRaw('work_orders.id_branches, DATE(work_orders.tgl_ps) AS ps_date, COUNT(*) AS total')
+            ->groupBy('work_orders.id_branches')->groupByRaw('DATE(work_orders.tgl_ps)')->toBase()->get();
+        foreach ($dailyAggregates as $daily) {
+            if (isset($series[$daily->ps_date])) {
+                $series[$daily->ps_date]['count'] += (int) $daily->total;
             }
         }
         $groups = [];
@@ -117,7 +110,9 @@ class AreaAnalyticsService
             $types = array_intersect_key($types, [strtoupper(trim($filters['jenis_pekerjaan'], ' ')) => true]);
         }
 
-        return ['orderMonths' => app(OrderMonthAnalyticsService::class)->summary($base), 'ownerGroups' => app(OwnerGroupAnalyticsService::class)->summary($base), 'today' => $today, 'month' => $month, 'summary' => $summary, 'groups' => $groups, 'grand' => $grand, 'recap' => $types,
+        return ['mappingOrders' => ($filters['tab'] ?? 'progress') === 'progress' ? app(MappingOrderAnalyticsService::class)->summary($base, true, $filters['jenis_pekerjaan'] ?? 'all') : null,
+            'psDailyTable' => ($filters['tab'] ?? 'progress') === 'ach-ps' ? app(DailyPsTableService::class)->build($dailyAggregates, $branches, $month, $today, ($filters['ps_view'] ?? 'recent') === 'month') : null,
+            'orderMonths' => app(OrderMonthAnalyticsService::class)->summary($base), 'ownerGroups' => app(OwnerGroupAnalyticsService::class)->summary($base), 'today' => $today, 'month' => $month, 'summary' => $summary, 'groups' => $groups, 'grand' => $grand, 'recap' => $types,
             'branch_count' => count(array_filter($rows, fn ($row) => $row['branch_id'] !== null)),
             'series' => array_values($series), 'chart_max' => max(1, ...array_column($series, 'count')), 'month_ps' => array_sum(array_column($series, 'count')),
             'completion_rate' => $summary['total'] ? round($summary['ps_total'] / $summary['total'] * 100, 1) : 0, 'latest_pull' => $lastPull];

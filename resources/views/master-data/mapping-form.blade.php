@@ -14,7 +14,7 @@
             <p id="mapping-key-help" class="small muted">{{ $masterType === 'mapping-orders' ? 'Salin gabungan task dan status secara lengkap, misalnya Activate Service-STARTWORK. Task kosong dapat memakai -COMPWORK.' : 'Salin nama Owner Group persis dari kolom Owner Group pada export BIMA.' }}</p>
             @error($definition['code'])<p class="master-field-error">{{ $message }}</p>@enderror
             <label for="mapping-category">{{ $definition['value_label'] }} *</label>
-            <select id="mapping-category" name="{{ $definition['value'] }}" required @if($errors->has($definition['value'])) aria-invalid="true" @endif><option value="">Pilih kategori</option>@foreach($categories as $category)<option @selected(old($definition['value'],$record->{$definition['value']})===$category)>{{ $category }}</option>@endforeach</select>
+            <select id="mapping-category" name="{{ $definition['value'] }}" required @if($errors->has($definition['value'])) aria-invalid="true" @endif><option value="">Pilih kategori</option>@foreach($categories as $category)<option value="{{ $category }}" @selected(old($definition['value'],$record->{$definition['value']})===$category)>{{ $category }}</option>@endforeach</select>
             @error($definition['value'])<p class="master-field-error">{{ $message }}</p>@enderror
             <label for="mapping-active">Status *</label>
             <select id="mapping-active" name="active"><option value="1" @selected((string)old('active',$record->exists ? (int)$record->active : 1)==='1')>Aktif</option><option value="0" @selected((string)old('active',$record->exists ? (int)$record->active : 1)==='0')>Nonaktif</option></select>

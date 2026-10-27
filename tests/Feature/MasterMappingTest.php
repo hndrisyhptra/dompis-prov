@@ -9,6 +9,7 @@ use App\Models\MappingOwnergrup;
 use App\Models\WorkOrder;
 use App\Services\MasterDataService;
 use App\Services\OwnerGroupAnalyticsService;
+use App\Services\PriorityOrderService;
 use Illuminate\Support\Facades\Cache;
 
 class MasterMappingTest extends OloTestCase
@@ -114,6 +115,18 @@ class MasterMappingTest extends OloTestCase
         $this->assertSame($before, $order->fresh()->getRawOriginal());
         $this->get('/master-data/mapping-owner-groups?q=Owner&category=DCS&status=active')->assertOk()->assertSee('1 data sesuai filter');
         $this->get('/master-data/mapping-orders?category=UNKNOWN')->assertSessionHasErrors('category');
+        app(PriorityOrderService::class)->set($this->area, $order, true);
+        foreach (['CSO', 'MSO'] as $group) {
+            $this->get('/master-data/mapping-owner-groups/create')->assertOk()->assertSee('value="'.$group.'"', false);
+            $this->put('/master-data/mapping-owner-groups/'.$rule->getKey(), ['owner_grup' => $rule->owner_grup, 'kelompok_ownergrup' => $group,
+                'active' => 1, 'version' => $this->version($rule)])->assertSessionHasNoErrors();
+            $this->get('/master-data/mapping-owner-groups?category='.$group)->assertOk()->assertSee('1 data sesuai filter');
+            $this->get(route('work-orders.index', ['jenis_pekerjaan' => 'all', 'owner_group' => $group]))->assertOk()->assertViewHas('total', 1);
+            $this->get(route('area.dashboard', ['tab' => 'owner-group']))->assertOk()->assertViewHas('ownerGroups', fn ($data) => $data['totals'][$group] === 1);
+            $this->get(route('priorities.index', ['owner_group' => $group]))->assertOk()->assertViewHas('orders', fn ($orders) => $orders->total() === 1);
+            $this->get(route('priorities.monitoring', ['owner_group' => $group]))->assertOk()->assertViewHas('report', fn ($data) => $data['total'] === 1 && $data['totals'][$group] === 1);
+        }
+        $this->assertSame($before, $order->fresh()->getRawOriginal());
     }
 
     public function test_used_mapping_keys_cannot_be_deleted_or_renamed_even_after_deactivation(): void

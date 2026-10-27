@@ -136,7 +136,7 @@ class PriorityOrdersTest extends OloTestCase
             $allowed ? $response->assertRedirect() : $response->assertForbidden();
             if ($role !== Role::Bot) {
                 $list = $this->get(route('work-orders.index'))->assertOk();
-                $allowed ? $list->assertSee(' Order Prioritas</a>', false) : $list->assertDontSee(' Order Prioritas</a>', false);
+                $allowed ? $list->assertSee('aria-label="Submenu Order Prioritas"', false) : $list->assertDontSee('aria-label="Submenu Order Prioritas"', false);
             }
         }
         $inactive = $this->branchActor();

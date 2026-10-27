@@ -60,7 +60,13 @@ class DashboardDrilldownTest extends OloTestCase
         $this->assertSame(12, $xpath->query('//table[contains(@class,"area-matrix")]/tfoot/tr/*')->length);
         $this->assertSame(['Survey', 'OGP BIMA', 'Instalasi', 'Kendala', 'JT', 'Lainnya', 'Cancel', 'CLOSE'], array_map(fn ($node) => trim($node->textContent), iterator_to_array($xpath->query('//table[contains(@class,"area-matrix")]/thead/tr[2]/th'))));
         $this->assertGreaterThanOrEqual(3, $xpath->query('//table[contains(@class,"area-matrix")]//button[@data-region-toggle and @aria-expanded="false"]')->length);
-        $this->assertGreaterThanOrEqual(3, $xpath->query('//table[contains(@class,"owner-group-matrix")]//button[@data-region-toggle and @aria-expanded="false"]')->length);
+        $ownerPage = $this->get(route('area.dashboard', ['tab' => 'owner-group']))->assertOk();
+        $ownerXpath = $this->xpath($ownerPage->getContent());
+        $this->assertGreaterThanOrEqual(3, $ownerXpath->query('//table[contains(@class,"owner-group-matrix")]//button[@data-region-toggle and @aria-expanded="false"]')->length);
+        foreach ($ownerXpath->query('//a[@data-dashboard-orders]') as $link) {
+            $list = $this->get($link->getAttribute('href'))->assertOk();
+            $this->assertSame((int) str_replace(',', '', $link->textContent), $list->viewData('total'));
+        }
         foreach ($xpath->query('//button[@data-region-toggle]') as $button) {
             $this->assertSame(1, $xpath->query('//tbody[@id="'.$button->getAttribute('aria-controls').'" and @hidden]')->length);
         }

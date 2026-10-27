@@ -21,35 +21,37 @@ class BranchAnalyticsService
             $series[$date->format('Y-m-d')] = ['date' => $date->format('Y-m-d'), 'label' => $date->format('d M'), 'count' => 0];
         }
         // PS is confirmed by both statuses; calendar date comes from BIMA TGL PS.
-        foreach ((clone $base)->psEligible()->whereDate('tgl_ps', '>=', $start->toDateString())->whereDate('tgl_ps', '<=', $today->toDateString())->select(['id_work_orders', 'tgl_ps'])->cursor() as $order) {
-            $key = $order->tgl_ps->toDateString();
+        foreach ((clone $base)->psEligible()->where('tgl_ps', '>=', $start->toDateString())->where('tgl_ps', '<', $today->addDay()->toDateString())
+            ->selectRaw('DATE(work_orders.tgl_ps) AS ps_date, COUNT(*) AS total')->groupByRaw('DATE(work_orders.tgl_ps)')->toBase()->get() as $order) {
+            $key = $order->ps_date;
             if (isset($series[$key])) {
-                $series[$key]['count']++;
+                $series[$key]['count'] = (int) $order->total;
             }
         }
         $outstanding = (clone $base)->outstanding();
+        $metrics = [
+            'waiting_bima' => fn ($q) => $q->waitingBima(),
+            'closed_by_branch' => fn ($q) => $q->whereRaw('UPPER(TRIM(progress_category)) = ?', ['CLOSE']),
+            'ps_total' => fn ($q) => $q->psEligible(), 'potential_ps' => fn ($q) => $q->potentialPs(), 'new_order' => fn ($q) => $q->newOrder(),
+            'incoming' => fn ($q) => $q->where('tgl_order', '>=', $today->toDateString())->where('tgl_order', '<', $today->addDay()->toDateString()), 'complete' => fn ($q) => $q->psOnDate($today->toDateString()),
+            'outstanding' => fn ($q) => $q->outstanding(), 'issues' => fn ($q) => $q->outstanding()->whereHas('issues', fn ($q) => $q->where('status', 'OPEN')),
+            'unupdated' => fn ($q) => $q->outstanding()->whereNull('last_progress_at'), 'assigned_total' => fn ($q) => $q,
+        ];
+        $aggregate = app(OrderMetricAggregate::class)->query($base, $metrics)->selectRaw('MAX(work_orders.last_pulled_at) AS latest_pull')->toBase()->first();
+        $counts = array_map(fn ($key) => (int) $aggregate->$key, array_keys($metrics));
+        $counts = array_combine(array_keys($metrics), $counts);
 
-        return [
+        return $counts + [
+            'mappingOrders' => app(MappingOrderAnalyticsService::class)->summary($base, false),
             'orderMonths' => app(OrderMonthAnalyticsService::class)->summary($base),
             'ownerGroups' => app(OwnerGroupAnalyticsService::class)->summary($base),
             'today' => $today,
-            'waiting_bima' => (clone $base)->waitingBima()->count(),
-            'closed_by_branch' => (clone $base)->whereRaw('UPPER(TRIM(progress_category)) = ?', ['CLOSE'])->count(),
-            'ps_total' => (clone $base)->psEligible()->count(),
-            'potential_ps' => (clone $base)->potentialPs()->count(),
-            'new_order' => (clone $base)->newOrder()->count(),
-            'incoming' => (clone $base)->whereDate('tgl_order', $today->format('Y-m-d'))->count(),
-            'complete' => (clone $base)->psOnDate($today->toDateString())->count(),
-            'outstanding' => (clone $outstanding)->count(),
-            'issues' => (clone $outstanding)->whereHas('issues', fn ($query) => $query->where('status', 'OPEN'))->count(),
-            'unupdated' => (clone $outstanding)->whereNull('last_progress_at')->count(),
             'series' => array_values($series),
             'period_complete' => array_sum(array_column($series, 'count')),
             'chart_max' => max(1, ...array_column($series, 'count')),
             'attention' => (clone $outstanding)->with('assignedBranch')->withCount(['issues as open_issues_count' => fn ($query) => $query->where('status', 'OPEN')])
                 ->orderByDesc('open_issues_count')->orderByRaw('CASE WHEN last_progress_at IS NULL THEN 0 ELSE 1 END')->orderBy('tgl_order')->limit(6)->get(),
-            'latest_pull' => (clone $base)->max('last_pulled_at'),
-            'assigned_total' => (clone $base)->count(),
+            'latest_pull' => $aggregate->latest_pull,
         ];
     }
 }

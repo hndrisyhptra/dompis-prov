@@ -57,7 +57,7 @@ class OwnerGroupAnalyticsService
             'total' => array_sum($totals), 'has_mapping' => MappingOwnergrup::where('active', true)->whereIn('kelompok_ownergrup', MappingOwnergrup::GROUPS)->exists()];
     }
 
-    private static function joinMapping(Builder $query, string $alias): Builder
+    public static function joinMapping(Builder $query, string $alias): Builder
     {
         return $query->leftJoin('mapping_ownergrup as '.$alias, function ($join) use ($alias) {
             self::matchOwner($join, $alias.'.owner_grup');

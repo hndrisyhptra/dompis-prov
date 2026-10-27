@@ -21,6 +21,7 @@ $selectedBranch = $branches->firstWhere('id_branches', (int) request('branch'));
 <a class="stat kpi-link" href="{{ route('work-orders.index', $orderFilters + ['queue' => 'potential_ps']) }}"><span class="small muted">Potensi PS</span><strong>{{ number_format($potential_ps) }}</strong><span class="small muted">Task &amp; status BIMA sesuai kriteria</span></a>
 <a class="stat kpi-link" href="{{ route('work-orders.index', $orderFilters + ['queue' => 'new_order']) }}"><span class="small muted">New Order</span><strong>{{ number_format($new_order) }}</strong><span class="small muted">Review Order TSQ sesuai status BIMA</span></a>
 </div>
+@include('dashboard.mapping-orders', ['mappingScopeFilters' => $orderFilters])
 @include('owner-groups.summary', ['ownerScopeFilters' => $orderFilters])
 @include('work-orders.order-month-summary', ['monthScopeFilters' => $orderFilters])
 <div class="grid analytics-grid gap-top">

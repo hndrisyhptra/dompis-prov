@@ -9,7 +9,34 @@ use App\Models\WorkOrder;
 
 class BimaOrderResolver
 {
+    private ?array $routingCache = null;
+
+    /** Only reuse routing within one inbound-lock-protected stage, never across preview/commit. */
+    public function withRoutingCache(callable $callback): mixed
+    {
+        $previous = $this->routingCache;
+        $this->routingCache = [];
+        try {
+            return $callback();
+        } finally {
+            $this->routingCache = $previous;
+        }
+    }
+
     public function resolve(array $data): ?int
+    {
+        if ($this->routingCache === null) {
+            return $this->resolveCurrent($data);
+        }
+        $key = json_encode([mb_strtoupper(trim($data['branch'] ?? '')), mb_strtoupper(trim($data['sto'] ?? ''))], JSON_THROW_ON_ERROR);
+        if (! array_key_exists($key, $this->routingCache)) {
+            $this->routingCache[$key] = $this->resolveCurrent($data);
+        }
+
+        return $this->routingCache[$key];
+    }
+
+    private function resolveCurrent(array $data): ?int
     {
         $sourceBranch = mb_strtoupper(trim($data['branch'] ?? ''));
         $mapping = BranchMapping::where('enabled', true)->where('bima_branch', $sourceBranch)

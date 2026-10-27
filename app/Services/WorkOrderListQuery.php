@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Enums\ProgressCategory;
 use App\Models\User;
+use App\Support\OrderAging;
 use App\Support\ProgressSummary;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 
 class WorkOrderListQuery
@@ -22,7 +24,14 @@ class WorkOrderListQuery
         if (! empty($filters['ps_date'])) {
             $query->psOnDate($filters['ps_date']);
         }
+        if (! empty($filters['ps_from']) && ! empty($filters['ps_to'])) {
+            $end = CarbonImmutable::parse($filters['ps_to'], 'Asia/Jakarta')->min(CarbonImmutable::now('Asia/Jakarta')->startOfDay());
+            $query->psEligible()->where('tgl_ps', '>=', $filters['ps_from'])->where('tgl_ps', '<', $end->addDay()->toDateString());
+        }
+        if (! empty($filters['aging_bucket']) && ! empty($filters['aging_on'])) {
+            OrderAging::filter($query, $filters['aging_bucket'], $filters['aging_on']);
+        }
 
-        return $query;
+        return MappingOrderAnalyticsService::applyDetailFilters($query, $filters);
     }
 }

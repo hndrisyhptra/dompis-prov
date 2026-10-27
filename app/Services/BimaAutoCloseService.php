@@ -18,8 +18,12 @@ class BimaAutoCloseService
 
         return DB::transaction(function () use ($workOrder, $actor, $syncJobId) {
             $order = WorkOrder::lockForUpdate()->findOrFail($workOrder->getKey());
-            if ($order->source_system !== 'BIMA' || ! PsEligibility::sourceMatches($order->status_order, $order->task_bima, $order->status_bima)
-                || strtoupper(trim($order->progress_category ?? '', ' ')) === 'CLOSE') {
+            if ($order->source_system !== 'BIMA' || ! PsEligibility::sourceMatches($order->status_order, $order->task_bima, $order->status_bima)) {
+                return false;
+            }
+            if ($order->isPsEligible()) {
+                app(PriorityOrderService::class)->releaseForPs($order, $actor, 'bima_sync');
+
                 return false;
             }
             $before = $order->only(['progress_category', 'operational_status', 'revision', 'verification_status', 'verified_at', 'last_progress_at']);
@@ -39,6 +43,7 @@ class BimaAutoCloseService
                 'metadata' => ['origin' => $syncJobId ? 'inbound' : 'backfill', 'id_sync_jobs' => $syncJobId, 'status_order' => $order->status_order,
                     'before' => $before, 'after' => $order->only(array_keys($before)), 'open_issues_preserved' => $openIssues,
                     'completion_date_inferred' => false]]);
+            app(PriorityOrderService::class)->releaseForPs($order, $actor, 'bima_sync');
 
             return true;
         }, 3);

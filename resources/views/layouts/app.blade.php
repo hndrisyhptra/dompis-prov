@@ -25,7 +25,14 @@
             <a class="nav-link {{ request()->routeIs('revenue.*') ? 'active' : '' }}" href="{{ route('revenue.index') }}"><x-icon name="revenue"/> Revenue Overview</a>
             @endcan
             @can('priority-orders')
-            <a class="nav-link {{ request()->routeIs('priorities.*') ? 'active' : '' }}" href="{{ route('priorities.index') }}"><x-icon name="bookmark"/> Order Prioritas</a>
+            <details class="nav-master" @if(request()->routeIs('priorities.*')) open @endif>
+                <summary class="nav-link {{ request()->routeIs('priorities.*') ? 'active' : '' }}"><x-icon name="bookmark"/><span class="nav-master-label">Order Prioritas</span><span class="nav-master-chevron" aria-hidden="true">⌄</span></summary>
+                <div class="nav-submenu" aria-label="Submenu Order Prioritas">
+                    @foreach(['priorities.monitoring'=>'Monitoring Order Prioritas', 'priorities.index'=>'List Order Prioritas'] as $route => $label)
+                    <a class="nav-sublink {{ request()->routeIs($route) ? 'active' : '' }}" href="{{ route($route) }}" @if(request()->routeIs($route)) aria-current="page" @endif>{{ $label }}</a>
+                    @endforeach
+                </div>
+            </details>
             @endcan
             @can('material-reports')<a class="nav-link {{ request()->routeIs('materials.*', 'branch.material') ? 'active' : '' }}" href="{{ route('materials.index') }}"><x-icon name="material"/> Laporan Material</a>@endcan
             @can('sync')

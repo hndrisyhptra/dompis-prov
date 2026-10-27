@@ -38,7 +38,7 @@ class BranchOrderScope
         }
         if (! empty($filters['order_month'])) {
             $month = CarbonImmutable::createFromFormat('!Y-m', $filters['order_month']);
-            $query->whereDate('tgl_order', '>=', $month->toDateString())->whereDate('tgl_order', '<', $month->addMonth()->toDateString());
+            $query->where('tgl_order', '>=', $month->toDateString())->where('tgl_order', '<', $month->addMonth()->toDateString());
         }
         $type = $filters['jenis_pekerjaan'] ?? 'NEW INSTALL';
         if ($type === 'TANPA JENIS') {

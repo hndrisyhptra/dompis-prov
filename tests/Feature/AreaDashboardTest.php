@@ -6,9 +6,45 @@ use App\Enums\Role;
 use App\Models\Branch;
 use App\Models\WorkOrder;
 use Carbon\Carbon;
+use DOMDocument;
+use DOMXPath;
 
 class AreaDashboardTest extends OloTestCase
 {
+    public function test_progress_and_owner_tabs_render_separately_preserve_filters_and_do_not_write_data(): void
+    {
+        $this->fixtures();
+        $before = WorkOrder::orderBy('id_work_orders')->get()->toArray();
+        $this->actingAs($this->area);
+        $this->get(route('area.dashboard'))->assertOk()->assertViewHas('activeTab', 'progress')
+            ->assertSee('id="area-dashboard-progress"', false)->assertSee('Rekap jenis pekerjaan')->assertDontSee('Perolehan PS harian')
+            ->assertDontSee('id="owner-group-title"', false);
+        $filters = ['region' => 1, 'branch' => $this->branch->getKey(), 'service' => 'METRO', 'jenis_pekerjaan' => 'MODIFY', 'month' => '2026-09'];
+        $page = $this->get(route('area.dashboard', $filters + ['tab' => 'owner-group']))->assertOk()->assertViewHas('activeTab', 'owner-group')
+            ->assertSee('Distribusi Owner Group')->assertSee('id="area-dashboard-owner-group"', false)
+            ->assertDontSee('Rekap jenis pekerjaan')->assertDontSee('Perolehan PS harian');
+        $this->assertSame(1, $page->viewData('ownerGroups')['total']);
+        $dom = new DOMDocument;
+        @$dom->loadHTML($page->getContent());
+        $xpath = new DOMXPath($dom);
+        $this->assertSame(3, $xpath->query('//nav[@aria-label="Tab dashboard Area"]/a')->length);
+        $this->assertSame('area-tab-owner-group', $xpath->query('//nav[@aria-label="Tab dashboard Area"]/a[@aria-current="page"]')->item(0)->getAttribute('id'));
+        $progressUrl = $xpath->query('//a[@id="area-tab-progress"]')->item(0)->getAttribute('href');
+        parse_str(parse_url($progressUrl, PHP_URL_QUERY), $query);
+        $this->assertEquals($filters + ['tab' => 'progress'], $query);
+        $this->assertSame(1, $xpath->query('//form//input[@type="hidden" and @name="tab" and @value="owner-group"]')->length);
+        $this->assertSame(1, $xpath->query('//form//input[@type="hidden" and @name="month" and @value="2026-09"]')->length);
+        $this->get($progressUrl)->assertOk()->assertViewHas('activeTab', 'progress')->assertViewHas('branch_count', 1)->assertDontSee('id="owner-group-title"', false);
+        $achUrl = $xpath->query('//a[@id="area-tab-ach-ps"]')->item(0)->getAttribute('href');
+        parse_str(parse_url($achUrl, PHP_URL_QUERY), $achQuery);
+        $this->assertEquals($filters + ['tab' => 'ach-ps'], $achQuery);
+        $this->get($achUrl)->assertOk()->assertViewHas('activeTab', 'ach-ps')->assertSee('Perolehan PS harian')->assertSee('id="area-dashboard-ach-ps"', false)
+            ->assertDontSee('Rekap jenis pekerjaan')->assertDontSee('Distribusi Owner Group')->assertDontSee('Mapping Order Region');
+        $this->getJson(route('area.dashboard', ['tab' => 'forged']))->assertUnprocessable()->assertJsonValidationErrors('tab');
+        $this->assertSame($before, WorkOrder::orderBy('id_work_orders')->get()->toArray());
+        $this->actingAs($this->user())->get(route('area.dashboard', ['tab' => 'owner-group']))->assertForbidden();
+    }
+
     private function fixtures(): void
     {
         $this->travelTo(Carbon::parse('2026-10-17 17:05:00', 'UTC'));

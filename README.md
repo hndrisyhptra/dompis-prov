@@ -46,13 +46,13 @@ php artisan olo:user branch@example.com --name="Admin Branch" --role=branch_admi
 
 `--branch` boleh diulang. Role branch wajib minimal satu branch aktif. Kolom role/active tidak mass assignable dari request. Akun yang sudah ada sebelum migrasi tetap tidak aktif sampai diprovision/direview oleh administrator; tidak otomatis diberi hak Area.
 
-Jalankan worker di terminal/proses terpisah:
+Untuk pengembangan lokal, jalankan listener di terminal/proses terpisah agar setiap job memuat kode terbaru:
 
 ```sh
-php artisan queue:work --queue=default --tries=5 --timeout=180 --sleep=1
+php artisan queue:listen --queue=default --tries=5 --timeout=180 --sleep=1
 ```
 
-Gunakan `QUEUE_CONNECTION=database`, `CACHE_STORE=database` (atau Redis bersama) dan `DB_QUEUE_RETRY_AFTER=300`. Timeout job 180 detik, lock koneksi 240 detik, visibility/retry_after 300 detik. Shared cache diperlukan untuk lock antar-worker; jangan memakai array cache di production. Worker perlu `queue:restart` setelah deploy/perubahan konfigurasi. Jalankan worker melalui supervisor produksi. Queued yang belum berjalan berarti menunggu worker; bukan sync sukses.
+Gunakan `QUEUE_CONNECTION=database`, `CACHE_STORE=database` (atau Redis bersama) dan `DB_QUEUE_RETRY_AFTER=300`. Timeout job 180 detik, lock koneksi 240 detik, visibility/retry_after 300 detik. Shared cache diperlukan untuk lock antar-worker; jangan memakai array cache di production. Production menggunakan `queue:work --queue=default --tries=5 --timeout=180 --sleep=1` melalui Supervisor. Jalankan `queue:restart` setelah deploy/perubahan konfigurasi dan pastikan Supervisor menyalakan worker kembali. Queued yang belum berjalan berarti menunggu worker; bukan sync sukses. [Pemulihan versi upload BIMA](docs/BIMA_IMPORT_WORKER_RECOVERY.md).
 
 Port 8000 pada sesi pengembangan sudah digunakan aplikasi lain; pengujian OLO memakai 8011 dengan SQLite sementara. Server uji dan akun sintetisnya bukan environment operasional.
 

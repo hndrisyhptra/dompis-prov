@@ -33,7 +33,7 @@ class OwnerGroupMappingReferenceTest extends OloTestCase
         $this->assertSame(24, $service->apply($reference, $this->area)['rules_inserted']);
         $master = MappingOwnergrup::orderBy('id_mapping_ownergrup')->get()->toArray();
         $matrix = app(OwnerGroupAnalyticsService::class)->summary(WorkOrder::query());
-        $this->assertSame(['DISTRICT' => 12, 'PMD' => 4, 'ED REGIONAL' => 2, 'SDI REGIONAL' => 3, 'FF SO 3' => 1, 'FF SO 4' => 1, 'DCS' => 1, 'unmapped' => 0], $matrix['totals']);
+        $this->assertSame(['DISTRICT' => 12, 'PMD' => 4, 'ED REGIONAL' => 2, 'SDI REGIONAL' => 3, 'FF SO 3' => 1, 'FF SO 4' => 1, 'DCS' => 1, 'CSO' => 0, 'MSO' => 0, 'unmapped' => 0], $matrix['totals']);
         $this->assertSame(24, $matrix['total']);
         $this->actingAs($this->area)->get(route('work-orders.index', ['owner_group' => 'DCS']))->assertOk()->assertViewHas('total', 1)->assertSee('DCS DCEC');
         $this->travel(1)->minutes();

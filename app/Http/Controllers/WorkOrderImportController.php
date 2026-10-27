@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\ProcessWorkOrderImport;
 use App\Models\AuditLog;
 use App\Models\SyncJob;
+use App\Models\SyncJobRow;
 use App\Services\BimaWorkOrdersTemplate;
 use App\Services\ExcelWorkOrderImportService;
 use App\Services\ExcelWorkOrderMapper;
@@ -59,8 +60,22 @@ class WorkOrderImportController extends Controller
             abort_unless($job->id_users === $request->user()->getKey() && $job->direction === 'import', 403);
             abort_unless(($job->snapshot['import']['file_hash'] ?? null) === $hash && ($job->snapshot['import']['sheet'] ?? null) === $workbook['sheet'] && ($job->snapshot['import']['header_row'] ?? null) === (int) $data['header_row'], 409, 'Form upload sudah digunakan untuk file lain. Muat ulang Sync Center.');
             if ($job->wasRecentlyCreated) {
+                $batch = [];
+                $bytes = 0;
                 foreach ($workbook['rows'] as $index => $cells) {
-                    $job->rows()->create(['row_index' => $index, 'action' => 'pending', 'payload' => ['raw' => $cells]]);
+                    // Preserve encrypted casts while batching below a conservative MySQL packet budget.
+                    $attributes = (new SyncJobRow(['id_sync_jobs' => $job->getKey(), 'row_index' => $index, 'action' => 'pending', 'payload' => ['raw' => $cells]]))->getAttributes();
+                    $size = strlen($attributes['payload']) + 256;
+                    if ($batch && (count($batch) >= 100 || $bytes + $size > 262144)) {
+                        SyncJobRow::insert($batch);
+                        $batch = [];
+                        $bytes = 0;
+                    }
+                    $batch[] = $attributes;
+                    $bytes += $size;
+                }
+                if ($batch) {
+                    SyncJobRow::insert($batch);
                 }
                 AuditLog::create(['id_users' => $job->id_users, 'action' => 'excel.uploaded', 'entity_type' => 'sync_job', 'id_entity' => $job->getKey(), 'metadata' => ['rows' => count($workbook['rows']), 'file_hash' => $hash]]);
             }
@@ -96,7 +111,8 @@ class WorkOrderImportController extends Controller
 
         return view('imports.mapping', ['job' => $syncJob, 'meta' => $meta, 'fields' => $fields,
             'primaryFields' => $primaryFields, 'additionalFields' => array_diff_key($fields, $primaryFields), 'presetMapping' => $preset, 'useBimaDefaults' => $useBimaDefaults, 'mapping' => $mapping,
-            'sample' => $syncJob->rows()->orderBy('row_index')->limit(3)->get()]);
+            'rowCount' => $syncJob->rows()->count(),
+            'sample' => $syncJob->rows()->orderBy('row_index')->limit(3)->get()->map(fn ($row) => ['row_index' => $row->row_index, 'raw' => $row->payload['raw'] ?? []])]);
     }
 
     public function preview(Request $request, SyncJob $syncJob)
@@ -117,6 +133,10 @@ class WorkOrderImportController extends Controller
             if (trim($syncJob->snapshot['import']['headers'][$column - 1]) === '') {
                 throw ValidationException::withMessages(['mapping' => 'Kolom tanpa header tidak dapat dipilih.']);
             }
+        }
+        $preset = BimaWorkOrdersTemplate::mapping($syncJob->snapshot['import']['headers']);
+        if ($preset !== null && isset($mapping['tgl_ps']) && $mapping['tgl_ps'] !== (int) $preset['tgl_ps']) {
+            throw ValidationException::withMessages(['mapping.tgl_ps' => 'Untuk export BIMA Work Orders, pilih Date Modified sebagai Tanggal PS atau Tidak diimpor. Tanggal hanya diterapkan pada status PS dengan Mapping Order PS aktif.']);
         }
         DB::transaction(function () use ($request, $syncJob, $mapping) {
             $job = SyncJob::whereKey($syncJob->getKey())->lockForUpdate()->firstOrFail();

@@ -79,12 +79,12 @@ class BimaWorkOrdersTemplateTest extends OloTestCase
         $this->assertSame(BimaWorkOrdersTemplate::NAME, $job->snapshot['import']['template']);
         $this->get(route('imports.mapping', $job))->assertOk()->assertSee('Template BIMA Work Orders terdeteksi');
         $mapping = (new ExcelWorkOrderMapper)->suggest(self::HEADERS);
-        $this->assertCount(13, $mapping);
+        $this->assertCount(14, $mapping);
         $this->assertSame('10', $mapping['owner_grup']);
         if (! $includeOwner) {
             unset($mapping['owner_grup']);
         }
-        foreach (['status_order', 'tgl_ps', 'ps_hari_ini', 'umur_hari', 'kategori_umur'] as $field) {
+        foreach (['status_order', 'ps_hari_ini', 'umur_hari', 'kategori_umur'] as $field) {
             $this->assertArrayNotHasKey($field, $mapping);
         }
         $this->post(route('imports.preview', $job), ['confirmed_mapping' => 1, 'mapping' => $mapping])->assertSessionHasNoErrors()->assertRedirect();
@@ -158,7 +158,7 @@ class BimaWorkOrdersTemplateTest extends OloTestCase
         $this->assertArrayNotHasKey('no_tq_sc_id', (new ExcelWorkOrderMapper)->suggest(['ORDER', 'Description']));
     }
 
-    public function test_order_header_restores_all_thirteen_choices_on_an_existing_pending_upload_without_writes(): void
+    public function test_order_header_restores_all_fourteen_choices_on_an_existing_pending_upload_without_writes(): void
     {
         config(['olo.inbound' => 'excel']);
         Queue::fake();
@@ -176,7 +176,7 @@ class BimaWorkOrdersTemplateTest extends OloTestCase
         $snapshot = $job->snapshot;
         $snapshot['import']['template'] = null;
         $job->update(['snapshot' => $snapshot]);
-        $expected = ['tgl_order' => '1', 'no_tq_sc_id' => '4', 'sid' => '7', 'task_bima' => '8', 'jenis_pekerjaan' => '9',
+        $expected = ['tgl_order' => '1', 'tgl_ps' => '2', 'no_tq_sc_id' => '4', 'sid' => '7', 'task_bima' => '8', 'jenis_pekerjaan' => '9',
             'owner_grup' => '10', 'status_bima' => '11', 'layanan' => '12', 'alamat' => '13', 'nama_olo' => '15', 'sto' => '16', 'branch' => '29', 'regional' => '30'];
         $response = $this->get(route('imports.mapping', $job))->assertOk()->assertSee('Template BIMA Work Orders terdeteksi')->assertViewHas('mapping', $expected);
         $this->assertSame(array_keys($expected), array_keys($response->viewData('primaryFields')));
@@ -188,7 +188,7 @@ class BimaWorkOrdersTemplateTest extends OloTestCase
             $this->assertNotNull($node, $field);
             $this->assertSame($column, $node->getAttribute('value'), $field);
         }
-        $this->assertSame(13, $xpath->query('//form/div[contains(@class,"import-mapping-row")]')->length);
+        $this->assertSame(14, $xpath->query('//form/div[contains(@class,"import-mapping-row")]')->length);
         foreach (ExcelWorkOrderMapper::DERIVED_FIELDS as $field) {
             $response->assertDontSee('name="mapping['.$field.']"', false);
         }
@@ -266,5 +266,68 @@ class BimaWorkOrdersTemplateTest extends OloTestCase
         $headers[9] = 'Different header';
         $this->assertNull(BimaWorkOrdersTemplate::mapping($headers));
         $this->assertArrayNotHasKey('owner_grup', (new ExcelWorkOrderMapper)->suggest($headers));
+    }
+
+    public function test_latest_export_without_witel_and_with_booking_id_maps_customer_n_sto_o_and_imports_correctly(): void
+    {
+        config(['olo.inbound' => 'excel']);
+        Queue::fake();
+        $headers = self::HEADERS;
+        $row = $this->templateRow();
+        array_splice($headers, 13, 1);
+        array_splice($row, 13, 1);
+        array_splice($headers, 26, 0, ['Booking ID']);
+        array_splice($row, 26, 0, ['']);
+        $expected = BimaWorkOrdersTemplate::mapping(self::HEADERS);
+        $expected['nama_olo'] = '14';
+        $expected['sto'] = '15';
+        $this->assertSame($expected, (new ExcelWorkOrderMapper)->suggest($headers));
+        $file = XlsxFile::make($headers, [$row], 'Work Orders');
+        try {
+            $this->actingAs($this->area)->post(route('imports.upload'), ['file' => $file, 'header_row' => 1, 'idempotency_key' => (string) Str::uuid()])->assertSessionHasNoErrors()->assertRedirect();
+        } finally {
+            unlink($file->getRealPath());
+        }
+        $job = SyncJob::sole();
+        // Pending jobs from the previous detector are re-detected read-only.
+        $snapshot = $job->snapshot;
+        $snapshot['import']['template'] = null;
+        $job->update(['snapshot' => $snapshot]);
+        $page = $this->get(route('imports.mapping', $job))->assertOk()->assertViewHas('mapping', $expected)->assertSee('Template BIMA Work Orders terdeteksi');
+        $dom = new \DOMDocument;
+        @$dom->loadHTML($page->getContent());
+        $xpath = new \DOMXPath($dom);
+        foreach ($expected as $field => $column) {
+            $this->assertSame($column, $xpath->query('//select[@id="map-'.$field.'"]/option[@selected]')->item(0)->getAttribute('value'), $field);
+        }
+        $this->assertSame($snapshot, $job->fresh()->snapshot);
+        $this->assertDatabaseCount('work_orders', 0);
+        $this->post(route('imports.preview', $job), ['mapping' => $expected, 'confirmed_mapping' => 1])->assertSessionHasNoErrors()->assertRedirect();
+        (new ProcessWorkOrderImport($job->getKey()))->handle(app(ExcelWorkOrderImportService::class));
+        $this->assertSame(1, $job->fresh()->stats['new']);
+        $this->post(route('sync.commit', $job), ['confirmed' => 1])->assertRedirect();
+        (new ProcessWorkOrderImport($job->getKey()))->handle(app(ExcelWorkOrderImportService::class));
+        $order = WorkOrder::sole();
+        $this->assertSame('Pelanggan fiktif', $order->nama_olo);
+        $this->assertSame('TST', $order->sto);
+        $this->assertSame('BRANCH UJI', $order->branch);
+        $this->assertSame('REGION UJI', $order->regional);
+        $this->assertSame($this->branch->getKey(), $order->id_branches);
+        $this->assertSame('ACTIVATION-COMPLETE', $order->status_order);
+        $again = $this->import($this->templateRow());
+        $this->assertSame(1, $again->stats['unchanged']);
+        $this->assertDatabaseCount('work_orders', 1);
+        $this->assertDatabaseCount('bima_task_logs', 0);
+    }
+
+    public function test_complete_header_contract_tolerates_reordering_but_never_ambiguous_identity_or_headers(): void
+    {
+        $headers = self::HEADERS;
+        [$headers[0], $headers[14]] = [$headers[14], $headers[0]];
+        $this->assertSame('15', BimaWorkOrdersTemplate::mapping($headers)['tgl_order']);
+        $this->assertSame('1', BimaWorkOrdersTemplate::mapping($headers)['nama_olo']);
+        $this->assertNull(BimaWorkOrdersTemplate::mapping([...$headers, 'Owner Group']));
+        $this->assertNull(BimaWorkOrdersTemplate::mapping([...$headers, 'ORDER']));
+        $this->assertArrayNotHasKey('no_tq_sc_id', (new ExcelWorkOrderMapper)->suggest(['ORDER', 'Description']));
     }
 }

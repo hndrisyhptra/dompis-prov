@@ -13,13 +13,27 @@ class PriorityOrderQuery
 
     public function base(User $actor, array $filters): Builder
     {
-        return $this->scope->orders($actor, ['jenis_pekerjaan' => 'all'] + $filters)->whereHas('priorities', $this->selections($actor, $filters))
+        $query = $this->scope->orders($actor, ['jenis_pekerjaan' => 'all'] + $filters)->notPsEligible()->whereHas('priorities', $this->selections($actor, $filters))
             ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($q) => $q->where('no_tq_sc_id', 'like', '%'.$term.'%')->orWhere('sid', 'like', '%'.$term.'%')->orWhere('nama_olo', 'like', '%'.$term.'%')));
+        foreach (['bima_status' => 'status_bima', 'bima_task' => 'task_bima'] as $filter => $column) {
+            if ($filters[$filter.'_missing'] ?? false) {
+                $query->where(fn ($q) => $q->whereNull($column)->orWhereRaw('LENGTH(work_orders.'.$column.') = 0'));
+            } elseif (isset($filters[$filter]) && $filters[$filter] !== '') {
+                $query->whereRaw($query->getConnection()->getDriverName() === 'mysql' ? 'BINARY work_orders.'.$column.' = BINARY ?' : 'work_orders.'.$column.' = ?', [$filters[$filter]]);
+            }
+        }
+
+        return $query;
+    }
+
+    public function filtered(User $actor, array $filters): Builder
+    {
+        return $this->queues->apply($this->base($actor, $filters), $filters['state'] ?? 'all', CarbonImmutable::now('Asia/Jakarta'));
     }
 
     public function ordered(User $actor, array $filters): Builder
     {
-        $query = $this->queues->apply($this->base($actor, $filters), $filters['state'] ?? 'all', CarbonImmutable::now('Asia/Jakarta'))
+        $query = $this->filtered($actor, $filters)
             ->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($actor)->with('creator:id_users,name')])
             ->withCount(['issues as open_issues_count' => fn ($q) => $q->where('status', 'OPEN')])->withMax(['priorities as priority_selected_at' => $this->selections($actor, $filters)], 'created_at');
         match ($filters['sort'] ?? 'selected') {

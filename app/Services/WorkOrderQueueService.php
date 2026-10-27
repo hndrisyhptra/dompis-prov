@@ -10,7 +10,7 @@ class WorkOrderQueueService
     public function apply(Builder $query, string $queue, CarbonImmutable $today): Builder
     {
         if ($queue === 'today') {
-            return $query->whereDate('tgl_order', $today->toDateString());
+            return $query->where('tgl_order', '>=', $today->toDateString())->where('tgl_order', '<', $today->addDay()->toDateString());
         }
         if ($queue === 'ps_today') {
             return $query->psOnDate($today->toDateString());
@@ -34,7 +34,7 @@ class WorkOrderQueueService
             return $query->psEligible()->whereNull('tgl_ps');
         }
         if ($queue === 'future_ps_date') {
-            return $query->psEligible()->whereDate('tgl_ps', '>', $today->toDateString());
+            return $query->psEligible()->where('tgl_ps', '>=', $today->addDay()->toDateString());
         }
         if ($queue === 'unmapped') {
             return $query->whereNull('id_branches');
@@ -54,11 +54,16 @@ class WorkOrderQueueService
 
     public function counts(Builder $base, CarbonImmutable $today): array
     {
-        $counts = [];
-        foreach (['all', 'unupdated', 'outstanding', 'issues', 'closed', 'waiting_bima', 'complete', 'potential_ps', 'new_order'] as $queue) {
-            $counts[$queue] = $this->apply(clone $base, $queue, $today)->count();
+        return $this->selectedCounts($base, $today, ['all', 'unupdated', 'outstanding', 'issues', 'closed', 'waiting_bima', 'complete', 'potential_ps', 'new_order']);
+    }
+
+    public function selectedCounts(Builder $base, CarbonImmutable $today, array $queues): array
+    {
+        $metrics = [];
+        foreach ($queues as $queue) {
+            $metrics[$queue] = fn ($query) => $this->apply($query, $queue, $today);
         }
 
-        return $counts;
+        return app(OrderMetricAggregate::class)->counts($base, $metrics);
     }
 }

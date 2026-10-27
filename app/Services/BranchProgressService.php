@@ -21,6 +21,7 @@ class BranchProgressService
             abort_unless($order->revision === (int) $data['revision'], 409, 'Progress sudah berubah. Muat ulang sebelum menyimpan.');
             if (isset($data['progress_category'])) {
                 $this->updateCategory($actor, $order, $data);
+                $this->releasePsPriority($order, $actor);
 
                 return;
             }
@@ -32,6 +33,8 @@ class BranchProgressService
             abort_if($target === 'COMPLETED' && ! in_array($order->operational_status, ['FIELD_DONE', 'PENDING_VALIDATION', 'COMPLETED']), 422, 'Verifikasi complete hanya setelah pekerjaan lapangan selesai.');
             $old = $order->operational_status;
             if ($old === $target) {
+                $this->releasePsPriority($order, $actor);
+
                 return;
             }
             $revision = $order->revision + 1;
@@ -46,7 +49,15 @@ class BranchProgressService
             $order->events()->create(['id_users' => $actor->getKey(), 'old_status' => $old, 'new_status' => $target, 'old_progress_category' => $oldCategory, 'new_progress_category' => $category, 'revision' => $revision, 'notes' => $data['notes']]);
             AuditLog::create(['id_users' => $actor->getKey(), 'action' => 'progress.changed', 'entity_type' => 'work_order', 'id_entity' => $order->getKey(),
                 'metadata' => ['old' => $old, 'new' => $target, 'revision' => $revision]]);
+            $this->releasePsPriority($order, $actor);
         }, 3);
+    }
+
+    private function releasePsPriority(WorkOrder $order, User $actor): void
+    {
+        if ($order->isPsEligible()) {
+            app(PriorityOrderService::class)->releaseForPs($order, $actor, 'branch_progress');
+        }
     }
 
     private function updateCategory(User $actor, WorkOrder $order, array $data): void

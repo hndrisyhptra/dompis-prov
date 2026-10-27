@@ -18,15 +18,27 @@
     <a class="stat kpi-link" href="{{ $listUrl(['queue' => 'potential_ps']) }}"><span class="small muted">Potensi PS</span><strong>{{ number_format($summary['potential_ps']) }}</strong><span class="small muted">Task &amp; status BIMA sesuai kriteria</span></a>
     <a class="stat kpi-link" href="{{ $listUrl(['queue' => 'new_order']) }}"><span class="small muted">New Order</span><strong>{{ number_format($summary['new_order']) }}</strong><span class="small muted">Review Order TSQ sesuai status BIMA</span></a>
 </div>
-@include('area.operations-handoff')
 <section class="panel gap-top"><form method="GET" class="filters area-filter-form" data-loading="Memuat dashboard…">
+    <input type="hidden" name="tab" value="{{ $activeTab }}">
+    @if(isset($filters['ps_view']))<input type="hidden" name="ps_view" value="{{ $filters['ps_view'] }}">@endif
     <div><label for="region">Regional</label><select id="region" name="region"><option value="">Semua regional</option>@foreach($regions as $region)<option value="{{ $region->getKey() }}" @selected((string) request('region') === (string) $region->getKey())>{{ $region->name }}</option>@endforeach</select></div>
     <div><label for="branch">Branch</label><select id="branch" name="branch"><option value="">Semua Branch</option>@foreach($branches as $branch)<option value="{{ $branch->getKey() }}" @selected((string) request('branch') === (string) $branch->getKey())>{{ $branch->name }}{{ ! $branch->active || $branch->trashed() ? ' · nonaktif' : '' }}</option>@endforeach</select></div>
     <div><label for="jenis_pekerjaan">Jenis pekerjaan</label><select id="jenis_pekerjaan" name="jenis_pekerjaan"><option value="all" @selected(request('jenis_pekerjaan', 'all') === 'all')>Semua jenis</option>@foreach($types as $type)<option value="{{ $type }}" @selected(request('jenis_pekerjaan') === $type)>{{ $type }}</option>@endforeach</select></div>
     <div><label for="service">Layanan</label><select id="service" name="service"><option value="">Semua layanan</option>@foreach($services as $service)<option value="{{ $service }}" @selected(request('service') === $service)>{{ $service }}</option>@endforeach</select></div>
-    <div><label for="month">Bulan grafik PS</label><input id="month" type="month" name="month" min="2000-01" max="2100-12" value="{{ $month->format('Y-m') }}" required></div>
-    <button class="button primary" type="submit">Terapkan</button><a class="button secondary" href="{{ route('area.dashboard') }}">Reset</a>
-</form><div class="area-filter-hint small muted">Rekap order bersifat akumulatif. Pilihan bulan hanya mengatur grafik PS. Klik angka untuk membuka daftar order terkait.</div></section>
+    @if($activeTab === 'ach-ps')<div><label for="month">Bulan grafik PS</label><input id="month" type="month" name="month" min="2000-01" max="2100-12" value="{{ $month->format('Y-m') }}" required></div>@else<input type="hidden" name="month" value="{{ $month->format('Y-m') }}">@endif
+    <button class="button primary" type="submit">Terapkan</button><a class="button secondary" href="{{ route('area.dashboard', ['tab' => $activeTab]) }}">Reset</a>
+</form><div class="area-filter-hint small muted">Rekap order bersifat akumulatif. {{ $activeTab === 'ach-ps' ? 'Pilihan bulan hanya mengatur grafik PS. ' : '' }}Klik angka untuk membuka daftar order terkait.</div></section>
+<nav class="area-dashboard-tabs gap-top" aria-label="Tab dashboard Area">
+    @foreach(['progress' => 'Progress', 'owner-group' => 'Owner Group', 'ach-ps' => 'Ach PS'] as $tab => $label)
+    <a id="area-tab-{{ $tab }}" class="area-dashboard-tab {{ $activeTab === $tab ? 'active' : '' }}" href="{{ route('area.dashboard', array_replace(['month' => $month->format('Y-m')], $filters, ['tab' => $tab])) }}" @if($activeTab === $tab) aria-current="page" @endif>{{ $label }}</a>
+    @endforeach
+</nav>
+<div id="area-dashboard-{{ $activeTab }}" role="region" aria-labelledby="area-tab-{{ $activeTab }}">
+@if($activeTab === 'owner-group')
+@include('owner-groups.summary', ['ownerScopeFilters' => $scopeFilters])
+@elseif($activeTab === 'ach-ps')
+@include('area.ps-achievement')
+@else
 @if($summary['open_issues'] || $summary['waiting_bima'] || $summary['missing_ps_date'] || $summary['future_ps_date'] || $summary['unmapped'])
 <div class="area-attention gap-top" aria-label="Perlu perhatian">
     @if($summary['open_issues'])<a href="{{ $listUrl(['queue' => 'issues']) }}"><strong>{{ $summary['open_issues'] }}</strong><span>Order dengan kendala aktif<small>Perlu tindak lanjut Branch</small></span><span aria-hidden="true">→</span></a>@endif
@@ -37,7 +49,9 @@
 </div>
 @endif
 @include('area.progress-matrix')
-@include('owner-groups.summary', ['ownerScopeFilters' => $scopeFilters])
+@include('dashboard.mapping-orders', ['mappingScopeFilters' => $scopeFilters])
+@include('area.open-transactions')
+@include('area.mapping-aging')
 @include('work-orders.order-month-summary', ['monthScopeFilters' => $scopeFilters])
 <section class="panel gap-top" aria-labelledby="type-recap-title"><div class="panel-head dashboard-table-heading"><div><h2 id="type-recap-title">Rekap jenis pekerjaan</h2><p class="small muted">Volume order dan penyelesaian sesuai filter aktif</p></div></div>
     <div class="table-wrap dashboard-table-scroll" tabindex="0" aria-label="Rekap jenis pekerjaan, geser horizontal"><table class="area-type-table dashboard-table"><thead><tr><th scope="col" class="branch-sticky">Keterangan</th>@foreach($recap as $type => $values)<th scope="col">{{ $type }}</th>@endforeach<th scope="col">Total</th></tr></thead><tbody>
@@ -47,21 +61,8 @@
     </tbody></table></div>
     <div class="area-table-note small muted">Completed / PS = progress order <strong>CLOSE</strong> dan <strong>status_order memenuhi daftar 14 kombinasi PS</strong>. Close hanya berarti instalasi lapangan selesai. CLOSE ON DESK dan status BIMA di luar daftar tidak dihitung PS.</div>
 </section>
-<section class="panel gap-top" aria-labelledby="area-chart-title"><div class="panel-head dashboard-table-heading"><div><h2 id="area-chart-title">Perolehan PS harian</h2><p class="small muted">{{ $month->locale('id')->translatedFormat('F Y') }} · {{ number_format($month_ps) }} PS · berdasarkan TGL PS BIMA</p></div></div><div class="panel-body">
-    @if(! $month_ps)<p class="small muted area-chart-empty">Belum ada perolehan PS dalam bulan ini. Grafik akan terisi setelah kedua status dan TGL PS BIMA memenuhi ketentuan.</p>@endif
-    @php
-        $step = 910 / max(1, count($series) - 1);
-        $points = collect($series)->filter(fn($p) => ! $p['future'])->values()->map(fn($p, $i) => (56 + $i * $step).','. (212 - $p['count'] / $chart_max * 164))->join(' ');
-    @endphp
-    <div class="area-chart-container"><svg class="area-line-chart" viewBox="0 0 1000 266" role="img" aria-labelledby="area-ps-chart-title area-ps-chart-desc"><title id="area-ps-chart-title">PS harian {{ $month->locale('id')->translatedFormat('F Y') }}</title><desc id="area-ps-chart-desc">{{ $month_ps }} PS pada bulan terpilih. Tanggal tanpa perolehan bernilai nol. Rincian tersedia di tabel data harian.</desc>
-        @foreach(array_unique([0, (int) ceil($chart_max / 2), $chart_max]) as $tick)<line x1="56" y1="{{ 212 - $tick / $chart_max * 164 }}" x2="966" y2="{{ 212 - $tick / $chart_max * 164 }}" class="chart-grid"/><text x="42" y="{{ 216 - $tick / $chart_max * 164 }}" text-anchor="end" class="chart-label">{{ $tick }}</text>@endforeach
-        @if($points)<polyline points="{{ $points }}" class="area-chart-line"/>@endif
-        @foreach($series as $point)@php $x = 56 + $loop->index * $step; $y = 212 - $point['count'] / $chart_max * 164; @endphp
-            @if(! $point['future'])<circle cx="{{ $x }}" cy="{{ $y }}" r="4" class="area-chart-point" role="button" tabindex="0" aria-label="{{ $point['label'] }}: {{ $point['count'] }} PS" data-chart-point data-label="{{ $point['label'] }}" data-count="{{ $point['count'] }}"><title>{{ $point['label'] }}: {{ $point['count'] }} PS</title></circle>@endif
-            @if($loop->first || $loop->last || ($point['day'] % 5 === 0 && count($series) - $point['day'] >= 3))<text x="{{ $x }}" y="244" text-anchor="middle" class="chart-label">{{ $point['label'] }}</text>@endif
-        @endforeach
-    </svg></div><p class="small muted" data-chart-caption aria-live="polite">Pilih titik grafik untuk melihat perolehan harian. Tanggal setelah hari ini belum dihitung.</p>
-    <details class="gap-top"><summary>Lihat data PS harian</summary><div class="table-wrap gap-top dashboard-table-scroll"><table class="dashboard-table daily-data-table"><thead><tr><th scope="col" class="branch-sticky">Tanggal PS</th><th scope="col" class="numeric">Jumlah PS</th></tr></thead><tbody>@foreach($series as $point)<tr><td class="branch-sticky">{{ $point['date'] }}</td><td class="numeric">@if($point['future'])<span class="small muted">Belum berjalan</span>@else<x-order-count :count="$point['count']" :filters="array_replace($scopeFilters, ['ps_date' => $point['date']])" :label="'PS · '.$point['label']"/>@endif</td></tr>@endforeach</tbody></table></div></details>
-</div></section>
+
+@endif
+</div>
 @include('dashboard.order-dialog')
 @endsection

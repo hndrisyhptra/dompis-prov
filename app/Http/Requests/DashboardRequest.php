@@ -18,7 +18,8 @@ class DashboardRequest extends FormRequest
         $area = $this->routeIs('area.*');
 
         return ['branch' => 'nullable|integer', 'jenis_pekerjaan' => 'nullable|string|max:80'] + ($area
-            ? ['region' => 'nullable|integer|exists:regions,id_regions', 'service' => 'nullable|string|max:255', 'month' => 'nullable|date_format:Y-m|after_or_equal:2000-01|before_or_equal:2100-12']
+            ? ['region' => 'nullable|integer|exists:regions,id_regions', 'service' => 'nullable|string|max:255', 'month' => 'nullable|date_format:Y-m|after_or_equal:2000-01|before_or_equal:2100-12',
+                'ps_view' => ['nullable', Rule::in(['recent', 'month'])], 'tab' => ['nullable', Rule::in(['progress', 'owner-group', 'ach-ps'])]]
             : ['days' => ['nullable', Rule::in([7, 14, 30])]]);
     }
 

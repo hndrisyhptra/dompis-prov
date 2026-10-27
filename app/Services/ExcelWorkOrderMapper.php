@@ -46,12 +46,16 @@ class ExcelWorkOrderMapper
         return $mapping;
     }
 
-    public function map(array $cells, array $mapping, bool $date1904 = false): array
+    public function map(array $cells, array $mapping, bool $date1904 = false, array $headers = []): array
     {
         $data = ['source_system' => 'BIMA'];
         $source = [];
         foreach (self::inputFields() as $field => $label) {
             if (empty($mapping[$field])) {
+                continue;
+            }
+            if ($field === 'tgl_ps' && BimaPsDateResolver::usesDateModified(['mapping' => $mapping, 'headers' => $headers])) {
+                // Resolve against the effective source status and active master after loading the existing WO.
                 continue;
             }
             $cell = $cells[(int) $mapping[$field] - 1] ?? ['value' => '', 'type' => 's', 'formula' => false];
@@ -101,5 +105,21 @@ class ExcelWorkOrderMapper
         $data['source_bima_fields'] = $source;
 
         return $data;
+    }
+
+    public function dateCell(array $cell, bool $date1904, string $label): ?string
+    {
+        if (($cell['type'] ?? '') === 'e' || ($cell['formula'] ?? false)) {
+            throw new InvalidArgumentException($label.' harus nilai tanggal asli tanpa formula/error Excel.');
+        }
+        $value = $cell['value'] ?? '';
+        if ($date1904 && is_numeric($value)) {
+            $value = (string) ((float) $value + 1462);
+        }
+        try {
+            return (new BimaRowMapper)->date($value);
+        } catch (InvalidArgumentException $exception) {
+            throw new InvalidArgumentException($label.': '.$exception->getMessage());
+        }
     }
 }

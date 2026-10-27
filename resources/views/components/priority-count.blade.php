@@ -1,0 +1,2 @@
+@props(['count', 'filters' => [], 'selection' => [], 'label'])
+<a class="{{ $count ? 'count-link' : 'zero count-link' }}" href="{{ route('priorities.index', array_filter(array_replace(\Illuminate\Support\Arr::except($filters, ['tab']), $selection), fn($value) => $value !== null && $value !== '')) }}" title="Lihat {{ $label }}" aria-label="{{ $label }}: {{ number_format($count) }} order">{{ number_format($count) }}</a>

@@ -8,12 +8,14 @@ use App\Models\Branch;
 use App\Models\MappingOwnergrup;
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderPriority;
 use App\Services\PriorityOrderService;
 use Carbon\Carbon;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use ZipArchive;
 
 class OrderExportTest extends OloTestCase
@@ -115,6 +117,59 @@ class OrderExportTest extends OloTestCase
         }
     }
 
+    public function test_mapping_order_and_sto_drilldown_export_keeps_branch_scope_and_context(): void
+    {
+        DB::table('work_orders')->whereIn('no_tq_sc_id', ['0000123', 'PRIVATE-OTHER'])->update(['mapping_order' => 'STUCK', 'sto' => 'XLS']);
+        $this->actingAs($this->branchUser());
+        $filters = ['jenis_pekerjaan' => 'all', 'mapping_order' => 'STUCK', 'sto' => 'XLS'];
+        $page = $this->get(route('work-orders.index', $filters))->assertOk();
+        $book = $this->workbook($this->get(route('work-orders.export', $filters)));
+        $this->assertSame(['0000123'], $book['ids']);
+        $this->assertSame($page->viewData('orders')->pluck('no_tq_sc_id')->all(), $book['ids']);
+        $this->assertStringContainsString('Mapping Order: STUCK', $book['rows'][3][0]);
+        $this->assertStringContainsString('STO: XLS', $book['rows'][3][0]);
+        $filters = ['jenis_pekerjaan' => 'all', 'mapping_order' => 'unmapped', 'sto_missing' => 1];
+        $page = $this->get(route('work-orders.index', $filters))->assertOk();
+        $book = $this->workbook($this->get(route('work-orders.export', $filters)));
+        $this->assertSame($page->viewData('orders')->pluck('no_tq_sc_id')->all(), $book['ids']);
+        $this->assertCount(2, $book['ids']);
+        $filters = ['jenis_pekerjaan' => 'all', 'mapping_order' => 'open_stuck'];
+        $book = $this->workbook($this->get(route('work-orders.export', $filters)));
+        $this->assertSame(['0000123'], $book['ids']);
+        $this->assertStringContainsString('Mapping Order: OPEN & STUCK', $book['rows'][3][0]);
+    }
+
+    public function test_ps_period_export_matches_branch_scoped_list_and_excludes_future_dates(): void
+    {
+        foreach (['0000123', 'PRIVATE-OTHER'] as $number) {
+            WorkOrder::where('no_tq_sc_id', $number)->sole()->update(['progress_category' => 'CLOSE', 'task_bima' => 'Approval E2E Testing Manual', 'status_bima' => 'COMPLETE', 'tgl_ps' => '2026-10-25']);
+        }
+        $this->actingAs($this->branchUser());
+        $filters = ['jenis_pekerjaan' => 'all', 'ps_from' => '2026-10-25', 'ps_to' => '2026-10-25'];
+        $book = $this->workbook($this->get(route('work-orders.export', $filters)));
+        $this->assertSame(['0000123'], $book['ids']);
+        $this->assertStringContainsString('Tanggal PS mulai: 2026-10-25', $book['rows'][3][0]);
+        $filters['ps_to'] = '2026-10-31';
+        $page = $this->get(route('work-orders.index', $filters))->assertOk();
+        $book = $this->workbook($this->get(route('work-orders.export', $filters)));
+        $this->assertSame($page->viewData('orders')->pluck('no_tq_sc_id')->all(), $book['ids']);
+        $this->assertCount(2, $book['ids']);
+    }
+
+    public function test_live_aging_snapshot_export_preserves_mapping_and_branch_scope(): void
+    {
+        DB::table('work_orders')->whereIn('no_tq_sc_id', ['0000123', 'PRIVATE-OTHER'])->update(['tgl_order' => '2026-09-01', 'mapping_order' => 'OPEN', 'umur_hari' => 1, 'kategori_umur' => '0-7 HARI']);
+        $this->actingAs($this->branchUser());
+        $filters = ['jenis_pekerjaan' => 'all', 'mapping_order' => 'OPEN', 'aging_bucket' => 'over_28', 'aging_on' => '2026-10-26'];
+        $page = $this->get(route('work-orders.index', $filters))->assertOk();
+        $book = $this->workbook($this->get(route('work-orders.export', $filters)));
+        $this->assertSame(['0000123'], $book['ids']);
+        $this->assertSame($page->viewData('orders')->pluck('no_tq_sc_id')->all(), $book['ids']);
+        $this->assertStringContainsString('Kategori umur: > 28 HARI', $book['rows'][3][0]);
+        $this->assertStringContainsString('Umur per tanggal WIB: 2026-10-26', $book['rows'][3][0]);
+        $this->assertSame('1', $book['records'][0]['umur_hari']); // Export still contains physical database values.
+    }
+
     public function test_work_order_export_matches_every_filter_and_list_sort_with_typed_text_dates_and_no_formula_execution(): void
     {
         $this->actingAs($this->area);
@@ -184,16 +239,20 @@ class OrderExportTest extends OloTestCase
     public function test_priority_filters_and_sort_are_identical_to_monitoring_page(): void
     {
         $actor = $this->branchUser();
-        foreach (['0000123', 'OWN-PS', 'OWN-MOD'] as $id) {
+        foreach (['0000123', 'OWN-MOD'] as $id) {
             $this->select($this->area, $id);
         }
+        // A bookmark created before the auto-release feature must also be absent from exports.
+        WorkOrderPriority::create(['id_work_orders' => WorkOrder::where('no_tq_sc_id', 'OWN-PS')->sole()->getKey(), 'scope_key' => 'area',
+            'id_users' => $this->area->getKey(), 'selection_token' => (string) Str::uuid()]);
         $this->select($actor, 'OWN-MOD');
         WorkOrder::where('no_tq_sc_id', 'OWN-MOD')->sole()->issues()->create(['id_users' => $actor->getKey(), 'category' => 'OTHER', 'description' => 'Kendala uji', 'pic' => 'PIC']);
         $this->actingAs($actor);
-        foreach ([['source' => 'area'], ['source' => 'branch'], ['state' => 'issues'], ['state' => 'closed'], ['state' => 'waiting_bima'], ['q' => '000SID'], ['sort' => 'age'], ['sort' => 'updated'], ['sort' => 'selected', 'branch' => $this->branch->getKey()]] as $filters) {
+        foreach ([['owner_group' => 'DISTRICT'], ['owner_group' => 'unmapped'], ['bima_status' => 'COMPLETE'], ['bima_task' => 'Approval E2E Testing Manual'], ['bima_task_missing' => 1], ['bima_status_missing' => 1], ['owner_group' => 'DISTRICT', 'bima_status' => 'COMPLETE', 'bima_task' => 'Approval E2E Testing Manual'], ['source' => 'area'], ['source' => 'branch'], ['state' => 'issues'], ['state' => 'closed'], ['state' => 'waiting_bima'], ['q' => '000SID'], ['sort' => 'age'], ['sort' => 'updated'], ['sort' => 'selected', 'branch' => $this->branch->getKey()]] as $filters) {
             $page = $this->get(route('priorities.index', $filters))->assertOk();
             $book = $this->workbook($this->get(route('priorities.export', $filters)));
             $this->assertSame($page->viewData('orders')->pluck('no_tq_sc_id')->all(), $book['ids']);
+            $this->assertNotContains('OWN-PS', $book['ids']);
         }
         $other = Branch::where('code', 'XLSX-OTHER')->sole();
         $this->get(route('priorities.export', ['branch' => $other->getKey()]))->assertForbidden();

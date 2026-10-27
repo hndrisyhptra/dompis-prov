@@ -77,6 +77,25 @@ test('Region summaries start collapsed and each toggle changes only its own rows
     assert.equal(f.buttons[0].attributes['aria-expanded'], 'false');
 });
 
+test('screenshot tables start fully open and their expand control follows the actual state', () => {
+    const body = { hidden: false };
+    const button = Object.assign(new EventTarget(), {
+        attrs: { 'aria-controls': 'capture' }, hasAttribute: key => key === 'data-region-open',
+        getAttribute(key) { return this.attrs[key]; }, setAttribute(key, value) { this.attrs[key] = value; },
+    });
+    const control = Object.assign(new EventTarget(), {
+        attrs: {}, closest: () => ({ querySelectorAll: () => [button] }),
+        getAttribute(key) { return this.attrs[key]; }, setAttribute(key, value) { this.attrs[key] = value; },
+    });
+    setupDashboardTables({ querySelectorAll: selector => selector === '[data-region-expand]' ? [control] : [button], querySelector: () => null, getElementById: () => body }, undefined, 'https://olo.test/priority-orders/monitoring');
+    assert.equal(body.hidden, false);
+    assert.equal(button.getAttribute('aria-expanded'), 'true');
+    assert.equal(control.textContent, 'Tutup semua');
+    control.dispatchEvent(new Event('click'));
+    assert.equal(body.hidden, true);
+    assert.equal(control.textContent, 'Buka semua');
+});
+
 test('a number opens a loading modal and fetches a scoped GET while retaining the full Work Order link', async () => {
     const f = fixture();
     const href = 'https://olo.test/work-orders?branch=4&bucket=instalasi&jenis_pekerjaan=all';

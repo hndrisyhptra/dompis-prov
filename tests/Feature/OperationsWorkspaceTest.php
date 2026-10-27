@@ -27,7 +27,7 @@ class OperationsWorkspaceTest extends OloTestCase
         $this->get(route('work-orders.index', ['q' => 'NEW']))->assertViewHas('total', 1)->assertViewHas('queueCounts', fn ($counts) => $counts['all'] === 1 && $counts['unupdated'] === 1);
         $this->get(route('work-orders.index', ['q' => 'NOT-FOUND']))->assertViewHas('total', 0)->assertViewHas('queueCounts', fn ($counts) => array_sum($counts) === 0);
         $this->get(route('branch.dashboard'))->assertOk()->assertViewHas('waiting_bima', 1)->assertViewHas('closed_by_branch', 1)->assertViewHas('ps_total', 0);
-        $this->actingAs($this->area)->get(route('area.dashboard'))->assertOk()->assertSee('Operasional Area ke Branch')->assertSee('Import order BIMA');
+        $this->actingAs($this->area)->get(route('area.dashboard'))->assertOk()->assertDontSee('Operasional Area ke Branch')->assertSee('Sync Center');
     }
 
     public function test_actions_prefill_the_right_form_and_keep_terminal_and_device_permissions(): void
