@@ -3,16 +3,16 @@
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Monitoring') · Dompis Prov WIBS Area Jawa Bali</title>
+    <title>@yield('title', 'Monitoring') · Wibsy Area Jawa Bali</title>
     <script>try{document.documentElement.classList.toggle('dark',(localStorage.getItem('olo-theme')|| (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark')}catch(e){}</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
 @auth
-    <div class="mobile-bar"><button class="button secondary" id="menu-toggle" aria-controls="sidebar" aria-expanded="false">Menu</button><div><strong>Dompis Prov</strong><div class="small muted">WIBS Area Jawa Bali</div></div></div>
+    <div class="mobile-bar"><button class="button secondary" id="menu-toggle" aria-controls="sidebar" aria-expanded="false">Menu</button><div><strong>Wibsy</strong><div class="small muted">Area Jawa Bali</div></div></div>
     <button class="drawer-backdrop" aria-label="Tutup menu" hidden></button>
     <aside class="sidebar" id="sidebar">
-        <a class="brand" aria-label="Dompis Prov WIBS Area Jawa Bali" href="{{ route(auth()->user()->role->areaScope() ? 'area.dashboard' : 'branch.dashboard') }}"><span class="brand-mark">DP</span><span>Dompis Prov<small>WIBS<br>Area Jawa Bali</small></span></a>
+        <a class="brand" aria-label="Wibsy Area Jawa Bali" href="{{ route(auth()->user()->role->areaScope() ? 'area.dashboard' : 'branch.dashboard') }}"><span class="brand-mark">W</span><span>Wibsy<small>Area Jawa Bali</small></span></a>
         <div class="nav-label">Operasional</div>
         <nav aria-label="Navigasi utama">
             @if(auth()->user()->role->areaScope())
