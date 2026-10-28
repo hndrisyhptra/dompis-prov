@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class QeBoq extends Model
+class BoqJt extends Model
 {
     use SoftDeletes;
 
-    protected $primaryKey = 'id_qe_boqs';
+    protected $table = 'boq_jt';
 
-    protected $guarded = ['id_qe_boqs'];
+    protected $primaryKey = 'id_boq_jt';
+
+    protected $guarded = ['id_boq_jt'];
 
     public function workOrder()
     {
@@ -25,12 +27,12 @@ class QeBoq extends Model
 
     public function items()
     {
-        return $this->hasMany(QeBoqItem::class, 'id_qe_boqs');
+        return $this->hasMany(BoqItem::class, 'id_boq_jt');
     }
 
     public function histories()
     {
-        return $this->hasMany(QeBoqHistory::class, 'id_qe_boqs')->latest('id_qe_boq_histories');
+        return $this->hasMany(BoqHistory::class, 'id_boq_jt')->latest('id_boq_histories');
     }
 
     protected function casts(): array

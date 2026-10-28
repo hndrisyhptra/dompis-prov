@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class QeBoqHistory extends Model
+class BoqHistory extends Model
 {
-    protected $primaryKey = 'id_qe_boq_histories';
+    protected $primaryKey = 'id_boq_histories';
 
-    protected $guarded = ['id_qe_boq_histories'];
+    protected $guarded = ['id_boq_histories'];
 
     public function actor()
     {

@@ -23,5 +23,9 @@
 @case('orders')<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>@break
 @case('sync')<path d="m16 3 4 4-4 4M4 7h16M8 21l-4-4 4-4M20 17H4"/>@break
 @case('branches')<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v7M14 17.5h7"/>@break
+@case('reset-book')
+    <path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/>
+    <path d="M3 3v5h5"/>
+    @break
 @endswitch
 </svg>

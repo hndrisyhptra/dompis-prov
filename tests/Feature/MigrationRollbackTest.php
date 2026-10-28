@@ -12,7 +12,7 @@ class MigrationRollbackTest extends TestCase
 
     public function test_business_migrations_rollback_and_reapply_without_removing_existing_user_table(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 21, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 23, '--force' => true])->assertSuccessful();
         $this->assertFalse(Schema::hasTable('work_orders'));
         $this->assertFalse(Schema::hasTable('wo_issues'));
         $this->assertTrue(Schema::hasTable('users'));

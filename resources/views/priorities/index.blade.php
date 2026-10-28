@@ -12,7 +12,15 @@
 </div><p class="small muted gap-top">Ringkasan mengikuti seluruh filter kecuali status monitoring; pilihan status mengatur daftar di bawah. Semua jenis pekerjaan ditampilkan.</p>
 <section class="panel gap-top">
 @include('priorities.filters')
-<div class="panel-head order-list-heading"><div><h2>{{ number_format($orders->total()) }} order prioritas</h2><span class="small muted">{{ $area ? 'Pilihan Area' : 'Sesuai cakupan Branch Anda' }} · Waktu WIB</span></div><x-excel-download label="Order Prioritas" :url="route('priorities.export', $filters)"/></div>
+<div class="panel-head order-list-heading">
+    <div><h2>{{ number_format($orders->total()) }} order prioritas</h2><span class="small muted">{{ $area ? 'Pilihan Area' : 'Sesuai cakupan Branch Anda' }} · Waktu WIB</span>
+        <p class="small muted" id="priority-reset-help">{{ number_format($resetPreview['count']) }} bookmark {{ $area ? 'Area' : 'lokal Branch' }} dapat direset · Reset mencakup semua halaman, tanpa mengikuti filter daftar.{{ $area ? '' : ' Arahan Area tetap tersimpan.' }}</p>
+    </div>
+    <div class="dashboard-table-tools" role="group" aria-label="Aksi daftar prioritas">
+        <x-excel-download label="Order Prioritas" :url="route('priorities.export', $filters)"/>
+        @include('priorities.reset')
+    </div>
+</div>
 <div class="table-wrap priority-desktop" tabindex="0" aria-label="Monitoring order prioritas, geser untuk melihat semua kolom"><table class="priority-table"><thead><tr><th>No WO / Pelanggan</th><th>Branch / STO</th><th>Sumber prioritas</th><th>Status monitoring</th><th>Update terakhir</th><th>Aksi</th></tr></thead><tbody>
 @forelse($orders as $order)<tr><td><a class="mono strong" href="{{ route('work-orders.show',$order) }}">{{ $order->no_tq_sc_id }}</a><div class="small">{{ $order->nama_olo ?: 'Pelanggan belum tersedia' }}</div>@include('priorities.bookmark',['showPriorityLabels'=>false])</td><td>{{ $order->assignedBranch?->name ?? 'Belum dipetakan' }}<div class="small muted">STO {{ $order->sto ?: '—' }}</div><div class="small muted">{{ $order->umur_hari===null ? 'Umur belum tersedia' : $order->umur_hari.' hari' }}</div></td><td>@include('priorities.selection-meta')</td><td>@include('priorities.monitoring-status')</td><td>{{ $order->last_progress_at?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? 'Belum diperbarui' }}<div class="small muted">{{ $order->last_progress_at ? 'Pembaruan Branch' : 'Perlu progress pertama' }}</div></td><td>@include('work-orders.row-actions')</td></tr>
 @empty<tr><td colspan="6">@include('priorities.empty')</td></tr>@endforelse

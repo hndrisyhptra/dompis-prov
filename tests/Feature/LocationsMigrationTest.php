@@ -16,7 +16,7 @@ class LocationsMigrationTest extends TestCase
 
     public function test_existing_users_and_branches_survive_import_and_rollback_and_only_matching_branch_references_are_linked(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 17, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 19, '--force' => true])->assertSuccessful();
         $user = User::factory()->create();
         $branch = new Branch(['code' => 'SDA', 'name' => 'SIDOARJO', 'regional' => 'REGION JATIM']);
         $branch->forceFill(['id_branches' => 2])->save();
@@ -32,7 +32,7 @@ class LocationsMigrationTest extends TestCase
         $this->assertNull($user->fresh()->id_regions);
         $this->assertNull($user->fresh()->id_service_areas);
         $this->assertSame($branchesBefore, DB::table('branches')->select(array_keys($branchesBefore[0]))->orderBy('id_branches')->get()->map(fn ($row) => (array) $row)->all());
-        $this->artisan('migrate:rollback', ['--step' => 17, '--force' => true])->assertSuccessful();
+        $this->artisan('migrate:rollback', ['--step' => 19, '--force' => true])->assertSuccessful();
         $this->assertFalse(Schema::hasTable('regions'));
         $this->assertFalse(Schema::hasTable('service_areas'));
         $this->assertSame($usersBefore, DB::table('users')->get()->map(fn ($row) => (array) $row)->all());

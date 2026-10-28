@@ -4,11 +4,11 @@ namespace Tests\Feature;
 
 use App\Enums\Role;
 use App\Models\AuditLog;
+use App\Models\BoqItem;
+use App\Models\BoqJt;
 use App\Models\DesignatorPackagePrice;
 use App\Models\DesignatorType;
 use App\Models\Package;
-use App\Models\QeBoq;
-use App\Models\QeBoqItem;
 use App\Models\WorkOrder;
 use App\Services\Boq\BoqImportService;
 use App\Support\BoqAmount;
@@ -49,7 +49,7 @@ class BoqImportTest extends OloTestCase
     {
         $order = $this->order();
         $this->get(route('work-orders.action.edit', [$order, 'progress']))->assertOk()->assertSee('Skip dulu')->assertSee('Simpan JT &amp; Upload RAB/BOQ', false);
-        $this->assertDatabaseCount('qe_boqs', 0);
+        $this->assertDatabaseCount('boq_jt', 0);
         $this->get(route('work-orders.show', $order))->assertOk()->assertSee('Upload RAB/BOQ')->assertSee('Pekerjaan memerlukan JT.');
         $this->patch(route('work-orders.action.update', [$order, 'progress']), ['revision' => 1, 'progress_category' => 'INSTALASI', 'notes' => 'Lanjut instalasi.'])->assertSessionHasNoErrors();
         $this->get(route('boqs.create', $order))->assertOk()->assertSee('Skip dulu')->assertSee('Paket 5')->assertSee('Paket 10');
@@ -66,7 +66,7 @@ class BoqImportTest extends OloTestCase
         $this->assertSame(0, $order->fresh()->revision);
         $this->patch(route('work-orders.action.update', [$order, 'progress']), ['revision' => 0, 'progress_category' => 'JT', 'notes' => 'JT perlu BOQ.', 'boq_next' => 'upload'])->assertSessionHasNoErrors()->assertRedirect(route('boqs.create', $order));
         $this->assertSame('JT', $order->fresh()->progress_category);
-        $this->assertDatabaseCount('qe_boqs', 0);
+        $this->assertDatabaseCount('boq_jt', 0);
     }
 
     public function test_xlsx_import_exact_totals_private_source_preview_and_idempotent_retry_keep_work_order_unchanged(): void
@@ -75,7 +75,7 @@ class BoqImportTest extends OloTestCase
         $before = $order->getAttributes();
         $rows = [['M-RJ45-CAT6', '2'], ['M-Rak Pasif spliter 1:4', '1']];
         $this->upload($order, $rows)->assertSessionHasNoErrors()->assertRedirect(route('boqs.show', $order));
-        $boq = QeBoq::sole();
+        $boq = BoqJt::sole();
         $this->assertSame('1615235.00', $boq->grand_total);
         $this->assertSame(2, $boq->item_count);
         $this->assertSame('MATERIAL', $boq->items()->first()->type);
@@ -87,7 +87,7 @@ class BoqImportTest extends OloTestCase
         $this->get(route('boqs.show', $order))->assertOk()->assertSee('1.615.235,00')->assertSee('Rincian material')->assertSee('Versi 1')->assertDontSee($boq->file_path);
         $this->get(route('work-orders.show', $order))->assertOk()->assertSee('Preview BOQ');
         $this->upload($order, $rows, ['boq_revision' => 0])->assertSessionHasNoErrors()->assertRedirect();
-        $this->assertDatabaseCount('qe_boq_histories', 1);
+        $this->assertDatabaseCount('boq_histories', 1);
         $this->assertCount(1, Storage::disk('local')->allFiles('boq'));
         $this->assertEquals($before, $order->fresh()->getAttributes());
         DesignatorPackagePrice::where('designator_id', 531)->where('package_id', 2)->update(['price' => '999.99']);
@@ -98,7 +98,7 @@ class BoqImportTest extends OloTestCase
     {
         $order = $this->order();
         $this->upload($order)->assertSessionHasNoErrors();
-        $boq = QeBoq::sole();
+        $boq = BoqJt::sole();
         $original = $boq->file_path;
         $this->upload($order, [['M-RJ45-CAT6', '3']])->assertSessionHasNoErrors();
         $boq->refresh();
@@ -109,8 +109,8 @@ class BoqImportTest extends OloTestCase
         $this->assertSame(2, $boq->histories()->count());
         $latest = $boq->histories()->first();
         $this->assertSame('13000.00', $latest->before_data['grand_total']);
-        $this->assertSame('6500.00', QeBoqItem::withTrashed()->findOrFail($latest->before_data['item_ids'][0])->unit_price);
-        $this->assertNotNull(QeBoqItem::withTrashed()->findOrFail($latest->before_data['item_ids'][0])->deleted_at);
+        $this->assertSame('6500.00', BoqItem::withTrashed()->findOrFail($latest->before_data['item_ids'][0])->unit_price);
+        $this->assertNotNull(BoqItem::withTrashed()->findOrFail($latest->before_data['item_ids'][0])->deleted_at);
         $this->assertSame('19500.00', $latest->after_data['grand_total']);
         Storage::disk('local')->assertExists($original);
         $this->assertSame(2, AuditLog::whereIn('action', ['boq.created', 'boq.updated'])->count());
@@ -127,9 +127,9 @@ class BoqImportTest extends OloTestCase
         $this->upload($order, [['M-RJ45-CAT6', '1', 'JASA']], [], ['DESIGNATOR', 'QTY', 'TYPE'])->assertSessionHasErrors('file');
         DesignatorPackagePrice::where('designator_id', 531)->where('package_id', 2)->delete();
         $this->upload($order)->assertSessionHasErrors('file');
-        $this->assertDatabaseCount('qe_boqs', 0);
-        $this->assertDatabaseCount('qe_boq_items', 0);
-        $this->assertDatabaseCount('qe_boq_histories', 0);
+        $this->assertDatabaseCount('boq_jt', 0);
+        $this->assertDatabaseCount('boq_items', 0);
+        $this->assertDatabaseCount('boq_histories', 0);
         $this->assertCount(0, Storage::disk('local')->allFiles('boq'));
     }
 
@@ -138,11 +138,11 @@ class BoqImportTest extends OloTestCase
         $order = $this->order();
         DesignatorPackagePrice::where('designator_id', 531)->where('package_id', 2)->update(['price' => '0.01']);
         $this->upload($order, [['M-RJ45-CAT6', '0.500']])->assertSessionHasNoErrors();
-        $this->assertSame('0.01', QeBoq::sole()->grand_total);
+        $this->assertSame('0.01', BoqJt::sole()->grand_total);
         $this->assertSame('9.999.999.999.999.999,99', BoqAmount::format('9999999999999999.99'));
         DesignatorPackagePrice::where('designator_id', 531)->where('package_id', 2)->update(['price' => '9999999999999.99']);
         $this->upload($order, [['M-RJ45-CAT6', '999999999999.999']])->assertSessionHasErrors('file');
-        $this->assertSame('0.01', QeBoq::sole()->grand_total);
+        $this->assertSame('0.01', BoqJt::sole()->grand_total);
     }
 
     public function test_csv_template_and_import_use_master_type_and_inactive_type_or_package_cannot_be_used(): void
@@ -152,7 +152,7 @@ class BoqImportTest extends OloTestCase
         $this->assertStringContainsString('DESIGNATOR,QTY,TYPE', $template);
         $file = UploadedFile::fake()->createWithContent('boq.csv', "\xEF\xBB\xBFDESIGNATOR,QTY,TYPE\nM-RJ45-CAT6,1,MATERIAL\n");
         $this->post(route('boqs.store', $order), ['file' => $file, 'package_id' => 2, 'order_revision' => 1, 'boq_revision' => 0, 'header_row' => 1])->assertSessionHasNoErrors()->assertRedirect();
-        $this->assertSame('6500.00', QeBoq::sole()->grand_total);
+        $this->assertSame('6500.00', BoqJt::sole()->grand_total);
         DesignatorType::findOrFail(1)->update(['is_active' => false]);
         $this->upload($order)->assertSessionHasErrors('file');
         Package::findOrFail(2)->delete();
@@ -178,7 +178,7 @@ class BoqImportTest extends OloTestCase
         $this->actingAs($this->area);
         $order->increment('revision');
         $this->upload($order, extra: ['order_revision' => 1])->assertConflict();
-        $this->assertDatabaseCount('qe_boq_histories', 1);
+        $this->assertDatabaseCount('boq_histories', 1);
     }
 
     public function test_failed_audit_rolls_back_new_boq_and_removes_only_the_new_private_file(): void
@@ -199,9 +199,9 @@ class BoqImportTest extends OloTestCase
         } finally {
             unlink($file->getRealPath());
         }
-        $this->assertDatabaseCount('qe_boqs', 0);
-        $this->assertDatabaseCount('qe_boq_items', 0);
-        $this->assertDatabaseCount('qe_boq_histories', 0);
+        $this->assertDatabaseCount('boq_jt', 0);
+        $this->assertDatabaseCount('boq_items', 0);
+        $this->assertDatabaseCount('boq_histories', 0);
         $this->assertCount(0, Storage::disk('local')->allFiles('boq'));
         $this->assertSame('JT', $order->fresh()->progress_category);
     }
@@ -210,7 +210,7 @@ class BoqImportTest extends OloTestCase
     {
         $order = $this->order();
         $this->upload($order)->assertSessionHasNoErrors();
-        $boq = QeBoq::sole();
+        $boq = BoqJt::sole();
         $before = $boq->getAttributes();
         $items = $boq->items()->get()->toArray();
         $histories = $boq->histories()->get()->toArray();
@@ -240,6 +240,6 @@ class BoqImportTest extends OloTestCase
         $this->withServerVariables(['CONTENT_LENGTH' => 50 * 1024 * 1024]);
         $this->post(route('boqs.store', $order))->assertStatus(413)->assertSee('Kembali ke Work Order')->assertDontSee('Kembali ke Sync Center');
         $this->postJson(route('boqs.store', $order))->assertStatus(413)->assertJsonValidationErrors('file');
-        $this->assertDatabaseCount('qe_boqs', 0);
+        $this->assertDatabaseCount('boq_jt', 0);
     }
 }

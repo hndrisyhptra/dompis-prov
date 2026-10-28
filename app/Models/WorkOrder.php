@@ -150,7 +150,7 @@ class WorkOrder extends Model
 
     public function boq()
     {
-        return $this->hasOne(QeBoq::class, 'id_work_orders');
+        return $this->hasOne(BoqJt::class, 'id_work_orders');
     }
 
     public function assignedBranch()

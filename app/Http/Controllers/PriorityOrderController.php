@@ -9,6 +9,7 @@ use App\Services\OwnerGroupAnalyticsService;
 use App\Services\PriorityMonitoringService;
 use App\Services\PriorityOrderQuery;
 use App\Services\PriorityOrderService;
+use App\Services\PriorityResetService;
 use App\Services\WorkOrderQueueService;
 use App\Support\ScopedOrderListPermissions;
 use Carbon\CarbonImmutable;
@@ -35,7 +36,7 @@ class PriorityOrderController extends Controller
             'branches' => $scope->branches($request->user()), 'area' => $request->user()->role->areaScope()]);
     }
 
-    public function index(PriorityOrderListRequest $request, BranchOrderScope $scope, WorkOrderQueueService $queues, PriorityOrderQuery $priorities)
+    public function index(PriorityOrderListRequest $request, BranchOrderScope $scope, WorkOrderQueueService $queues, PriorityOrderQuery $priorities, PriorityResetService $reset)
     {
         Gate::authorize('priority-orders');
         $actor = $request->user();
@@ -43,12 +44,25 @@ class PriorityOrderController extends Controller
         $filters = $request->validated();
         $base = $priorities->base($actor, $filters);
         $today = CarbonImmutable::now('Asia/Jakarta');
-        $summary = $queues->selectedCounts($base, $today, ['all', 'outstanding', 'issues', 'waiting_bima']);
-        $query = $priorities->ordered($actor, $filters);
+        $state = $filters['state'] ?? 'all';
+        $summaryKeys = ['all', 'outstanding', 'issues', 'waiting_bima'];
+        $counts = $queues->selectedCounts($base, $today, array_unique([...$summaryKeys, $state]));
+        $summary = array_intersect_key($counts, array_flip($summaryKeys));
+        $query = $priorities->orderedFrom($queues->apply(clone $base, $state, $today), $actor, $filters);
 
-        return view('priorities.index', ['orders' => $query->paginate(25)->withQueryString(),
+        return view('priorities.index', ['orders' => $query->paginate(25, total: $counts[$state])->withQueryString(),
             'scopedOrderPermissions' => ScopedOrderListPermissions::for($actor),
-            'summary' => $summary, 'branches' => $scope->branches($actor), 'filters' => $filters, 'area' => $area]);
+            'summary' => $summary, 'branches' => $scope->branches($actor), 'filters' => $filters, 'area' => $area, 'resetPreview' => $reset->preview($actor)]);
+    }
+
+    public function reset(Request $request, PriorityResetService $reset)
+    {
+        Gate::authorize('priority-orders');
+        $data = $request->validate(['reset_token' => 'required|string|max:4096', 'confirmed' => 'required|accepted',
+            'scope_key' => 'prohibited', 'id_branches' => 'prohibited', 'id_users' => 'prohibited', 'id_work_orders' => 'prohibited']);
+        $removed = $reset->reset($request->user(), $data['reset_token']);
+
+        return redirect()->route('priorities.index')->with('status', $removed.' bookmark '.($request->user()->role->areaScope() ? 'Area' : 'lokal Branch').' dilepas. Work Order dan riwayat tetap tersimpan.');
     }
 
     public function store(Request $request, WorkOrder $workOrder, PriorityOrderService $service)

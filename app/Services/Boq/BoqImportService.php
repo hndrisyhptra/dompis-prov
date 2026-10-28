@@ -3,10 +3,10 @@
 namespace App\Services\Boq;
 
 use App\Models\AuditLog;
+use App\Models\BoqJt;
 use App\Models\Designator;
 use App\Models\DesignatorPackagePrice;
 use App\Models\Package;
-use App\Models\QeBoq;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Services\WorkOrderXlsxReader;
@@ -26,7 +26,7 @@ class BoqImportService
 {
     public static function available(): bool
     {
-        return Schema::hasColumns('qe_boqs', ['material_total', 'labor_total']);
+        return Schema::hasColumns('boq_jt', ['material_total', 'labor_total']);
     }
 
     public function eligible(WorkOrder $order): bool
@@ -138,7 +138,7 @@ class BoqImportService
                 Gate::forUser($actor)->authorize('importBoq', $order);
                 abort_unless($this->eligible($order), 422, 'RAB/BOQ tersedia setelah order pernah diperbarui ke JT.');
                 abort_unless($order->revision === (int) $data['order_revision'], 409, 'Order berubah. Muat ulang sebelum mengunggah BOQ.');
-                $boq = QeBoq::where('id_work_orders', $order->getKey())->lockForUpdate()->first();
+                $boq = BoqJt::where('id_work_orders', $order->getKey())->lockForUpdate()->first();
                 if ($boq && $boq->revision !== (int) $data['boq_revision'] && $boq->package_id === (int) $data['package_id']
                     && hash_equals($boq->file_hash, hash_file('sha256', $file->getRealPath()))) {
                     return ['boq' => $boq, 'changed' => false];
@@ -160,7 +160,7 @@ class BoqImportService
                 if (! Storage::disk('local')->put($path, file_get_contents($file->getRealPath()))) {
                     throw new \RuntimeException('File BOQ belum dapat disimpan.');
                 }
-                $boq ??= new QeBoq(['id_work_orders' => $order->getKey(), 'created_by' => $actor->getKey()]);
+                $boq ??= new BoqJt(['id_work_orders' => $order->getKey(), 'created_by' => $actor->getKey()]);
                 $existing = $boq->exists;
                 $boq->fill(['package_id' => $package->getKey(), 'source' => 'import', 'status' => 'ready', 'item_count' => count($parsed['items']),
                     'grand_total' => $parsed['grand_total'], 'material_total' => $parsed['material_total'], 'labor_total' => $parsed['labor_total'], 'revision' => $existing ? $boq->revision + 1 : 1, 'updated_by' => $actor->getKey(),
@@ -169,7 +169,7 @@ class BoqImportService
                 $boq->items()->createMany($parsed['items']);
                 $boq->histories()->create(['id_users' => $actor->getKey(), 'event_type' => $existing ? 'updated' : 'created', 'before_data' => $before,
                     'after_data' => $this->snapshot($boq), 'note' => 'BOQ diimpor; harga paket disimpan sebagai snapshot, belum merupakan pengakuan Revenue.']);
-                AuditLog::create(['id_users' => $actor->getKey(), 'action' => $existing ? 'boq.updated' : 'boq.created', 'entity_type' => 'qe_boq', 'id_entity' => $boq->getKey(),
+                AuditLog::create(['id_users' => $actor->getKey(), 'action' => $existing ? 'boq.updated' : 'boq.created', 'entity_type' => 'boq_jt', 'id_entity' => $boq->getKey(),
                     'metadata' => ['id_work_orders' => $order->getKey(), 'revision' => $boq->revision, 'item_count' => $boq->item_count, 'grand_total' => $boq->grand_total, 'file_hash' => $fileHash]]);
 
                 return ['boq' => $boq, 'changed' => true];
@@ -216,9 +216,9 @@ class BoqImportService
         return ['headers' => $headers, 'rows' => $rows];
     }
 
-    private function snapshot(QeBoq $boq): array
+    private function snapshot(BoqJt $boq): array
     {
         return $boq->only(['package_id', 'status', 'item_count', 'grand_total', 'material_total', 'labor_total', 'revision', 'file_path', 'file_hash', 'original_name'])
-            + ['item_ids' => $boq->items()->orderBy('id_qe_boq_items')->pluck('id_qe_boq_items')->all()];
+            + ['item_ids' => $boq->items()->orderBy('id_boq_items')->pluck('id_boq_items')->all()];
     }
 }

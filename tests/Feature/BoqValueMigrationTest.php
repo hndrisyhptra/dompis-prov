@@ -13,6 +13,18 @@ class BoqValueMigrationTest extends TestCase
 {
     use DatabaseMigrations;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        (require database_path('migrations/2026_10_28_000023_rename_boq_tables.php'))->down();
+    }
+
+    protected function tearDown(): void
+    {
+        (require database_path('migrations/2026_10_28_000023_rename_boq_tables.php'))->up();
+        parent::tearDown();
+    }
+
     public function test_backfill_uses_only_active_snapshot_items_and_preserves_order_header_hash_price_and_history(): void
     {
         $migration = require database_path('migrations/2026_10_25_000020_add_boq_value_breakdown.php');

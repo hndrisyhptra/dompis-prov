@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\BoqJt;
 use App\Models\DesignatorPackagePrice;
 use App\Models\Package;
-use App\Models\QeBoq;
 use App\Models\WorkOrder;
 use App\Services\Boq\BoqImportService;
 use DOMDocument;
@@ -132,8 +132,8 @@ class DompisBoqTemplateTest extends OloTestCase
                 unlink($file->getRealPath());
             }
         }
-        $this->assertSame(1, QeBoq::sole()->revision);
-        $this->assertDatabaseCount('qe_boq_histories', 1);
+        $this->assertSame(1, BoqJt::sole()->revision);
+        $this->assertDatabaseCount('boq_histories', 1);
         $this->assertSame($before, $order->fresh()->getRawOriginal());
         $this->get(route('boqs.show', $order))->assertOk()->assertSee('13.210,50')->assertSee('Peta Order / KML');
     }

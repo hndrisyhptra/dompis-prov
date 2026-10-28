@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\BoqJt;
 use App\Models\Package;
-use App\Models\QeBoq;
 use App\Models\WorkOrder;
 use App\Services\Boq\BoqBreakdown;
 use App\Services\Boq\BoqImportService;
@@ -52,12 +52,12 @@ class BoqCalculationTest extends OloTestCase
                 unlink($file->getRealPath());
             }
         }
-        $boq = QeBoq::sole();
+        $boq = BoqJt::sole();
         $this->assertSame(2, $boq->revision);
         $this->assertSame('1010302.00', $boq->material_total);
         $this->assertSame('817401.00', $boq->labor_total);
         $this->assertSame('1827703.00', $boq->grand_total);
-        $this->assertDatabaseCount('qe_boq_histories', 2);
+        $this->assertDatabaseCount('boq_histories', 2);
         $this->assertSame($before, $order->fresh()->getRawOriginal());
         $this->get(route('boqs.show', $order))->assertOk()->assertSee('1.827.703,00')->assertSee('817.401,00')->assertSee('Akumulasi volume item per satuan');
     }

@@ -55,7 +55,7 @@ class RevenueOverviewService
         $months = [];
         $latest = null;
         (clone $query)->select(['id_work_orders', 'id_branches', 'tgl_order', 'progress_category', 'operational_status', 'status_order', 'status_bima', 'task_bima'])
-            ->with(['boq' => fn ($q) => $q->select(['id_qe_boqs', 'id_work_orders', 'material_total', 'labor_total', 'grand_total', 'updated_at'])])
+            ->with(['boq' => fn ($q) => $q->select(['id_boq_jt', 'id_work_orders', 'material_total', 'labor_total', 'grand_total', 'updated_at'])])
             ->reorder()->chunkById(500, function ($orders) use (&$summary, &$branches, &$months, &$latest) {
                 foreach ($orders as $order) {
                     $branch = $order->id_branches ?? 'unassigned';

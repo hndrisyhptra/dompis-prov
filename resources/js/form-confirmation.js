@@ -49,10 +49,10 @@ export function setupFormConfirmation(root, confirmFallback) {
         event.preventDefault();
         if (dialog.open) return;
         pending = { form, submitter: event.submitter };
-        title.textContent = deleting ? 'Konfirmasi hapus data' : 'Konfirmasi simpan data';
+        title.textContent = form.dataset.confirmTitle || (deleting ? 'Konfirmasi hapus data' : 'Konfirmasi simpan data');
         description.textContent = message;
         context.textContent = event.submitter?.textContent?.trim().replace(/\s+/g, ' ') || 'Periksa data sebelum melanjutkan.';
-        yes.textContent = deleting ? 'Ya, Hapus' : 'Ya, Simpan';
+        yes.textContent = form.dataset.confirmYes || (deleting ? 'Ya, Hapus' : 'Ya, Simpan');
         yes.classList.toggle('primary', !deleting);
         yes.classList.toggle('master-delete-button', deleting);
         dialog.showModal();

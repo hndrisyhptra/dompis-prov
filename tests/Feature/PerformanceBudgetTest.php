@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\Branch;
 use App\Models\WorkOrder;
 use App\Services\AreaAnalyticsService;
 use App\Services\BranchAnalyticsService;
@@ -41,6 +42,77 @@ class PerformanceBudgetTest extends OloTestCase
         }
         $this->assertSame($results[5], $results[30]);
         file_put_contents('/private/tmp/olo-list-query-profile-'.DB::getDriverName().'.json', json_encode($results, JSON_PRETTY_PRINT));
+    }
+
+    public function test_priority_pagination_reuses_counts_with_branch_filter_and_every_monitoring_state(): void
+    {
+        $branch = $this->user(Role::BranchHd);
+        $branch->branches()->attach($this->branch);
+        $service = app(PriorityOrderService::class);
+        $expected = ['all' => [], 'outstanding' => [], 'issues' => [], 'waiting_bima' => [], 'closed' => []];
+        for ($i = 0; $i < 34; $i++) {
+            $category = match ($i) {
+                30 => 'HOLD', 31, 32 => 'CLOSE', 33 => 'CANCEL', default => 'SURVEY'
+            };
+            $order = WorkOrder::create(['source_system' => 'BIMA', 'no_tq_sc_id' => 'PAGING-'.$i, 'id_branches' => $this->branch->getKey(),
+                'progress_category' => $category, 'tgl_order' => now()->subDays($i)->toDateString(), 'last_progress_at' => now()->subMinutes($i),
+                'task_bima' => 'Site Survey', 'status_bima' => 'STARTWORK', 'status_order' => 'Site Survey-STARTWORK',
+                'source_bima_fields' => [], 'source_snapshot_hash' => hash('sha256', 'paging-'.$i)]);
+            $service->set($this->area, $order, true);
+            $service->set($branch, $order, true);
+            $expected['all'][] = $order->getKey();
+            if ($i <= 30) {
+                $expected['outstanding'][] = $order->getKey();
+            }
+            if ($i === 30) {
+                $order->issues()->create(['id_users' => $branch->getKey(), 'category' => 'OTHER', 'description' => 'Synthetic issue', 'pic' => 'PIC']);
+                $expected['issues'][] = $order->getKey();
+            }
+            if (in_array($i, [31, 32], true)) {
+                $expected['closed'][] = $order->getKey();
+                $expected['waiting_bima'][] = $order->getKey();
+            }
+        }
+        // Area must not count Branch-only selections, even when they match the search/Branch filter.
+        $private = $order->replicate()->fill(['no_tq_sc_id' => 'PAGING-PRIVATE', 'progress_category' => 'SURVEY']);
+        $private->save();
+        $service->set($branch, $private, true);
+        $other = Branch::create(['code' => 'PAGING-OTHER', 'name' => 'Other Paging Branch']);
+        $foreign = $private->replicate()->fill(['no_tq_sc_id' => 'PAGING-FOREIGN', 'id_branches' => $other->getKey()]);
+        $foreign->save();
+        $service->set($this->area, $foreign, true);
+        foreach ([$this->area, $branch] as $actor) {
+            $this->actingAs($actor);
+            $actorExpected = $expected;
+            if ($actor->is($branch)) {
+                $actorExpected['all'][] = $private->getKey();
+                $actorExpected['outstanding'][] = $private->getKey();
+            }
+            foreach ($actorExpected as $state => $ids) {
+                foreach ($state === 'all' ? [1, 2] : [1] as $number) {
+                    $filters = ['q' => 'PAGING-', 'branch' => $this->branch->getKey(), 'state' => $state,
+                        'sort' => match ($state) {
+                            'all' => 'age', 'issues' => 'updated', default => 'selected'
+                        }, 'page' => $number];
+                    DB::flushQueryLog();
+                    DB::enableQueryLog();
+                    try {
+                        $page = $this->get(route('priorities.index', $filters))->assertOk();
+                        $queries = DB::getQueryLog();
+                    } finally {
+                        DB::disableQueryLog();
+                    }
+                    $orders = $page->viewData('orders');
+                    $this->assertSame(count($ids), $orders->total(), $state);
+                    $this->assertCount(min(25, count($ids) - ($number - 1) * 25), $orders);
+                    $this->assertSame([], array_diff($orders->modelKeys(), $ids));
+                    $this->assertSame(array_map('count', array_intersect_key($actorExpected, array_flip(['all', 'outstanding', 'issues', 'waiting_bima']))), $page->viewData('summary'));
+                    $this->assertLessThanOrEqual(8, count($queries), $state);
+                }
+            }
+            $this->get(route('priorities.index', ['q' => 'ABSENT-PAGING', 'state' => 'closed']))
+                ->assertViewHas('orders', fn ($orders) => $orders->total() === 0 && $orders->isEmpty());
+        }
     }
 
     public function test_dashboard_and_queue_query_budgets_do_not_grow_with_order_volume(): void

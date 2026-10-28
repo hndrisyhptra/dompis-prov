@@ -55,6 +55,7 @@ Route::middleware(['auth', ActiveUser::class])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::get('/priority-orders', [PriorityOrderController::class, 'index'])->middleware('can:priority-orders')->name('priorities.index');
+    Route::delete('/priority-orders/reset', [PriorityOrderController::class, 'reset'])->middleware(['can:priority-orders', 'throttle:30,1'])->name('priorities.reset');
     Route::get('/priority-orders/monitoring', [PriorityOrderController::class, 'monitoring'])->middleware('can:priority-orders')->name('priorities.monitoring');
     Route::get('/priority-orders/bulk', [PriorityBulkController::class, 'create'])->middleware('can:priority-orders')->name('priorities.bulk.create');
     Route::post('/priority-orders/bulk/preview', [PriorityBulkController::class, 'preview'])->middleware(['can:priority-orders', 'throttle:30,1'])->name('priorities.bulk.preview');

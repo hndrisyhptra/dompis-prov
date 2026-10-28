@@ -33,7 +33,13 @@ class PriorityOrderQuery
 
     public function ordered(User $actor, array $filters): Builder
     {
-        $query = $this->filtered($actor, $filters)
+        return $this->orderedFrom($this->filtered($actor, $filters), $actor, $filters);
+    }
+
+    /** Order an already authorized/filtered query without rebuilding its Branch scope. */
+    public function orderedFrom(Builder $filtered, User $actor, array $filters): Builder
+    {
+        $query = (clone $filtered)
             ->with(['assignedBranch', 'priorities' => fn ($q) => $q->visibleTo($actor)->with('creator:id_users,name')])
             ->withCount(['issues as open_issues_count' => fn ($q) => $q->where('status', 'OPEN')])->withMax(['priorities as priority_selected_at' => $this->selections($actor, $filters)], 'created_at');
         match ($filters['sort'] ?? 'selected') {

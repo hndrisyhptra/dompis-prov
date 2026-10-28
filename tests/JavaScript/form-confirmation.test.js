@@ -67,6 +67,21 @@ test('No and Escape never send a request and a later action must be confirmed ag
     assert.equal(form.sent.length, 0);
 });
 
+test('bookmark reset uses explicit scope wording and requires Yes while No leaves it untouched', () => {
+    const f = fixture();
+    const form = f.form({ override: 'DELETE', dataset: { confirmTitle: 'Reset Bookmark Area', confirmYes: 'Ya, Lepas Semua', confirmMessage: 'Lepas seluruh 60 bookmark Area? Work Order tetap tersimpan.' } });
+    const button = f.button(form);
+    f.submit(form, button);
+    assert.equal(f.fields.title.textContent, 'Reset Bookmark Area');
+    assert.equal(f.fields.yes.textContent, 'Ya, Lepas Semua');
+    assert.match(f.fields.description.textContent, /60 bookmark Area/);
+    f.fields.no.dispatchEvent(new Event('click'));
+    assert.equal(form.sent.length, 0);
+    f.submit(form, button);
+    f.fields.yes.dispatchEvent(new Event('click'));
+    assert.deepEqual(form.sent, [button]);
+});
+
 test('delete has distinct wording and confirmation cannot submit another form', () => {
     const f = fixture(); const first = f.form({ override: 'DELETE' }); const other = f.form();
     f.submit(first, f.button(first));

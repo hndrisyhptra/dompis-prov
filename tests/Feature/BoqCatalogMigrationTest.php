@@ -16,6 +16,18 @@ class BoqCatalogMigrationTest extends TestCase
 {
     use DatabaseMigrations;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        (require database_path('migrations/2026_10_28_000023_rename_boq_tables.php'))->down();
+    }
+
+    protected function tearDown(): void
+    {
+        (require database_path('migrations/2026_10_28_000023_rename_boq_tables.php'))->up();
+        parent::tearDown();
+    }
+
     public function test_catalog_reference_counts_values_and_named_keys_without_categories_or_legacy_qe_orders(): void
     {
         $this->assertDatabaseCount('designator_types', 5);
