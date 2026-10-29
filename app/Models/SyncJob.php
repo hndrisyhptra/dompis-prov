@@ -14,7 +14,7 @@ class SyncJob extends Model
 
     protected function casts(): array
     {
-        return ['snapshot' => 'encrypted:array', 'stats' => 'array', 'started_at' => 'datetime', 'finished_at' => 'datetime', 'expires_at' => 'datetime'];
+        return ['id_users' => 'integer', 'snapshot' => 'encrypted:array', 'stats' => 'array', 'started_at' => 'datetime', 'finished_at' => 'datetime', 'expires_at' => 'datetime'];
     }
 
     public function rows()

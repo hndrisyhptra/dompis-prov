@@ -4,6 +4,7 @@ import { setupMaterialTemplate } from './material-template';
 import { setupDashboardTables } from './dashboard-tables';
 import { setupExcelDownloads } from './excel-downloads';
 import { setupFormConfirmation } from './form-confirmation';
+import { setupSyncPolling } from './sync-polling';
 
 setupFormConfirmation(document, message => window.confirm(message));
 setupDashboardTables(document);
@@ -11,6 +12,7 @@ setupExcelDownloads(document);
 setupJtBoq(document);
 setupPasswordVisibility(document);
 setupMaterialTemplate(document);
+setupSyncPolling(document);
 
 const kmlPreview = document.querySelector('[data-kml-preview]');
 if (kmlPreview) {
@@ -66,23 +68,6 @@ document.querySelectorAll('form[data-loading]').forEach(form => form.addEventLis
     form.querySelectorAll('button[type="submit"], button:not([type])').forEach(button => { button.disabled = true; button.setAttribute('aria-busy', 'true'); button.textContent = form.dataset.loading; });
 }));
 window.addEventListener('pageshow', event => { if (event.persisted) location.reload(); });
-const poll = document.querySelector('[data-sync-poll]');
-if (poll) {
-    let failures = 0;
-    async function refresh() {
-        try {
-            const response = await fetch(poll.dataset.syncPoll, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
-            if (!response.ok) throw new Error();
-            const result = await response.json();
-            if (!['queued', 'running', 'retrying'].includes(result.state)) { location.reload(); return; }
-            poll.querySelector('[data-poll-state]').textContent = result.state;
-            poll.querySelector('[data-poll-error]').textContent = result.error || '';
-            failures = 0;
-        } catch (_) { failures++; poll.querySelector('[data-poll-error]').textContent = ' Pembaruan status gagal. Periksa koneksi atau muat ulang halaman.'; }
-        if (failures < 10) setTimeout(refresh, 3000);
-    }
-    setTimeout(refresh, 3000);
-}
 const userForm = document.querySelector('[data-user-form]');
 if (userForm) {
     const role = userForm.querySelector('[name=role]');

@@ -89,7 +89,7 @@ class WorkOrderImportController extends Controller
     public function mapping(Request $request, SyncJob $syncJob, ExcelWorkOrderMapper $mapper)
     {
         $this->authorizeImport();
-        abort_unless($syncJob->direction === 'import' && $syncJob->id_users === auth()->id(), 403);
+        abort_unless($syncJob->direction === 'import' && $syncJob->id_users === $request->user()->getKey(), 403, 'Mapping hanya dapat dibuka oleh operator yang mengunggah file. Buka Detail sinkronisasi untuk melihat status atau masuk dengan akun pengunggah.');
         if ($syncJob->stage === 'commit') {
             return redirect()->route('sync.show', $syncJob);
         }

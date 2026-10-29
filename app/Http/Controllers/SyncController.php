@@ -9,6 +9,7 @@ use App\Models\SyncJob;
 use App\Services\BimaSheetPullService;
 use App\Services\ExcelWorkOrderImportService;
 use App\Support\WorkOrderUpload;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -19,25 +20,32 @@ class SyncController extends Controller
     {
         Gate::authorize('sync');
 
-        $spreadsheetId = config('olo.sheets.spreadsheet_id');
+        $excel = config('olo.inbound') === 'excel';
+        $spreadsheetId = $excel ? null : config('olo.sheets.spreadsheet_id');
         $credentialsPath = config('olo.sheets.credentials_path');
         $spreadsheetUrl = is_string($spreadsheetId) && preg_match('/^[a-zA-Z0-9_-]{10,200}$/', $spreadsheetId)
             ? 'https://docs.google.com/spreadsheets/d/'.$spreadsheetId.'/edit' : null;
-        $credentialsReadable = $credentialsPath && is_file($credentialsPath) && is_readable($credentialsPath);
+        $credentialsReadable = ! $excel && $credentialsPath && is_file($credentialsPath) && is_readable($credentialsPath);
 
-        return view('sync.index', ['uploadLimitBytes' => WorkOrderUpload::limitBytes(), 'uploadLimitMb' => WorkOrderUpload::limitBytes() / 1024 / 1024, 'jobs' => SyncJob::with('actor')->latest('id_sync_jobs')->limit(5)->get(), 'jobCount' => SyncJob::count(),
-            'lastImport' => SyncJob::where('direction', 'import')->where('stage', 'commit')->whereIn('state', ['success', 'partial_success'])->latest('finished_at')->first(),
+        return view('sync.index', ['uploadLimitBytes' => WorkOrderUpload::limitBytes(), 'uploadLimitMb' => WorkOrderUpload::limitBytes() / 1024 / 1024, 'jobs' => $this->historyQuery()->latest('id_sync_jobs')->limit(5)->get(), 'jobCount' => SyncJob::count(),
+            'lastImport' => $excel ? SyncJob::select(['id_sync_jobs', 'finished_at'])->where('direction', 'import')->where('stage', 'commit')->whereIn('state', ['success', 'partial_success'])->latest('finished_at')->first() : null,
             'spreadsheetUrl' => $spreadsheetUrl, 'credentialsReadable' => $credentialsReadable,
-            'lastRead' => SyncJob::where('direction', 'pull')->where('connection_hash', BimaSheetPullService::connectionHash())
+            'lastRead' => $excel ? null : SyncJob::select(['id_sync_jobs', 'stats', 'finished_at'])->where('direction', 'pull')->where('connection_hash', BimaSheetPullService::connectionHash())
                 ->whereIn('state', ['preview_ready', 'success', 'partial_success'])->whereNotNull('finished_at')->latest('finished_at')->first(),
-            'lastPull' => SyncJob::where('direction', 'pull')->where('stage', 'commit')->whereIn('state', ['success', 'partial_success'])->latest('finished_at')->first()]);
+            'lastPull' => $excel ? null : SyncJob::select(['id_sync_jobs', 'finished_at'])->where('direction', 'pull')->where('stage', 'commit')->whereIn('state', ['success', 'partial_success'])->latest('finished_at')->first()]);
     }
 
     public function history()
     {
         Gate::authorize('sync');
 
-        return view('sync.all-history', ['jobs' => SyncJob::with('actor')->latest('id_sync_jobs')->paginate(20)]);
+        return view('sync.all-history', ['jobs' => $this->historyQuery()->latest('id_sync_jobs')->paginate(20)]);
+    }
+
+    private function historyQuery(): Builder
+    {
+        return SyncJob::select(['id_sync_jobs', 'id_users', 'direction', 'stage', 'state', 'stats', 'created_at'])
+            ->with('actor:id_users,name');
     }
 
     public function preview(Request $request)
@@ -64,13 +72,15 @@ class SyncController extends Controller
     {
         Gate::authorize('sync');
         if ($request->expectsJson()) {
-            return response()->json($syncJob->only(['id_sync_jobs', 'state', 'stage', 'stats', 'error', 'attempts', 'finished_at']));
+            return response()->json($syncJob->only(['id_sync_jobs', 'state', 'stage', 'stats', 'error', 'attempts', 'finished_at']))
+                ->withHeaders(['Cache-Control' => 'private, no-store', 'Vary' => 'Accept, Cookie']);
         }
-        if ($syncJob->direction === 'import' && $syncJob->stage === 'mapping') {
+        if ($syncJob->direction === 'import' && $syncJob->stage === 'mapping' && $syncJob->id_users === $request->user()->getKey()) {
             return redirect()->route('imports.mapping', $syncJob);
         }
 
-        return view('sync.show', ['job' => $syncJob->load('actor'), 'rows' => $syncJob->rows()->orderByRaw("CASE WHEN action IN ('rejected', 'conflict') THEN 0 ELSE 1 END")->orderBy('row_index')->paginate(30)]);
+        return response()->view('sync.show', ['job' => $syncJob->load('actor'), 'rows' => $syncJob->rows()->orderByRaw("CASE WHEN action IN ('rejected', 'conflict') THEN 0 ELSE 1 END")->orderBy('row_index')->paginate(30)])
+            ->withHeaders(['Cache-Control' => 'private, no-store', 'Vary' => 'Accept, Cookie']);
     }
 
     public function commit(Request $request, SyncJob $syncJob)

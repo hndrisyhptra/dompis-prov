@@ -155,7 +155,7 @@ input[type=checkbox] { margin-top:4px; accent-color:var(--primary); width:15px; 
 .password-field input { padding-right:48px; }
 .password-toggle { position:absolute; top:50%; right:5px; transform:translateY(-50%); display:grid; place-items:center; width:36px; height:36px; padding:8px; border:0; border-radius:6px; background:transparent; color:var(--muted); cursor:pointer; }
 .password-toggle:hover { background:var(--soft); color:var(--text); }
-.password-toggle[hidden] { display:none; }
+.password-toggle[hidden], [data-poll-retry][hidden] { display:none; }
 .brand small { text-transform:none; letter-spacing:.2px; line-height:1.5; margin-top:5px; }
 .cohort-chart { display:block; width:100%; min-width:640px; height:auto; }
 .cohort-line { fill:none; stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }

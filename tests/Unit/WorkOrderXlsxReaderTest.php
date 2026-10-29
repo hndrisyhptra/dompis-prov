@@ -11,6 +11,51 @@ use ZipArchive;
 
 class WorkOrderXlsxReaderTest extends TestCase
 {
+    public function test_skipping_subtrees_preserves_every_row_and_shared_string_including_formulas(): void
+    {
+        $rows = [];
+        for ($i = 0; $i < 150; $i++) {
+            $rows[] = [['type' => 's', 'value' => (string) $i], ['type' => 'n', 'value' => '5', 'formula' => 'ROUND(2.5*2,0)']];
+        }
+        $file = XlsxFile::make(['ID', 'VOLUME'], $rows, 'Export', 3);
+        try {
+            $zip = new ZipArchive;
+            $zip->open($file->getRealPath());
+            $shared = '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+            for ($i = 0; $i < 150; $i++) {
+                $shared .= '<si><r><t>000</t></r><r><t>'.$i.'</t></r></si>';
+            }
+            $zip->addFromString('xl/sharedStrings.xml', $shared.'</sst>');
+            $zip->close();
+            $data = (new WorkOrderXlsxReader)->read($file->getRealPath(), 'Export', 3, true);
+            $this->assertCount(150, $data['rows']);
+            foreach ($data['rows'] as $row => $cells) {
+                $this->assertSame('000'.($row - 4), $cells[0]['value']);
+                $this->assertSame('5', $cells[1]['value']);
+                $this->assertTrue($cells[1]['formula']);
+                $this->assertSame('ROUND(2.5*2,0)', $cells[1]['expression']);
+            }
+        } finally {
+            unlink($file->getRealPath());
+        }
+    }
+
+    public function test_malformed_xml_after_last_order_is_still_rejected(): void
+    {
+        $file = XlsxFile::make(['ID'], [['000123']]);
+        try {
+            $zip = new ZipArchive;
+            $zip->open($file->getRealPath());
+            $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+            $zip->addFromString('xl/worksheets/sheet1.xml', str_replace('</worksheet>', '<broken></worksheet>', $sheet));
+            $zip->close();
+            $this->expectException(InvalidArgumentException::class);
+            (new WorkOrderXlsxReader)->read($file->getRealPath());
+        } finally {
+            unlink($file->getRealPath());
+        }
+    }
+
     public function test_work_orders_is_selected_before_pivot_and_empty_formatted_rows_do_not_count_as_orders(): void
     {
         $file = XlsxFile::make(['ORDER-ID'], [['000123']], 'Work Orders');

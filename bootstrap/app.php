@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\MeasureWebPerformance;
 use App\Support\WorkOrderUpload;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(MeasureWebPerformance::class);
         $middleware->validateCsrfTokens(except: ['api/telegram/material/webhook']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

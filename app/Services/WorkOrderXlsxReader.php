@@ -91,12 +91,10 @@ class WorkOrderXlsxReader
             $shared = [];
             if ($zip->locateName('xl/sharedStrings.xml') !== false) {
                 $reader = $this->reader($this->part($zip, 'xl/sharedStrings.xml'));
-                while ($reader->read()) {
-                    if ($reader->nodeType === XMLReader::ELEMENT && $reader->localName === 'si') {
-                        $shared[] = $this->text($this->xml($reader->readOuterXml()));
-                        if (count($shared) > 200000) {
-                            throw new InvalidArgumentException('Workbook memiliki terlalu banyak teks bersama.');
-                        }
+                foreach ($this->elements($reader, 'si') as $element) {
+                    $shared[] = $this->text($this->xml($element));
+                    if (count($shared) > 200000) {
+                        throw new InvalidArgumentException('Workbook memiliki terlalu banyak teks bersama.');
                     }
                 }
                 $reader->close();
@@ -107,11 +105,8 @@ class WorkOrderXlsxReader
             $headers = null;
             $lastRow = 0;
             $scannedRows = 0;
-            while ($reader->read()) {
-                if ($reader->nodeType !== XMLReader::ELEMENT || $reader->localName !== 'row') {
-                    continue;
-                }
-                $row = $this->xml($reader->readOuterXml());
+            foreach ($this->elements($reader, 'row') as $element) {
+                $row = $this->xml($element);
                 $index = (int) $row['r'];
                 if ($index <= 0 || $index <= $lastRow || $index > 1048576 || ++$scannedRows > 100000) {
                     throw new InvalidArgumentException('Nomor baris tidak valid atau melebihi batas pembacaan sheet.');
@@ -136,7 +131,16 @@ class WorkOrderXlsxReader
                         throw new InvalidArgumentException('Alamat sel ganda pada workbook.');
                     }
                     $type = (string) $cell['t'] ?: 'n';
-                    $value = (string) ($cell->xpath('./*[local-name()="v"]')[0] ?? '');
+                    $valueNode = null;
+                    $formula = null;
+                    foreach ($cell->xpath('./*') as $child) {
+                        if ($child->getName() === 'v' && $valueNode === null) {
+                            $valueNode = $child;
+                        } elseif ($child->getName() === 'f' && $formula === null) {
+                            $formula = $child;
+                        }
+                    }
+                    $value = (string) ($valueNode ?? '');
                     if ($type === 's') {
                         if (! ctype_digit($value) || ! array_key_exists((int) $value, $shared)) {
                             throw new InvalidArgumentException('Referensi teks Excel tidak valid.');
@@ -148,9 +152,8 @@ class WorkOrderXlsxReader
                     if (mb_strlen($value) > 8192) {
                         throw new InvalidArgumentException('Teks sel melebihi 8.192 karakter.');
                     }
-                    $cells[$column - 1] = ['value' => $value, 'type' => $type, 'formula' => (bool) $cell->xpath('./*[local-name()="f"]')];
+                    $cells[$column - 1] = ['value' => $value, 'type' => $type, 'formula' => $formula !== null];
                     if ($includeFormulas && $cells[$column - 1]['formula']) {
-                        $formula = $cell->xpath('./*[local-name()="f"]')[0];
                         $cells[$column - 1]['expression'] = (string) $formula;
                         $cells[$column - 1]['shared_formula'] = (string) $formula['t'] === 'shared';
                     }
@@ -224,6 +227,20 @@ class WorkOrderXlsxReader
         }
 
         return $reader;
+    }
+
+    /** A parsed subtree need not be traversed again cell by cell by XMLReader. */
+    private function elements(XMLReader $reader, string $name): iterable
+    {
+        $available = $reader->read();
+        while ($available) {
+            if ($reader->nodeType === XMLReader::ELEMENT && $reader->localName === $name) {
+                yield $reader->readOuterXml();
+                $available = $reader->next();
+            } else {
+                $available = $reader->read();
+            }
+        }
     }
 
     private function text(SimpleXMLElement $xml): string
