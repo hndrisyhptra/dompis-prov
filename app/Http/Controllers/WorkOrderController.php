@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\WorkOrderListRequest;
 use App\Models\Region;
 use App\Models\WorkOrder;
+use App\Services\BimaTaskLogPresentation;
 use App\Services\Boq\BoqImportService;
 use App\Services\BranchOrderScope;
 use App\Services\WorkOrderListQuery;
@@ -49,7 +50,7 @@ class WorkOrderController extends Controller
             'total' => $orders->total()]);
     }
 
-    public function show(Request $request, WorkOrder $workOrder)
+    public function show(Request $request, WorkOrder $workOrder, BimaTaskLogPresentation $logPresentation)
     {
         Gate::authorize('view', $workOrder);
         $request->validate(['action' => ['nullable', Rule::in(['progress', 'issue', 'close'])]]);
@@ -57,7 +58,10 @@ class WorkOrderController extends Controller
             return redirect()->route('work-orders.action.edit', [$workOrder, $request->input('action')]);
         }
 
-        return view('work-orders.show', ['order' => $workOrder->load(['assignedBranch', 'events.actor', 'issues.notes.actor', 'priorities' => fn ($q) => $q->visibleTo($request->user())] + (BoqImportService::available() ? ['boq' => fn ($q) => $q] : [])), 'taskLogs' => $workOrder->taskLogs()->with('actor')->paginate(20, ['*'], 'task_page')]);
+        $taskLogs = $workOrder->taskLogs()->with('actor')->paginate(20, ['*'], 'task_page');
+
+        return view('work-orders.show', ['order' => $workOrder->load(['assignedBranch', 'events.actor', 'issues.notes.actor', 'priorities' => fn ($q) => $q->visibleTo($request->user())] + (BoqImportService::available() ? ['boq' => fn ($q) => $q] : [])),
+            'taskLogs' => $taskLogs, 'taskLogDetails' => $logPresentation->forPage($taskLogs->getCollection())]);
     }
 
     public function editAction(Request $request, WorkOrder $workOrder, string $mode)

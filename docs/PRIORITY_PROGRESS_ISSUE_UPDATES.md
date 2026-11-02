@@ -41,3 +41,11 @@ Tidak ada migration, env, dependency, perubahan data aplikasi atau integrasi eks
 - `AGENTS.md`, `SKILLS.md`, `PRD_OLO_Command_Center_v2.md`
 
 Progress workspace sebelumnya dipertahankan.
+
+## Tampilan waktu disembunyikan — 30 Oktober 2026
+
+Checklist: sembunyikan baris Diperbarui beserta tanggal/waktu pada tabel Order Kendala → pertahankan label/catatan terbaru dan data waktu untuk pemilihan riwayat → jalankan regresi monitoring dan build.
+
+Baris waktu tidak lagi dirender pada kolom Update Progress/Kendala, untuk tampilan Area dan Branch yang memakai partial yang sama. Data `at`, pemilihan pembaruan terbaru, timestamp/audit dan detail WO tetap tersedia tanpa perubahan query/database. Berkas: `resources/views/priorities/monitoring-issues.blade.php`, penyesuaian assertions waktu pada `tests/Feature/PriorityMonitoringTabsTest.php`, dokumen ini dan addendum AGENTS.md. Tidak ada migration/env/dependency baru atau input yang diperlukan.
+
+Checklist selesai. Regresi PriorityMonitoringTabsTest/PriorityMonitoringTest: **13tes /386assertions lulus** pada SQLite terisolasi; Vite build, Pint dan git diff --check lulus. Perintah tes memakai APP_CONFIG_CACHE ke path sementara yang tidak ada agar cache konfigurasi aplikasi aktif tidak mengarahkan tes ke MySQL aktual; cache asli dan data aplikasi tidak diubah. Assertions lama mengenai tampilan waktu diganti dengan pemeriksaan bahwa teks waktu tersembunyi tetapi waktu update yang dipilih tetap benar pada data view. Tidak membuat tes baru untuk perubahan tampilan ini, tidak melakukan verifikasi visual browser baru, migration, commit atau deployment.

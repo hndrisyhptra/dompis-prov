@@ -137,8 +137,9 @@ class PriorityMonitoringTabsTest extends OloTestCase
         $before = $order->fresh()->getRawOriginal();
         $filters = ['tab' => 'issues', 'branch' => $this->branch->getKey(), 'q' => 'LATEST-', 'source' => 'branch'];
         $page = $this->get(route('priorities.monitoring', $filters))->assertOk()->assertSee($progressText)->assertSee('INSTALASI')->assertSee('Site Survey-STARTWORK')
-            ->assertSee('08:02:00 WIB')->assertDontSee('Kendala awal akses lokasi.')->assertDontSee($latestText)
+            ->assertDontSee('priority-issue-time')->assertDontSee('08:02:00 WIB')->assertDontSee('Kendala awal akses lokasi.')->assertDontSee($latestText)
             ->assertDontSee('Rincian Order per Branch')->assertDontSee('Status BIMA × Owner Group');
+        $this->assertSame('08:02:00', $page->viewData('issueUpdates')->get($order->getKey())['at']->timezone('Asia/Jakarta')->format('H:i:s'));
         $this->assertSame(1, $page->viewData('orders')->total());
         $dom = new DOMDocument;
         @$dom->loadHTML($page->getContent());
@@ -160,7 +161,8 @@ class PriorityMonitoringTabsTest extends OloTestCase
         $this->travel(1)->minutes();
         $this->post(route('issues.notes', $issue), ['revision' => 3, 'note' => 'Update kendala setelah progress instalasi.'])->assertSessionHasNoErrors();
         $issue->notes()->where('note', 'Update kendala setelah progress instalasi.')->update(['created_at' => now()]);
-        $this->get(route('priorities.monitoring', $filters))->assertOk()->assertSee('Update kendala setelah progress instalasi.')->assertSee('08:03:00 WIB')->assertDontSee($progressText);
+        $updatedPage = $this->get(route('priorities.monitoring', $filters))->assertOk()->assertSee('Update kendala setelah progress instalasi.')->assertDontSee('08:03:00 WIB')->assertDontSee($progressText);
+        $this->assertSame('08:03:00', $updatedPage->viewData('issueUpdates')->get($order->getKey())['at']->timezone('Asia/Jakarta')->format('H:i:s'));
         $this->patch(route('issues.resolve', $issue), ['revision' => 4, 'resolution' => 'Akses sudah diberikan.'])->assertSessionHasNoErrors();
         $this->get(route('priorities.monitoring', $filters))->assertOk()->assertViewHas('orders', fn ($rows) => $rows->total() === 1)
             ->assertSee($progressText)->assertDontSee('Update kendala setelah progress instalasi.');

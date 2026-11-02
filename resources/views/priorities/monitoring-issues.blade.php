@@ -12,7 +12,7 @@
             <td>{{ $order->assignedBranch?->name ?? 'Belum ditugaskan' }}</td>
             <td><a class="mono strong" href="{{ route('work-orders.show', $order) }}" title="Detail Order {{ $order->no_tq_sc_id }}">{{ $order->no_tq_sc_id }}</a></td>
             <td>{{ $order->status_order !== null && $order->status_order !== '' ? $order->status_order : 'Status BIMA belum tersedia' }}</td>
-            <td>@if($update)<div class="small strong">{{ $update['label'] }}</div>@endif<div class="priority-issue-note">{{ $update['text'] ?? 'Catatan progress/kendala belum tersedia' }}</div>@if($update['at'] ?? null)<div class="small muted priority-issue-time">Diperbarui {{ $update['at']->timezone('Asia/Jakarta')->format('d M Y H:i:s') }} WIB</div>@endif</td>
+            <td>@if($update)<div class="small strong">{{ $update['label'] }}</div>@endif<div class="priority-issue-note">{{ $update['text'] ?? 'Catatan progress/kendala belum tersedia' }}</div></td>
         </tr>
         @endforeach
         </tbody>

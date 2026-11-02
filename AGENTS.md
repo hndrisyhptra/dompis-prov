@@ -1,5 +1,11 @@
 # AGENTS.md — OLO Command Center
 
+## Log Task BIMA tidak terbaca — perbaikan 2 November 2026
+Error produksi MAC invalid pada Log Task BIMA dapat menggagalkan rendering Detail setelah progress/kendala sebenarnya tersimpan. Presentasi menangkap DecryptException khusus per log dan memvalidasi diff, memberi peringatan tanpa mengubah ciphertext/cast/MAC atau otorisasi. Status/actor/waktu dan log sehat tetap tampil; hanya20 log halaman aktif diperiksa, warning hanya ID. CLI olo:check-bima-log-encryption membaca batch tanpa mutasi/isi sensitif. Kunci lama belum diketahui: pertahankan APP_KEY aktif, cari backup tepercaya dan gunakan APP_PREVIOUS_KEYS resmi bila tersedia; jangan key:generate/hapus riwayat. Tidak ada migration/dependency baru atau pemulihan kunci/deploy yang diklaim. Detail langkah, manifest dan pengujian: docs/BIMA_LOG_ENCRYPTION_RECOVERY.md.
+
+## Tampilan Order Kendala — 30 Oktober 2026
+Pada Monitoring Order Prioritas tab Order Kendala, baris Diperbarui beserta waktu pada kolom Update Progress/Kendala disembunyikan sesuai arahan pemilik. Label dan catatan tetap tampil; waktu/audit dan pemilihan update terbaru tetap tersimpan/digunakan. Detail perubahan: docs/PRIORITY_PROGRESS_ISSUE_UPDATES.md.
+
 ## Read first
 Read `PRD_OLO_Command_Center_v2.md` and `SKILLS.md` completely. These are project requirements and implementation discipline; resolve conflicts by preserving data integrity, authorizations, and the provided Bima/LHPP file contracts.
 
